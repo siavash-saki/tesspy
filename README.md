@@ -2,7 +2,7 @@
 
 
 ## Introduction 
-A package for urban areas tessalation
+A package for urban areas tessellation
 
 ## Installation
 ```python
@@ -18,7 +18,7 @@ example
 ### City Blocks
 example
 
-## Contributing to momepy
+## Contributing to tesspy
 Contribution is welcome!
 
 ## Acknowledgements
