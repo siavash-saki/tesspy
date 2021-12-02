@@ -4,7 +4,7 @@ with open("README.md", "r") as fh:
     LONG_DESCRIPTION = fh.read()
 
 # Packages that tesspy uses explicitly:
-INSTALL_REQUIRES = ['numpy', 'matplotlib', 'shapely<1.8', 'pandas', 'geopandas', 'geopy']
+INSTALL_REQUIRES = ['numpy', 'matplotlib', 'shapely<1.8', 'pandas', 'geopandas', 'geopy', 'h3', 'babelgrid', 'osmnx']
 
 setuptools.setup(
     name="tesspy",
