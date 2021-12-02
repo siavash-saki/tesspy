@@ -4,7 +4,7 @@ with open("README.md", "r") as fh:
     LONG_DESCRIPTION = fh.read()
 
 # Packages that tesspy uses explicitly:
-INSTALL_REQUIRES = ['numpy', 'matplotlib', 'shapely<1.8', 'pandas', 'geopandas', 'geopy', 'h3', 'babelgrid', 'osmnx']
+INSTALL_REQUIRES = ['numpy', 'pandas', 'shapely', 'geopandas', 'h3', 'babelgrid', 'osmnx']
 
 setuptools.setup(
     name="tesspy",
@@ -19,7 +19,9 @@ setuptools.setup(
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: BSD License",
+        "Intended Audience :: Science/Research",
         "Operating System :: OS Independent",
+        "Topic :: Scientific/Engineering :: GIS",
     ],
     python_requires='>=3.7',
     install_requires=INSTALL_REQUIRES
