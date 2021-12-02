@@ -1,2 +1,6 @@
 tesspy/__pycache__
 .gitTok
+tesspy.egg-info
+.idea
+venv
+tutorials/.ipynb_checkpoints
