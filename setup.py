@@ -11,7 +11,7 @@ setuptools.setup(
     version="0.0.1",
     author="tesspy Developers",
     author_email="cyberdude7@gmail.com",
-    description="Tesselation of Urban Areas",
+    description="Tessellation of Urban Areas",
     long_description=LONG_DESCRIPTION,
     long_description_content_type="text/markdown",
     url="https://github.com/siavash-saki/tesspy",
