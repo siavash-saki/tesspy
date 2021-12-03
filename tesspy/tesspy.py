@@ -29,8 +29,9 @@ class TessObj():
 
     def quadKey(self, city, resolution):
         """
+        :param resolution: resolution for mircosoft bing. Int ∈ [1,...,23]
         :param city: Must be a shapely.Polygon, GeoDataFrame Polygon or String e.g. "Frankfurt am Main"
-        :return:GeoDataFrame with all the squares
+        :return:GeoDataFrame with hexagons for the given city, geometry in shapely-Polygon
         """
         if type(city) == shapely.geometry.polygon.Polygon:
             df_city = gpd.GeoDataFrame(geometry=[city])
@@ -39,15 +40,34 @@ class TessObj():
             df_city = self.get_admin_Polygon(city)
             pass
         elif type(city) == gpd.GeoDataFrame:
-            df_city = city
+            df_city = city.copy()
             pass
         else:
-            print("Check available data formats")
+            raise TypeError("City must be in format: Shapely Polygon, GeoDataFrame or String")
         tiles = Babel('bing').polyfill(df_city.geometry.unary_union, resolution=resolution)
+        df_qk = gpd.GeoDataFrame([t.to_dict() for t in tiles], geometry='shapely', crs="EPSG:4326")
+        return df_qk
 
-
-    def hexagon(self, city):
-        pass
+    def hexagon(self, city, resolution):
+        """
+        :param city: Must be a shapely.Polygon, GeoDataFrame Polygon or String e.g. "Frankfurt am Main"
+        :param resolution: resolution for mircosoft bing. Int ∈ [0,...,15]
+        :return: GeoDataFrame with hexagons for the given city, geometry in shapely-Polygon
+        """
+        if type(city) == shapely.geometry.polygon.Polygon:
+            df_city = gpd.GeoDataFrame(geometry=[city])
+            pass
+        elif type(city) == str:
+            df_city = self.get_admin_Polygon(city)
+            pass
+        elif type(city) == gpd.GeoDataFrame:
+            df_city = city.copy()
+            pass
+        else:
+            raise TypeError("City must be in format: Shapely Polygon, GeoDataFrame or String")
+        tiles = Babel('bing').polyfill(df_city.geometry.unary_union, resolution=resolution)
+        df_h3 = gpd.GeoDataFrame([t.to_dict() for t in tiles], geometry='shapely', crs="EPSG:4326")
+        return df_h3
 
     def voronoi(self, city):
         pass
