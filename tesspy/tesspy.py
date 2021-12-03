@@ -1,16 +1,19 @@
-import shapely
-from shapely.geometry import Point, Polygon, LineString
+
+import numpy as np
+import pandas as pd
 import geopandas as gpd
 import osmnx as ox
-import h3pandas
+# import h3
 from babelgrid import Babel
+import shapely
+from shapely.geometry import Point, Polygon, LineString
 
 
 def add_numbers(a, b):
     return a + b
 
 
-class TessObj():
+class TessObj:
 
     def __init__(self, city, resolution):
         self.resolution = resolution
