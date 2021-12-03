@@ -17,6 +17,7 @@ class TessObj():
         self.city = city
         pass
 
+#should be define this function external s.t. its not a class object?
     def get_admin_Polygon(self, city):
         try:
             df_city = ox.geocode_to_gdf(city)
