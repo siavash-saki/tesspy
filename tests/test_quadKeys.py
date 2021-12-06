@@ -1,2 +1,2 @@
-def test_feature1()
+def test_feature1():
     pass
