@@ -1,4 +1,3 @@
-
 import numpy as np
 import pandas as pd
 import geopandas as gpd
@@ -9,8 +8,74 @@ import shapely
 from shapely.geometry import Point, Polygon, LineString
 
 
-def add_numbers(a, b):
-    return a + b
+def get_admin_polygon(city):
+    """
+    :param city:
+    :return: simple GeoDataFrame containing only the Polygon of the city
+    """
+    try:
+        df_city = ox.geocode_to_gdf(city)
+        df_city = df_city[["osm_id", "geometry"]]
+        df_city = df_city.rename({"osm_id": "osmid"})
+        return df_city
+
+    except:
+        print("Input must be a city in string format")
+
+
+def get_bbox(city):
+    """
+
+    :param city:
+    :return: Array of Int which represent the bounding boy for the given city in the format
+    [north, south,east,west]
+    """
+    gdf_city = ox.geocode_to_gdf(city)
+    bbox = [gdf_city["bbox_north"].values[0],
+            gdf_city["bbox_south"].values[0],
+            gdf_city["bbox_east"].values[0],
+            gdf_city["bbox_west"].values[0]]
+    return bbox
+
+
+def split_linestring(df):
+    """
+
+    :param df:
+    :return: DataFrame with shapely.linestring with two points each
+    The linestring, which are split up will have the same osmid since its still the same street
+    """
+    linestrings = []
+    osmid = []
+
+    for idx, row in df.iterrows():
+        if len(row["geometry"].coords) == 2:
+            linestrings.append(row["geometry"])
+            osmid.append(row["osmid"])
+        else:
+            for i in range(0, len(row["geometry"].coords) - 1):
+                p1 = Point(row["geometry"].coords[i][0], row["geometry"].coords[i][1])
+                p2 = Point(row["geometry"].coords[i + 1][0], row["geometry"].coords[i + 1][1])
+                linestrings.append(LineString([p1, p2]))
+                osmid.append(row["osmid"])
+
+    dataset = gpd.GeoDataFrame({"osmid": osmid, "geometry": linestrings})
+    return dataset
+
+
+def explode(gdf):
+    """
+
+    :param gdf: which can have multi-part geometries that will be exploded
+    :return: GeoDataFrame with single geometries
+    example: Multipolygon -> multiple Polygons
+    """
+    gs = gdf.explode()
+    gdf2 = gs.reset_index().rename(columns={0: "geometry"})
+    gdf_out = gdf2.merge(gdf.drop("geometry", axis=1), left_on="level_0", right_index=True)
+    gdf_out = gdf_out.set_index(["level_0", "level_1"]).set_geometry("geometry")
+    gdf_out.crs = gdf.crs
+    return gdf_out
 
 
 class TessObj:
@@ -19,17 +84,6 @@ class TessObj:
         self.resolution = resolution
         self.city = city
         pass
-
-#should be define this function external s.t. its not a class object?
-    def get_admin_Polygon(self, city):
-        try:
-            df_city = ox.geocode_to_gdf(city)
-            df_city = df_city[["osm_id", "geometry"]]
-            df_city = df_city.rename({"osm_id": "osmid"})
-            return df_city
-
-        except:
-            print("Input must be a city in string format")
 
     def quadKey(self, city, resolution):
         """
@@ -41,7 +95,7 @@ class TessObj:
             df_city = gpd.GeoDataFrame(geometry=[city])
             pass
         elif type(city) == str:
-            df_city = self.get_admin_Polygon(city)
+            df_city = get_admin_polygon(city)
             pass
         elif type(city) == gpd.GeoDataFrame:
             df_city = city.copy()
@@ -62,7 +116,7 @@ class TessObj:
             df_city = gpd.GeoDataFrame(geometry=[city])
             pass
         elif type(city) == str:
-            df_city = self.get_admin_Polygon(city)
+            df_city = get_admin_polygon(city)
             pass
         elif type(city) == gpd.GeoDataFrame:
             df_city = city.copy()
