@@ -8,7 +8,7 @@ import shapely
 from shapely.geometry import Point, Polygon, LineString
 
 
-def get_admin_polygon(city):
+def get_admin_polygon(city: str):
     """
     :param city:
     :return: simple GeoDataFrame containing only the Polygon of the city
@@ -23,7 +23,7 @@ def get_admin_polygon(city):
         print("Input must be a city in string format")
 
 
-def get_bbox(city):
+def get_bbox(city: str):
     """
 
     :param city:
@@ -85,7 +85,7 @@ class TessObj:
         self.city = city
         pass
 
-    def quadKey(self, city, resolution):
+    def quadKey(self, city, resolution: int):
         """
         :param resolution: resolution for mircosoft bing. Int ∈ [1,...,23]
         :param city: Must be a shapely.Polygon, GeoDataFrame Polygon or String e.g. "Frankfurt am Main"
@@ -106,7 +106,7 @@ class TessObj:
         df_qk = gpd.GeoDataFrame([t.to_dict() for t in tiles], geometry='shapely', crs="EPSG:4326")
         return df_qk
 
-    def hexagon(self, city, resolution):
+    def hexagon(self, city, resolution: int):
         """
         :param city: Must be a shapely.Polygon, GeoDataFrame Polygon or String e.g. "Frankfurt am Main"
         :param resolution: resolution for mircosoft bing. Int ∈ [0,...,15]
