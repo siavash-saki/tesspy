@@ -123,7 +123,7 @@ class TessObj:
             pass
         else:
             raise TypeError("City must be in format: Shapely Polygon, GeoDataFrame or String")
-        tiles = Babel('bing').polyfill(df_city.geometry.unary_union, resolution=resolution)
+        tiles = Babel('h3').polyfill(df_city.geometry.unary_union, resolution=resolution)
         df_h3 = gpd.GeoDataFrame([t.to_dict() for t in tiles], geometry='shapely', crs="EPSG:4326")
         return df_h3
 
