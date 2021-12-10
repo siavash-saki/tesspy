@@ -203,7 +203,6 @@ class TessObj:
         aqk_count = gpd.GeoDataFrame(aqk_count, geometry="shapely")
         threshold = int(np.median(aqk_count["count"].values))
         while max(aqk_count["count"].values) > threshold:
-            print(aqk_count.shape[0])
             df_temp = adaptive_tessellation(aqk_count, threshold)
             df_temp.drop(columns=["count"], inplace=True)
 

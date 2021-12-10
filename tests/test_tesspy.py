@@ -2,6 +2,7 @@ from unittest import TestCase
 import tesspy.tesspy as tp
 import geopandas as gpd
 import pandas as pd
+from shapely import wkt
 
 
 class TestTessObj(TestCase):
@@ -62,4 +63,13 @@ class TestTessObj(TestCase):
 class TestTessObj(TestCase):
     def test_adaptive_quadkey(self):
         admin_polygon = tp.get_admin_polygon("Frankfurt am Main")
-        pass
+        test_data = pd.read_csv("FFM_clean_data.csv")
+        test_data = gpd.GeoDataFrame(test_data, crs="EPSG:4326")
+        test_data["geometry"] = test_data["geometry"].apply(wkt.loads)
+        test_data.drop(columns=["Unnamed: 0"], inplace=True)
+        test_data = test_data[["osmid", "geometry", "value"]]
+
+        aqk = tp.TessObj.adaptive_quadkey(self, "Frankfurt am Main", test_data, 14)
+
+        print(aqk.head())
+
