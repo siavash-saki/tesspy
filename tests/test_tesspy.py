@@ -1,5 +1,7 @@
 from unittest import TestCase
 import tesspy.tesspy as tp
+import geopandas as gpd
+import pandas as pd
 
 
 class TestTessObj(TestCase):
@@ -55,3 +57,9 @@ class TestTessObj(TestCase):
         qk = tp.TessObj.hexagon(self, "Frankfurt am Main", 14)
         exploded_qk = qk.explode()
         print(exploded_qk.head())
+
+
+class TestTessObj(TestCase):
+    def test_adaptive_quadkey(self):
+        admin_polygon = tp.get_admin_polygon("Frankfurt am Main")
+        pass
