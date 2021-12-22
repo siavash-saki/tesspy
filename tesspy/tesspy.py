@@ -2,10 +2,11 @@ import numpy as np
 import pandas as pd
 import geopandas as gpd
 import osmnx as ox
-# import h3
+import h3
+import h3pandas
 from babelgrid import Babel
 import shapely
-from shapely.geometry import Point, Polygon, LineString
+from shapely.geometry import Point, Polygon, LineString, mapping
 
 
 def get_admin_polygon(city: str):
@@ -97,6 +98,19 @@ def count_poi(df, points):
     return final_df
 
 
+def get_h3(df, resolution):
+    """
+    :param df: should the geodatafram of the boundary polygon
+    :param resolution: resolution for uber's h3 hexagon grid
+    :return: GeoDataFrame with tessellation
+    """
+    area_json = mapping(df.geometry.iloc[0])
+    h3_index = h3.polyfill(area_json, resolution)
+    h3_polygons = [Polygon(h3.h3_to_geo_boundary(h3_idx)) for h3_idx in h3_index]
+    gdf = gpd.GeoDataFrame(geometry=h3_polygons, crs='EPSG:4326')
+    return gdf
+
+
 def adaptive_tessellation(gdf, threshold):
     """
     :param gdf: GeoDataFrame from babel (with children_id column)
@@ -171,8 +185,8 @@ class TessObj:
             pass
         else:
             raise TypeError("City must be in format: Shapely Polygon, GeoDataFrame or String")
-        tiles = Babel('h3').polyfill(df_city.geometry.unary_union, resolution=resolution)
-        df_h3 = gpd.GeoDataFrame([t.to_dict() for t in tiles], geometry='shapely', crs="EPSG:4326")
+
+        df_h3 = get_h3(df_city, resolution)
         return df_h3
 
     def adaptive_quadkey(self, city, poi_data, start_resolution):

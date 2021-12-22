@@ -59,8 +59,11 @@ class TestTessObj(TestCase):
         exploded_qk = qk.explode()
         print(exploded_qk.head())
 
+    def test_h3(self):
+        area = tp.get_admin_polygon("Frankfurt am Main")
+        h3_tess = tp.get_h3(area, 9)
+        print(h3_tess.shape)
 
-class TestTessObj(TestCase):
     def test_adaptive_quadkey(self):
         admin_polygon = tp.get_admin_polygon("Frankfurt am Main")
         test_data = pd.read_csv("FFM_clean_data.csv")
