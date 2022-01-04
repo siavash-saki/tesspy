@@ -76,3 +76,8 @@ class TestTessObj(TestCase):
 
         print(aqk.head())
 
+
+    def test_cityblock(self):
+        df = tp.TessObj.cityblocks(self, "Frankfurt am Main")
+        print(df.shape)
+
