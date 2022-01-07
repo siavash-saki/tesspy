@@ -1,3 +1,4 @@
+import hdbscan
 import numpy as np
 import pandas as pd
 import geopandas as gpd
@@ -7,9 +8,11 @@ import h3
 import h3pandas
 from babelgrid import Babel
 import shapely
-from shapely.geometry import Point, Polygon, LineString, mapping
+from shapely.geometry import Point, Polygon, LineString, mapping, MultiPoint
 from shapely.ops import polygonize, cascaded_union
-from sklearn.cluster import AgglomerativeClustering
+from sklearn.cluster import AgglomerativeClustering, KMeans
+from scipy.spatial import Voronoi, voronoi_plot_2d
+from collections import defaultdict
 
 
 def get_admin_polygon(city: str):
@@ -127,7 +130,8 @@ def get_LGU_threshold(city_admin_boundary, res):
 def get_hdscan_parameter(coordinates, threshold):
     dist_threshold = [i * 50 for i in range(2, 13)]
     for th in dist_threshold:
-        model = AgglomerativeClustering(n_clusters=None, distance_threshold=th, affinity="euclidean", compute_full_tree=True)
+        model = AgglomerativeClustering(n_clusters=None, distance_threshold=th, affinity="euclidean",
+                                        compute_full_tree=True)
         model.fit(coordinates)
         labels = model.labels_
         nb_clusters = len(set(labels)) - (1 if -1 in labels else 0)
@@ -163,6 +167,61 @@ def adaptive_tessellation(gdf, threshold):
             gdf = gdf.append(child_gdf)
 
     return gdf
+
+
+def voronoi_polygons(voronoi, diameter):
+    """Generate shapely.geometry.Polygon objects corresponding to the
+    regions of a scipy.spatial.Voronoi object, in the order of the
+    input points. The polygons for the infinite regions are large
+    enough that all points within a distance 'diameter' of a Voronoi
+    vertex are contained in one of the infinite polygons.
+
+    """
+    centroid = voronoi.points.mean(axis=0)
+
+    # Mapping from (input point index, Voronoi point index) to list of
+    # unit vectors in the directions of the infinite ridges starting
+    # at the Voronoi point and neighbouring the input point.
+    ridge_direction = defaultdict(list)
+    for (p, q), rv in zip(voronoi.ridge_points, voronoi.ridge_vertices):
+        u, v = sorted(rv)
+        if u == -1:
+            # Infinite ridge starting at ridge point with index v,
+            # equidistant from input points with indexes p and q.
+            t = voronoi.points[q] - voronoi.points[p]  # tangent
+            n = np.array([-t[1], t[0]]) / np.linalg.norm(t)  # normal
+            midpoint = voronoi.points[[p, q]].mean(axis=0)
+            direction = np.sign(np.dot(midpoint - centroid, n)) * n
+            ridge_direction[p, v].append(direction)
+            ridge_direction[q, v].append(direction)
+
+    for i, r in enumerate(voronoi.point_region):
+        region = voronoi.regions[r]
+        if -1 not in region:
+            # Finite region.
+            yield Polygon(voronoi.vertices[region])
+            continue
+        # Infinite region.
+        inf = region.index(-1)  # Index of vertex at infinity.
+        j = region[(inf - 1) % len(region)]  # Index of previous vertex.
+        k = region[(inf + 1) % len(region)]  # Index of next vertex.
+        if j == k:
+            # Region has one Voronoi vertex with two ridges.
+            dir_j, dir_k = ridge_direction[i, j]
+        else:
+            # Region has two Voronoi vertices, each with one ridge.
+            dir_j, = ridge_direction[i, j]
+            dir_k, = ridge_direction[i, k]
+
+        # Length of ridges needed for the extra edge to lie at least
+        # 'diameter' away from all Voronoi vertices.
+        length = 2 * diameter / np.linalg.norm(dir_j + dir_k)
+
+        # Polygon consists of finite part plus an extra edge.
+        finite_part = voronoi.vertices[region[inf + 1:] + region[:inf]]
+        extra_edge = [voronoi.vertices[j] + dir_j * length,
+                      voronoi.vertices[k] + dir_k * length]
+        yield Polygon(np.concatenate((finite_part, extra_edge)))
 
 
 class TessObj:
@@ -251,7 +310,54 @@ class TessObj:
         return aqk_count
 
     def voronoi(self, city, data, cluster_algo="k-means"):
-        pass
+        """
+        :param city: Must be a shapely.Polygon, GeoDataFrame Polygon or String e.g. "Frankfurt am Main"
+        :param data: GeoDataFrame with a geometry column representing data like POI or generators for Voronoi Diagrams
+        :param cluster_algo: if not generators are used directly the spatial data is going to be clustered. specify the
+        cluster algorithm
+        :return: GeoDataFrame with Polygons representing the voronoi polygons
+        """
+        if type(city) == shapely.geometry.polygon.Polygon:
+            df_city = gpd.GeoDataFrame(geometry=[city])
+            pass
+        elif type(city) == str:
+            df_city = get_admin_polygon(city)
+            pass
+        elif type(city) == gpd.GeoDataFrame:
+            df_city = city.copy()
+            pass
+        else:
+            raise TypeError("City must be in format: Shapely Polygon, GeoDataFrame or String")
+
+        data_locs = np.column_stack([data.geometry.x, data.geometry.y])
+
+        # TODO: maybe include more cluster algorithms like DBSCAN,..
+        if cluster_algo == "k-means":
+            # TODO: Think about automating nb of clusters
+            clusterer = KMeans(n_clusters=500).fit(data_locs)
+            data["ClusterIDs"] = clusterer.labels_
+
+        elif cluster_algo == "hdbscan":
+            # TODO: Think about automating min_cluster_size e.g. x% of the initial data shape
+            clusterer = hdbscan.HDBSCAN(min_cluster_size=15, prediction_data=True).fit(data_locs)
+            soft_clusters = hdbscan.all_points_membership_vectors(clusterer)
+            data["ClusterIDs"] = [np.argmax(x) for x in soft_clusters]
+
+        elif cluster_algo == "None":
+            data["ClusterIDs"] = data.geometry
+        else:
+            raise ValueError("Please use one of the implemented clustering: k-mean, hdbscan, dbscan")
+
+        convex_hulls = [MultiPoint(data[data["ClusterIDs"] == ID]["geometry"].values).convex_hull for ID in
+                        data["ClusterIDs"].unique()]
+        gdf_generators = gpd.GeoDataFrame(geometry=convex_hulls, crs="EPSG:4326")
+        generators = gdf_generators["geometry"].centroid
+
+        voronoi_dia = Voronoi(np.column_stack([generators.x, generators.y]))
+        voronoi_poly = gpd.GeoDataFrame(geometry=[p for p in voronoi_polygons(voronoi_dia, 0.1)], crs="EPSG:4326")
+        vor_polygons = voronoi_poly.intersection(df_city.geometry.iloc[0])
+
+        return gpd.GeoDataFrame(geometry=vor_polygons)
 
     def cityblocks(self, city):
         """
@@ -318,7 +424,7 @@ class TessObj:
         th = get_hdscan_parameter(coord, threshold)
         print(f"Threshold for HDBSCAN distance_threshold is {th} and should be sth like 500")
 
-        model = AgglomerativeClustering(n_clusters=None, distance_threshold=th,  affinity='euclidean')
+        model = AgglomerativeClustering(n_clusters=None, distance_threshold=th, affinity='euclidean')
         model.fit(coord)
 
         new_df['Cluster'] = model.labels_
