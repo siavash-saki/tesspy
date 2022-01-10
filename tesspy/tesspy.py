@@ -76,9 +76,9 @@ def explode(gdf):
     :return: GeoDataFrame with single geometries
     example: Multipolygon -> multiple Polygons
     """
-    gs = gdf.explode()
+    gs = gdf.explode(index_parts=True)
     gdf2 = gs.reset_index().rename(columns={0: "geometry"})
-    gdf_out = gdf2.merge(gdf.drop("geometry", axis=1), left_on="level_0", right_index=True)
+    gdf_out = gdf2.merge(gdf.drop("geometry", axis=1), left_on="level_0", right_index=True, )
     gdf_out = gdf_out.set_index(["level_0", "level_1"]).set_geometry("geometry")
     gdf_out.crs = gdf.crs
     return gdf_out
