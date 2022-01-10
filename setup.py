@@ -4,13 +4,13 @@ with open("README.md", "r") as fh:
     LONG_DESCRIPTION = fh.read()
 
 # Packages that tesspy uses explicitly:
-INSTALL_REQUIRES = ['numpy', 'pandas', 'shapely', 'geopandas', 'h3', 'h3pandas', 'babelgrid', 'osmnx']
+INSTALL_REQUIRES = ['numpy', 'pandas', 'shapely', 'geopandas', 'h3', 'h3pandas', 'babelgrid', 'osmnx', 'hdbscan', 'sklearn', 'scipy', 'collections']
 
 setuptools.setup(
     name="tesspy",
     version="0.0.1",
     author="tesspy Developers",
-    author_email="cyberdude7@gmail.com",
+    author_email="jonas.hamann@fb3.fra-uas.de",
     description="Tessellation of Urban Areas",
     long_description=LONG_DESCRIPTION,
     long_description_content_type="text/markdown",

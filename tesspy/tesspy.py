@@ -5,13 +5,12 @@ import geopandas as gpd
 from geopandas import sjoin
 import osmnx as ox
 import h3
-import h3pandas
 from babelgrid import Babel
 import shapely
 from shapely.geometry import Point, Polygon, LineString, mapping, MultiPoint
 from shapely.ops import polygonize, cascaded_union
 from sklearn.cluster import AgglomerativeClustering, KMeans
-from scipy.spatial import Voronoi, voronoi_plot_2d
+from scipy.spatial import Voronoi
 from collections import defaultdict
 
 
