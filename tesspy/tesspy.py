@@ -91,7 +91,7 @@ def count_poi(df, points):
     :return: GeoDataFrame of LGUs with "count" column that counts points per LGU
     """
 
-    pointsInPolygon = gpd.sjoin(df, points, how="left", op='contains')
+    pointsInPolygon = gpd.sjoin(df, points, how="left", predicate='contains')
     pointsInPolygon['count'] = 1
     pointsInPolygon.reset_index(inplace=True)
     tmp_a = pointsInPolygon.groupby(by='tile_id').count()['count'].reset_index().sort_values(by="tile_id",
@@ -421,7 +421,6 @@ class TessObj:
         threshold = get_LGU_threshold(df_city, 9)
         print(f"Threshold for nb of LGUs is {threshold}")
         th = get_hdscan_parameter(coord, threshold)
-        print(f"Threshold for HDBSCAN distance_threshold is {th} and should be sth like 500")
 
         model = AgglomerativeClustering(n_clusters=None, distance_threshold=th, affinity='euclidean')
         model.fit(coord)
