@@ -356,7 +356,8 @@ class TessObj:
         voronoi_poly = gpd.GeoDataFrame(geometry=[p for p in voronoi_polygons(voronoi_dia, 0.1)], crs="EPSG:4326")
         vor_polygons = voronoi_poly.intersection(df_city.geometry.iloc[0])
 
-        return gpd.GeoDataFrame(geometry=vor_polygons)
+        df_vor = gpd.GeoDataFrame(geometry=vor_polygons)
+        return df_vor
 
     def cityblocks(self, city):
         """
