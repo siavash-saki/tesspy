@@ -81,3 +81,12 @@ class TestTessObj(TestCase):
         df = tp.TessObj.cityblocks(self, "Frankfurt am Main")
         print(df.shape)
 
+    def test_voronoi(self):
+        data = gpd.read_file("POI_data_FFM.geojson")
+        df_vor = tp.TessObj.voronoi(self, "Frankfurt am Main", data, cluster_algo="hdbscan")
+        print(df_vor.head(10))
+
+    def test_voronoi_kmeans(self):
+        data = gpd.read_file("POI_data_FFM.geojson")
+        df_vor = tp.TessObj.voronoi(self, "Frankfurt am Main", data)
+        print(df_vor.head(10))

@@ -443,6 +443,6 @@ class TessObj:
         explode_df = explode(To_explode)
         explode_df = explode_df.reset_index()
         explode_df.drop(columns=["level_0", "level_1"], inplace=True)
-        overall = pd.concat([keep_df, To_explode])
+        overall = pd.concat([keep_df, explode_df])
 
         return overall
