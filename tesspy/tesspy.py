@@ -5,6 +5,7 @@ import geopandas as gpd
 from geopandas import sjoin
 import osmnx as ox
 import h3
+import h3pandas
 from babelgrid import Babel
 import shapely
 from shapely.geometry import Point, Polygon, LineString, mapping, MultiPoint
