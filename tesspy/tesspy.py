@@ -1,3 +1,4 @@
+import geopandas
 import hdbscan
 import numpy as np
 import pandas as pd
@@ -13,9 +14,10 @@ from shapely.ops import polygonize, cascaded_union
 from sklearn.cluster import AgglomerativeClustering, KMeans
 from scipy.spatial import Voronoi
 from collections import defaultdict
+import mercantile
 
 
-def get_admin_polygon(city: str):
+def get_city_polygon(city: str):
     """
     :param city:
     :return: simple GeoDataFrame containing only the Polygon of the city
@@ -32,7 +34,6 @@ def get_admin_polygon(city: str):
 
 def get_bbox(city: str):
     """
-
     :param city:
     :return: Array of Int which represent the bounding boy for the given city in the format
     [north, south,east,west]
@@ -47,7 +48,6 @@ def get_bbox(city: str):
 
 def split_linestring(df):
     """
-
     :param df:
     :return: DataFrame with shapely.linestring with two points each
     The linestring, which are split up will have the same osmid since its still the same street
@@ -224,6 +224,34 @@ def voronoi_polygons(voronoi, diameter):
         yield Polygon(np.concatenate((finite_part, extra_edge)))
 
 
+def square_polyfill(gdf, zoom_level):
+    if not hasattr(gdf, "geometry"):
+        raise TypeError("This GeoDataFrame is not valid. Missing geometry column")
+
+    geom_name = gdf.geometry.name
+    temp_dfs = []
+
+    for idx, rows in gdf.iterrows():
+        gdf_geometry = rows[geom_name]
+        bbox = gdf_geometry.bounds
+        tiles = mercantile.tiles(bbox[0], bbox[1], bbox[2], bbox[3], zoom_level)
+        temp_rows = []
+        for tile in tiles:
+            temp_row = rows.copy()
+            square = shapely.geometry.box(*mercantile.bounds(tile))
+            if square.intersects(gdf_geometry):
+                temp_row[geom_name] = square
+                temp_row["quadkey"] = mercantile.quadkey(tile)
+                temp_rows.append(temp_row)
+        temp_dfs.append(pd.DataFrame(temp_rows))
+
+    df = pd.concat(temp_dfs).reset_index(drop=True)
+
+    return gpd.GeoDataFrame(df, geometry=geom_name, crs="epsg:4326")
+
+
+
+
 class TessObj:
 
     def __init__(self, city, resolution):
@@ -241,15 +269,15 @@ class TessObj:
             df_city = gpd.GeoDataFrame(geometry=[city])
             pass
         elif type(city) == str:
-            df_city = get_admin_polygon(city)
+            df_city = get_city_polygon(city)
             pass
         elif type(city) == gpd.GeoDataFrame:
             df_city = city.copy()
             pass
         else:
             raise TypeError("City must be in format: Shapely Polygon, GeoDataFrame or String")
-        tiles = Babel('bing').polyfill(df_city.geometry.unary_union, resolution=resolution)
-        df_qk = gpd.GeoDataFrame([t.to_dict() for t in tiles], geometry='shapely', crs="EPSG:4326")
+
+        df_qk = square_polyfill(df_city, resolution)
         return df_qk
 
     def hexagon(self, city, resolution: int):
@@ -262,7 +290,7 @@ class TessObj:
             df_city = gpd.GeoDataFrame(geometry=[city])
             pass
         elif type(city) == str:
-            df_city = get_admin_polygon(city)
+            df_city = get_city_polygon(city)
             pass
         elif type(city) == gpd.GeoDataFrame:
             df_city = city.copy()
@@ -284,7 +312,7 @@ class TessObj:
             df_city = gpd.GeoDataFrame(geometry=[city])
             pass
         elif type(city) == str:
-            df_city = get_admin_polygon(city)
+            df_city = get_city_polygon(city)
             pass
         elif type(city) == gpd.GeoDataFrame:
             df_city = city.copy()
@@ -321,7 +349,7 @@ class TessObj:
             df_city = gpd.GeoDataFrame(geometry=[city])
             pass
         elif type(city) == str:
-            df_city = get_admin_polygon(city)
+            df_city = get_city_polygon(city)
             pass
         elif type(city) == gpd.GeoDataFrame:
             df_city = city.copy()
@@ -371,7 +399,7 @@ class TessObj:
             x, y = box.exterior.coords.xy
             bbox = [max(y), min(y), max(x), min(x)]
         elif type(city) == str:
-            df_city = get_admin_polygon(city)
+            df_city = get_city_polygon(city)
             bbox = get_bbox(city)
             pass
         elif type(city) == gpd.GeoDataFrame:

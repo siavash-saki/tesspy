@@ -13,12 +13,12 @@ class TestTessObj(TestCase):
             print(qk.shape)
 
         print("Test for GeoDataFrame")
-        admin_polygon = tp.get_admin_polygon("Frankfurt am Main")
+        admin_polygon = tp.get_city_polygon("Frankfurt am Main")
         qk_GeoDF = tp.TessObj.quadKey(self, admin_polygon, 15)
         print(qk_GeoDF.shape)
 
         print("Test for Shapely Polygon")
-        admin_polygon = tp.get_admin_polygon("Frankfurt am Main")
+        admin_polygon = tp.get_city_polygon("Frankfurt am Main")
         polygon = admin_polygon.geometry.values[0]
         qk_polygon = tp.TessObj.quadKey(self, polygon, 15)
         print(qk_polygon.shape)
@@ -30,12 +30,12 @@ class TestTessObj(TestCase):
             print(h3.shape)
 
         print("Test for GeoDataFrame")
-        admin_polygon = tp.get_admin_polygon("Frankfurt am Main")
+        admin_polygon = tp.get_city_polygon("Frankfurt am Main")
         h3_GeoDF = tp.TessObj.hexagon(self, admin_polygon, 8)
         print(h3_GeoDF.shape)
 
         print("Test for Shapely Polygon")
-        admin_polygon = tp.get_admin_polygon("Frankfurt am Main")
+        admin_polygon = tp.get_city_polygon("Frankfurt am Main")
         polygon = admin_polygon.geometry.values[0]
         h3_polygon = tp.TessObj.hexagon(self, polygon, 8)
         print(h3_polygon.shape)
@@ -47,7 +47,7 @@ class TestTessObj(TestCase):
     #     self.fail()
 
     def test_admin_polygon(self):
-        city = tp.get_admin_polygon("Frankfurt am Main")
+        city = tp.get_city_polygon("Frankfurt am Main")
         print(city)
 
     def test_get_bbox(self):
@@ -60,12 +60,12 @@ class TestTessObj(TestCase):
         print(exploded_qk.head())
 
     def test_h3(self):
-        area = tp.get_admin_polygon("Frankfurt am Main")
+        area = tp.get_city_polygon("Frankfurt am Main")
         h3_tess = tp.get_h3(area, 9)
         print(h3_tess.shape)
 
     def test_adaptive_quadkey(self):
-        admin_polygon = tp.get_admin_polygon("Frankfurt am Main")
+        admin_polygon = tp.get_city_polygon("Frankfurt am Main")
         test_data = pd.read_csv("FFM_clean_data.csv")
         test_data = gpd.GeoDataFrame(test_data, crs="EPSG:4326")
         test_data["geometry"] = test_data["geometry"].apply(wkt.loads)
@@ -90,3 +90,9 @@ class TestTessObj(TestCase):
         data = gpd.read_file("POI_data_FFM.geojson")
         df_vor = tp.TessObj.voronoi(self, "Frankfurt am Main", data)
         print(df_vor.head(10))
+
+
+    def test_square_polyfill(self):
+        df_city = tp.get_city_polygon("Frankfurt am Main")
+        gdf_square = tp.square_polyfill(df_city, 15)
+        print(gdf_square.shape)
