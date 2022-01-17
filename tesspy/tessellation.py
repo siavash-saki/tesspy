@@ -1,27 +1,23 @@
+from sklearn.cluster import KMeans
 import hdbscan
-import numpy as np
-import pandas as pd
-import geopandas as gpd
-from geopandas import sjoin
-import osmnx as ox
-import h3
-import shapely
-from shapely.geometry import Point, Polygon, LineString, mapping, MultiPoint
-from shapely.ops import polygonize, cascaded_union
-from sklearn.cluster import AgglomerativeClustering, KMeans
-from collections import defaultdict
-import mercantile
-
 from scipy.spatial import Voronoi
-
 from tessellation_functions import *
 from poi_data import *
 
 
 def get_city_polygon(city: str):
     """
-    :param city:
-    :return: simple GeoDataFrame containing only the Polygon of the city
+    Gets the polygon of a city or an area
+
+    Parameters
+    ----------
+    city : str
+        city must be a name of a city, or an address of a region
+
+    Returns
+    --------
+    df_city : GeoDataFrame
+        GeoDataFrame containing the polygon of the city
     """
     df_city = ox.geocode_to_gdf(city)
     df_city = df_city[["osm_id", "geometry"]]
@@ -30,6 +26,17 @@ def get_city_polygon(city: str):
 
 
 def _check_input_geodataframe(gdf):
+    """
+    checks if the input gdf is in a correct format
+
+    Parameters
+    ----------
+    gdf : GeoDataFrame
+
+    Returns
+    --------
+    gdf : GeoDataFrame
+    """
     if len(gdf) != 1:
         raise ValueError("GeoDataFrame must have only one polygon")
     else:
@@ -79,7 +86,7 @@ class Tessellation:
         area : GeoDataFrame or str
             GeoDataFrame must have a single polygon in geometry column and
             its CRS must be defined.
-            str must be a name of a city
+            str must be a name of a city, or an address of a region
 
         Examples
         --------
@@ -225,12 +232,12 @@ class Tessellation:
             self.poi_dataframe = self.poi_dataframe.reset_index(drop=True)
 
         # data, based on which, tessellation should be done
-        tess_data = self.poi_dataframe[self.poi_dataframe[poi_categories].sum(axis=1) > 0]
-        points_geom = tess_data[['center_longitude', 'center_latitude']] \
-            .apply(lambda p: Point(p['center_longitude'], p['center_latitude']), axis=1)
-        tess_data = gpd.GeoDataFrame(geometry=points_geom,
-                                     data=tess_data[poi_categories],
-                                     crs='EPSG:4326')
+        # tess_data = self.poi_dataframe[self.poi_dataframe[poi_categories].sum(axis=1) > 0]
+        # points_geom = tess_data[['center_longitude', 'center_latitude']] \
+        #     .apply(lambda p: Point(p['center_longitude'], p['center_latitude']), axis=1)
+        # tess_data = gpd.GeoDataFrame(geometry=points_geom,
+        #                              data=tess_data[poi_categories],
+        #                              crs='EPSG:4326')
 
         # tiles = Babel("bing").polyfill(df_city.geometry.unary_union, resolution=start_resolution)
         # df_aqk = gpd.GeoDataFrame([t.to_dict() for t in tiles], geometry='shapely')
@@ -357,3 +364,9 @@ class Tessellation:
 
     def city_blocks(self):
         pass
+
+    def get_poi_data(self):
+        return self.poi_dataframe
+
+    def get_road_network(self):
+        return self.road_network
