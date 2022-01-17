@@ -4,3 +4,5 @@ tesspy.egg-info
 .idea
 venv
 tutorials/.ipynb_checkpoints
+tesspy/test_jn.ipynb
+tesspy/.ipynb_checkpoints
