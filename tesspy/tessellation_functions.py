@@ -1,4 +1,3 @@
-
 import hdbscan
 import numpy as np
 import pandas as pd
@@ -10,7 +9,7 @@ import shapely
 from shapely.geometry import Point, Polygon, LineString, mapping, MultiPoint
 from shapely.ops import polygonize, cascaded_union
 from sklearn.cluster import AgglomerativeClustering, KMeans
-from scipy.spatial import Voronoi
+
 from collections import defaultdict
 import mercantile
 
@@ -22,11 +21,11 @@ def count_poi(df, points):
     :return: GeoDataFrame of LGUs with "count" column that counts points per LGU
     """
 
-    pointsInPolygon = gpd.sjoin(df, points, how="left", op='contains')
-    pointsInPolygon['count'] = 1
-    pointsInPolygon.reset_index(inplace=True)
-    tmp_a = pointsInPolygon.groupby(by='tile_id').count()['count'].reset_index().sort_values(by="tile_id",
-                                                                                             ascending=True)
+    points_in_polygon = gpd.sjoin(df, points, how="left", op='contains')
+    points_in_polygon['count'] = 1
+    points_in_polygon.reset_index(inplace=True)
+    tmp_a = points_in_polygon.groupby(by='tile_id').count()['count'].reset_index().sort_values(by="tile_id",
+                                                                                               ascending=True)
     tmp_b = df.reset_index().sort_values(by="tile_id", ascending=True)
     final_df = pd.merge(tmp_a, tmp_b, on="tile_id")
     final_df.set_index("tile_id", inplace=True)
@@ -37,7 +36,6 @@ def count_poi(df, points):
 ##### squares
 
 def get_squares_polyfill(gdf, zoom_level):
-
     geom_name = gdf.geometry.name
     temp_dfs = []
 
@@ -105,6 +103,7 @@ def get_adaptive_squares(gdf, threshold):
 
     return gdf
 
+
 ##### voronoi diagram
 
 def voronoi_polygons(voronoi, diameter):
@@ -117,48 +116,39 @@ def voronoi_polygons(voronoi, diameter):
 
     centroid = voronoi.points.mean(axis=0)
 
-    # Mapping from (input point index, Voronoi point index) to list of
-    # unit vectors in the directions of the infinite ridges starting
-    # at the Voronoi point and neighbouring the input point.
     ridge_direction = defaultdict(list)
     for (p, q), rv in zip(voronoi.ridge_points, voronoi.ridge_vertices):
         u, v = sorted(rv)
         if u == -1:
-            # Infinite ridge starting at ridge point with index v,
-            # equidistant from input points with indexes p and q.
-            t = voronoi.points[q] - voronoi.points[p]  # tangent
-            n = np.array([-t[1], t[0]]) / np.linalg.norm(t)  # normal
+            tangent = voronoi.points[q] - voronoi.points[p]
+            normal = np.array([-tangent[1], tangent[0]]) / np.linalg.norm(tangent)
             midpoint = voronoi.points[[p, q]].mean(axis=0)
-            direction = np.sign(np.dot(midpoint - centroid, n)) * n
+            direction = np.sign(np.dot(midpoint - centroid, normal)) * normal
             ridge_direction[p, v].append(direction)
             ridge_direction[q, v].append(direction)
 
     for i, r in enumerate(voronoi.point_region):
         region = voronoi.regions[r]
         if -1 not in region:
-            # Finite region.
+            # finite regions
             yield Polygon(voronoi.vertices[region])
             continue
-        # Infinite region.
-        inf = region.index(-1)  # Index of vertex at infinity.
-        j = region[(inf - 1) % len(region)]  # Index of previous vertex.
-        k = region[(inf + 1) % len(region)]  # Index of next vertex.
-        if j == k:
-            # Region has one Voronoi vertex with two ridges.
-            dir_j, dir_k = ridge_direction[i, j]
-        else:
-            # Region has two Voronoi vertices, each with one ridge.
-            dir_j, = ridge_direction[i, j]
-            dir_k, = ridge_direction[i, k]
 
-        # Length of ridges needed for the extra edge to lie at least
-        # 'diameter' away from all Voronoi vertices.
+        # infinite regions
+        inf_vertex_id = region.index(-1)
+        previous_vertex_id = region[(inf_vertex_id - 1) % len(region)]
+        next_vertex_id = region[(inf_vertex_id + 1) % len(region)]
+        if previous_vertex_id == next_vertex_id:
+            dir_j, dir_k = ridge_direction[i, previous_vertex_id]
+        else:
+            dir_j, = ridge_direction[i, previous_vertex_id]
+            dir_k, = ridge_direction[i, next_vertex_id]
+
         length = 2 * diameter / np.linalg.norm(dir_j + dir_k)
 
-        # Polygon consists of finite part plus an extra edge.
-        finite_part = voronoi.vertices[region[inf + 1:] + region[:inf]]
-        extra_edge = [voronoi.vertices[j] + dir_j * length,
-                      voronoi.vertices[k] + dir_k * length]
+        finite_part = voronoi.vertices[region[inf_vertex_id + 1:] + region[:inf_vertex_id]]
+        extra_edge = [voronoi.vertices[previous_vertex_id] + dir_j * length,
+                      voronoi.vertices[next_vertex_id] + dir_k * length]
         yield Polygon(np.concatenate((finite_part, extra_edge)))
 
 
@@ -200,7 +190,7 @@ def explode(gdf):
     return gdf_out
 
 
-## todo --> rename hdbscan
+# todo --> rename hdbscan
 def get_hdscan_parameter(coordinates, threshold):
     dist_threshold = [i * 50 for i in range(2, 13)]
     for th in dist_threshold:
@@ -214,8 +204,7 @@ def get_hdscan_parameter(coordinates, threshold):
             return th
 
 
-
-## We don't need this --> default=None, n= user_input
+# We don't need this --> default=None, n= user_input
 # def get_LGU_threshold(city_admin_boundary, res):
 #     """
 #     :param city_admin_boundary: boundary polygon of the city
@@ -224,7 +213,6 @@ def get_hdscan_parameter(coordinates, threshold):
 #     """
 #     hexagons = city_admin_boundary.h3.polyfill_resample(res)
 #     return hexagons.shape[0]
-
 
 
 def get_cityblocks(city):
