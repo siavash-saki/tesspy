@@ -39,6 +39,8 @@ class POIdata:
 
         query_string = self.create_overpass_query_string()
 
+        if self.verbose:
+            print('Getting data from OSM...')
         api = overpass.API(timeout=self.timeout)
         resp = api._get_from_overpass(query_string).json()
 
@@ -46,6 +48,7 @@ class POIdata:
         lst_ways = []
 
         if self.verbose:
+            print('Creating POI DataFrame...')
             generator = progressbar(resp['elements'])
         else:
             generator = resp['elements']
