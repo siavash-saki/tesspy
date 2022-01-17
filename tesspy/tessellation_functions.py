@@ -6,7 +6,6 @@ import geopandas as gpd
 from geopandas import sjoin
 import osmnx as ox
 import h3
-from babelgrid import Babel
 import shapely
 from shapely.geometry import Point, Polygon, LineString, mapping, MultiPoint
 from shapely.ops import polygonize, cascaded_union
@@ -23,7 +22,7 @@ def count_poi(df, points):
     :return: GeoDataFrame of LGUs with "count" column that counts points per LGU
     """
 
-    pointsInPolygon = gpd.sjoin(df, points, how="left", predicate='contains')
+    pointsInPolygon = gpd.sjoin(df, points, how="left", op='contains')
     pointsInPolygon['count'] = 1
     pointsInPolygon.reset_index(inplace=True)
     tmp_a = pointsInPolygon.groupby(by='tile_id').count()['count'].reset_index().sort_values(by="tile_id",
@@ -37,9 +36,7 @@ def count_poi(df, points):
 
 ##### squares
 
-def square_polyfill(gdf, zoom_level):
-    if not hasattr(gdf, "geometry"):
-        raise TypeError("This GeoDataFrame is not valid. Missing geometry column")
+def get_squares_polyfill(gdf, zoom_level):
 
     geom_name = gdf.geometry.name
     temp_dfs = []
@@ -65,7 +62,7 @@ def square_polyfill(gdf, zoom_level):
 
 ##### hexagons
 
-def get_h3(df, resolution):
+def get_h3_hexagons(df, resolution):
     """
     :param df: should the geodatafram of the boundary polygon
     :param resolution: resolution for uber's h3 hexagon grid
@@ -80,7 +77,7 @@ def get_h3(df, resolution):
 
 ##### adaptive squares
 
-def adaptive_tessellation(gdf, threshold):
+def get_adaptive_squares(gdf, threshold):
     """
     :param gdf: GeoDataFrame from babel (with children_id column)
     :param threshold: Threshold of max data points per LGU allowed
