@@ -1,24 +1,31 @@
-import hdbscan
 import numpy as np
 import pandas as pd
 import geopandas as gpd
-from geopandas import sjoin
 import osmnx as ox
 import h3
 import shapely
-from shapely.geometry import Point, Polygon, LineString, mapping, MultiPoint
+from shapely.geometry import Point, Polygon, LineString, mapping
 from shapely.ops import polygonize, cascaded_union
-from sklearn.cluster import AgglomerativeClustering, KMeans
-
+from sklearn.cluster import AgglomerativeClustering
 from collections import defaultdict
 import mercantile
 
 
 def count_poi(df, points):
     """
-    :param df: Geodataframe of LGUs
-    :param points: GeoDataFrame of POI
-    :return: GeoDataFrame of LGUs with "count" column that counts points per LGU
+    Counts the number POI in each tile
+
+    Parameters
+    ----------
+    df : GeoDataFrame
+        GeoDataFrame containing the tiles (polygons)
+    points : GeoDataFrame
+        GeoDataFrame containing the POI
+
+    Returns
+    --------
+    final_df : GeoDataFrame
+        GeoDataFrame containing the tiles and the POI count
     """
 
     points_in_polygon = gpd.sjoin(df, points, how="left", op='contains')
@@ -36,6 +43,21 @@ def count_poi(df, points):
 ##### squares
 
 def get_squares_polyfill(gdf, zoom_level):
+    """
+    Square tessellation based on the quadKeys concept
+
+    Parameters
+    ----------
+    gdf : GeoDataFrame
+        GeoDataFrame containing the tiles (polygons)
+    zoom_level : int
+        Resolution, which controls the square sizes
+
+    Returns
+    --------
+    gdf : GeoDataFrame
+        GeoDataFrame containing the squares
+    """
     geom_name = gdf.geometry.name
     temp_dfs = []
 
@@ -60,13 +82,23 @@ def get_squares_polyfill(gdf, zoom_level):
 
 ##### hexagons
 
-def get_h3_hexagons(df, resolution):
+def get_h3_hexagons(gdf, resolution):
     """
-    :param df: should the geodatafram of the boundary polygon
-    :param resolution: resolution for uber's h3 hexagon grid
-    :return: GeoDataFrame with tessellation
+    Hexagon tessellation based on the h3 implementation of Uber
+
+    Parameters
+    ----------
+    gdf : GeoDataFrame
+        GeoDataFrame containing the tiles (polygons)
+    resolution : int
+        Resolution, which controls the hexagon sizes
+
+    Returns
+    --------
+    gdf : GeoDataFrame
+        GeoDataFrame containing the hexagons
     """
-    area_json = mapping(df.geometry.iloc[0])
+    area_json = mapping(gdf.geometry.iloc[0])
     h3_index = h3.polyfill(area_json, resolution)
     h3_polygons = [Polygon(h3.h3_to_geo_boundary(h3_idx)) for h3_idx in h3_index]
     gdf = gpd.GeoDataFrame(geometry=h3_polygons, crs='EPSG:4326')
@@ -77,9 +109,19 @@ def get_h3_hexagons(df, resolution):
 
 def get_adaptive_squares(gdf, threshold):
     """
-    :param gdf: GeoDataFrame from babel (with children_id column)
-    :param threshold: Threshold of max data points per LGU allowed
-    :return: divided GeoDataFrame where LGUs are subdivided that exceed the threshold
+    Adaptive tessellation. Create squares until the threshold is no longer exceeded.
+
+    Parameters
+    ----------
+    gdf : GeoDataFrame
+        GeoDataFrame containing the tiles (polygons)
+    threshold : int
+        threshold, which controls the division of squares
+
+    Returns
+    --------
+    gdf : GeoDataFrame
+        GeoDataFrame containing the squares
     """
 
     # DataFrame where the squares will be subdivided
@@ -106,32 +148,41 @@ def get_adaptive_squares(gdf, threshold):
 
 ##### voronoi diagram
 
-def voronoi_polygons(voronoi, diameter):
+def voronoi_polygons(sp_voronoi_obj, diameter):
     """
-    :returns voronoi polygons
-    :param voronoi:
-    :param diameter:
-    :return:
-    """
+    Voronoi Diagram. Create Voronoi polygons based on scipy Voronoi object
 
-    centroid = voronoi.points.mean(axis=0)
+    Parameters
+    ----------
+    sp_voronoi_obj : scipy.spatial.Voronoi
+        scipy Voronoi object is created using the point coordinates
+    diameter : int
+        controls the size of infinite polygons. It should be large enough
+        depending on the input values.
+
+    Returns
+    --------
+    gdf : shapely.Polygon
+        Voronoi polygon
+    """
+    centroid = sp_voronoi_obj.points.mean(axis=0)
 
     ridge_direction = defaultdict(list)
-    for (p, q), rv in zip(voronoi.ridge_points, voronoi.ridge_vertices):
+    for (p, q), rv in zip(sp_voronoi_obj.ridge_points, sp_voronoi_obj.ridge_vertices):
         u, v = sorted(rv)
         if u == -1:
-            tangent = voronoi.points[q] - voronoi.points[p]
+            tangent = sp_voronoi_obj.points[q] - sp_voronoi_obj.points[p]
             normal = np.array([-tangent[1], tangent[0]]) / np.linalg.norm(tangent)
-            midpoint = voronoi.points[[p, q]].mean(axis=0)
+            midpoint = sp_voronoi_obj.points[[p, q]].mean(axis=0)
             direction = np.sign(np.dot(midpoint - centroid, normal)) * normal
             ridge_direction[p, v].append(direction)
             ridge_direction[q, v].append(direction)
 
-    for i, r in enumerate(voronoi.point_region):
-        region = voronoi.regions[r]
+    for i, r in enumerate(sp_voronoi_obj.point_region):
+        region = sp_voronoi_obj.regions[r]
         if -1 not in region:
             # finite regions
-            yield Polygon(voronoi.vertices[region])
+            yield Polygon(sp_voronoi_obj.vertices[region])
             continue
 
         # infinite regions
@@ -146,9 +197,9 @@ def voronoi_polygons(voronoi, diameter):
 
         length = 2 * diameter / np.linalg.norm(dir_j + dir_k)
 
-        finite_part = voronoi.vertices[region[inf_vertex_id + 1:] + region[:inf_vertex_id]]
-        extra_edge = [voronoi.vertices[previous_vertex_id] + dir_j * length,
-                      voronoi.vertices[next_vertex_id] + dir_k * length]
+        finite_part = sp_voronoi_obj.vertices[region[inf_vertex_id + 1:] + region[:inf_vertex_id]]
+        extra_edge = [sp_voronoi_obj.vertices[previous_vertex_id] + dir_j * length,
+                      sp_voronoi_obj.vertices[next_vertex_id] + dir_k * length]
         yield Polygon(np.concatenate((finite_part, extra_edge)))
 
 
@@ -254,7 +305,7 @@ def get_cityblocks(city):
     blocks = gpd.GeoDataFrame(geometry=block_faces)
     blocks = blocks.set_crs('EPSG:4326', allow_override=True)
 
-    PolyInCity = sjoin(blocks, df_city, how='inner')
+    PolyInCity = gpd.sjoin(blocks, df_city, how='inner')
     PolyInCity.drop(columns=["index_right"], inplace=True)
 
     merged_polygons = gpd.GeoSeries(cascaded_union(PolyInCity["geometry"].values))
