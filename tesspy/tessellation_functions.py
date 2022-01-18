@@ -4,7 +4,7 @@ import geopandas as gpd
 import osmnx as ox
 import h3
 import shapely
-from shapely.geometry import Point, Polygon, LineString, mapping
+from shapely.geometry import Point, Polygon, LineString, mapping, MultiPolygon
 from shapely.ops import polygonize, cascaded_union
 from sklearn.cluster import AgglomerativeClustering
 from collections import defaultdict
@@ -98,11 +98,22 @@ def get_h3_hexagons(gdf, resolution):
     gdf : GeoDataFrame
         GeoDataFrame containing the hexagons
     """
-    area_json = mapping(gdf.geometry.iloc[0])
-    h3_index = h3.polyfill(area_json, resolution)
-    h3_polygons = [Polygon(h3.h3_to_geo_boundary(h3_idx)) for h3_idx in h3_index]
-    gdf = gpd.GeoDataFrame(geometry=h3_polygons, crs='EPSG:4326')
-    return gdf
+    if type(gdf.geometry.iloc[0]) == Polygon:
+        area_json = mapping(gdf.geometry.iloc[0])
+        h3_index = h3.polyfill(area_json, resolution)
+        h3_polygons = [Polygon(h3.h3_to_geo_boundary(h3_idx)) for h3_idx in h3_index]
+        gdf = gpd.GeoDataFrame(geometry=h3_polygons, crs='EPSG:4326')
+        return gdf
+
+    elif type(gdf.geometry.iloc[0]) == MultiPolygon:
+        gdf_exploded = gdf.explode().loc[0]
+
+        parts_lst = []
+        for i in range(len(gdf_exploded)):
+            part_h3 = get_h3_hexagons(gdf_exploded.iloc[[1]], resolution)
+            parts_lst.append(part_h3)
+
+        return pd.concat(parts_lst)
 
 
 ##### adaptive squares
@@ -156,7 +167,7 @@ def voronoi_polygons(sp_voronoi_obj, diameter):
     ----------
     sp_voronoi_obj : scipy.spatial.Voronoi
         scipy Voronoi object is created using the point coordinates
-    diameter : int
+    diameter : float
         controls the size of infinite polygons. It should be large enough
         depending on the input values.
 
