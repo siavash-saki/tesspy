@@ -72,7 +72,7 @@ class TestTessObj(TestCase):
         test_data.drop(columns=["Unnamed: 0"], inplace=True)
         test_data = test_data[["osmid", "geometry", "value"]]
 
-        aqk = tp.TessObj.adaptive_quadkey(self, "Frankfurt am Main", test_data, 14)
+        aqk = tp.TessObj.adaptive_squares(self, "Frankfurt am Main", test_data, 14)
 
         print(aqk.head())
 
