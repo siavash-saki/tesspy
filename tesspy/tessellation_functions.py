@@ -82,6 +82,7 @@ def get_squares_polyfill(gdf, zoom_level):
 
 ##### hexagons
 
+# todo: american cities don't work!
 def get_h3_hexagons(gdf, resolution):
     """
     Hexagon tessellation based on the h3 implementation of Uber
@@ -110,7 +111,7 @@ def get_h3_hexagons(gdf, resolution):
 
         parts_lst = []
         for i in range(len(gdf_exploded)):
-            part_h3 = get_h3_hexagons(gdf_exploded.iloc[[1]], resolution)
+            part_h3 = get_h3_hexagons(gdf_exploded.iloc[[i]], resolution)
             parts_lst.append(part_h3)
 
         return pd.concat(parts_lst)
