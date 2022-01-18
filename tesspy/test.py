@@ -8,13 +8,25 @@ import osmnx as ox
 # ffm = Tessellation(ffm_poly)
 # print(ffm.area_gdf)
 
-available=['amenity']
+from time import sleep
+from progressbar import progressbar
 
-lst=['amenity', 'shop', 'building']
 
-for i in lst:
-    if i in available:
-        print(i)
+def gen_sleep(verbose=True):
+    print('start')
 
-lst.remove('amenity')
-print(lst)
+    if verbose:
+        print('verbose...')
+        generator = progressbar(range(5))
+
+    else:
+        generator = range(10)
+
+    print('before for loop..')
+    for i in generator:
+        sleep(1)
+
+    print('done')
+
+
+gen_sleep()
