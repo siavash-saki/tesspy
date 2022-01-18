@@ -6,6 +6,23 @@ import warnings
 
 
 class POIdata:
+    """
+    This class creates a query for the investigated area and POI categories.
+    The query is sent to osm using overpass API and the data is retrieved.
+
+    Parameters
+    ----------
+    area : GeoDataFrame or str
+        GeoDataFrame must have a single shapely Polygon or MultiPolygon
+        in geometry column and its CRS must be defined.
+        str must be a name of a city, or an address of a region
+
+    poi_categories : A list of OSM primary map features or 'all'
+    timeout : int
+        The TCP connection timeout for the overpass request
+    verbose : bool
+        If True, print information while computing
+    """
 
     def __init__(self, area, poi_categories, timeout, verbose):
         self.area = area
@@ -15,6 +32,14 @@ class POIdata:
 
     @staticmethod
     def osm_primary_features():
+        """
+        list of primary OSM features
+        available at https://wiki.openstreetmap.org/wiki/Map_features
+
+        Returns
+        --------
+        osm_primary_features_lst : list
+        """
         osm_primary_features_lst = ['aerialway',
                                     'aeroway',
                                     'amenity',
@@ -48,6 +73,13 @@ class POIdata:
         return osm_primary_features_lst
 
     def create_overpass_query_string(self):
+        """
+        creates the query string to be passed to overpass
+
+        Returns
+        --------
+        query_string : str
+        """
         # make the query area a bit larger
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
@@ -77,6 +109,14 @@ class POIdata:
         return query_string
 
     def get_poi_data(self):
+        """
+        sends the query to osm using the overpass API and gets the data
+
+        Returns
+        --------
+        poi_df : pandas.DataFrame
+            A dataframe containing the POI, POI type, and coordinates
+        """
 
         query_string = self.create_overpass_query_string()
 
