@@ -75,27 +75,25 @@ def _check_input_geodataframe(gdf):
 
 
 class Tessellation:
+    """
+    Creates a Tessellation object using a GeoDataFrame or a city name,
+    which allows for different tessellation methods
+
+    Parameters
+    ----------
+    area : GeoDataFrame or str
+        GeoDataFrame must have a single shaply Polygon or MultiPolygon
+        in geometry column and its CRS must be defined.
+        str must be a name of a city, or an address of a region
+
+    Examples
+    --------
+    >>> ffm= Tessellation('Frankfurt am Main')
+    todo: write examples
+    """
 
     def __init__(self, area):
 
-        """
-        Creates a Tessellation object using a GeoDataFrame or a city name,
-        which allows for different tessellation methods
-
-        Parameters
-        ----------
-        area : GeoDataFrame or str
-            GeoDataFrame must have a single polygon in geometry column and
-            its CRS must be defined.
-            str must be a name of a city, or an address of a region
-
-        Examples
-        --------
-        >>> ffm= Tessellation('Frankfurt am Main')
-        todo: write examples
-        """
-
-        # todo: can input be MultiPolygon???
         if type(area) == gpd.GeoDataFrame:
             self.area_gdf = _check_input_geodataframe(area)
         elif type(area) == str:
@@ -388,14 +386,31 @@ class Tessellation:
         pass
 
     def get_polygon(self):
+        """
+        returns the area polygon in GeoDataFrame format
+        """
         return self.area_gdf
 
     def get_poi_data(self):
+        """
+        returns the POI data in GeoDataFrame format
+        """
         return self.poi_dataframe
 
     def get_road_network(self):
+        """
+        returns the road network data in GeoDataFrame format
+        """
         return self.road_network
 
     @staticmethod
     def osm_primary_features():
+        """
+        list of primary OSM features
+        available at https://wiki.openstreetmap.org/wiki/Map_features
+
+        Returns
+        --------
+        list
+        """
         return POIdata.osm_primary_features()
