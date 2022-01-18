@@ -13,11 +13,45 @@ class POIdata:
         self.timeout = timeout
         self.verbose = verbose
 
+    @staticmethod
+    def osm_primary_features():
+        osm_primary_features_lst = ['aerialway',
+                                    'aeroway',
+                                    'amenity',
+                                    'barrier',
+                                    'boundary',
+                                    'building',
+                                    'craft',
+                                    'emergency',
+                                    'geological',
+                                    'healthcare',
+                                    'highway',
+                                    'historic',
+                                    'landuse',
+                                    'leisure',
+                                    'man_made',
+                                    'military',
+                                    'natural',
+                                    'office',
+                                    'place',
+                                    'power',
+                                    'public_transport',
+                                    'railway',
+                                    'route',
+                                    'shop',
+                                    'sport',
+                                    'telecom',
+                                    'tourism',
+                                    'water',
+                                    'waterway']
+
+        return osm_primary_features_lst
+
     def create_overpass_query_string(self):
         # make the query area a bit larger
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
-            area = self.area.buffer(0.03).simplify(0.01)
+            area = self.area.buffer(0.008).simplify(0.005)
 
         # make polygon string for OSM overpass query
         xy = np.array(area.iloc[0].exterior.coords)
@@ -25,6 +59,13 @@ class POIdata:
         for lat, lon in zip(xy[:, 1], xy[:, 0]):
             poly_str = poly_str + str(lat) + ' ' + str(lon) + ' '
         poly_str = poly_str.strip()
+
+        # if poi not in primary --> error
+        # todo: is this necessary?
+        for poi_category in self.poi_categories:
+            if poi_category not in self.osm_primary_features():
+                raise ValueError(f'{poi_category} is not a valid POI primary category. See a list of OSM primary '
+                                 f'features with Tessellation.osm_primary_features()')
 
         # create query string for overpass
         query_string = ''
@@ -44,11 +85,13 @@ class POIdata:
         api = overpass.API(timeout=self.timeout)
         resp = api._get_from_overpass(query_string).json()
 
+        if self.verbose:
+            print('Creating POI DataFrame...')
+
         lst_nodes = []
         lst_ways = []
 
         if self.verbose:
-            print('Creating POI DataFrame...')
             generator = progressbar(resp['elements'])
         else:
             generator = resp['elements']
@@ -66,6 +109,9 @@ class POIdata:
                 lst_ways.append(item)
             else:
                 continue
+
+        if self.verbose:
+            print('Cleaning POI DataFrame...')
 
         nodes_df = pd.DataFrame(lst_nodes)
         ways_df = pd.DataFrame(lst_ways)
