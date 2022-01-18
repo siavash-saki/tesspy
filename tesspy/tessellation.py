@@ -317,7 +317,7 @@ class Tessellation:
 
         # data, based on which, tessellation should be done
         tess_data = self.poi_dataframe[self.poi_dataframe[poi_categories].sum(axis=1) > 0]
-        data_locs = tess_data[['center_latitude', 'center_longitude']].values
+        data_locs = tess_data[['center_longitude', 'center_latitude']].values
 
         # points_geom = tess_data[['center_longitude', 'center_latitude']] \
         #     .apply(lambda p: Point(p['center_longitude'], p['center_latitude']), axis=1)
@@ -365,8 +365,12 @@ class Tessellation:
     def city_blocks(self):
         pass
 
+    def get_polygon(self):
+        return self.area_gdf
+
     def get_poi_data(self):
         return self.poi_dataframe
 
     def get_road_network(self):
         return self.road_network
+
