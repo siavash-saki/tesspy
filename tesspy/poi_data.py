@@ -74,52 +74,6 @@ class POIdata:
 
         return osm_primary_features_lst
 
-    @staticmethod
-    def osm_highway_types():
-        """
-        list of primary OSM features
-        available at https://wiki.openstreetmap.org/wiki/Key:highway
-
-        Returns
-        --------
-        osm_highways_lst : list
-        """
-        osm_highways_lst = ['motorway',
-                            'trunk',
-                            'primary',
-                            'secondary',
-                            'tertiary',
-                            'residential',
-                            'unclassified',
-                            'motorway_link',
-                            'trunk_link',
-                            'primary_link',
-                            'secondary_link',
-                            'living_street',
-                            'pedestrian',
-                            'track',
-                            'bus_guideway',
-                            'footway',
-                            'path',
-                            'service',
-                            'cycleway']
-        return osm_highways_lst
-
-    def create_custom_filter(self, detail_deg=None):
-
-        if detail_deg is None:
-            highwaytypes = self.osm_highway_types()
-        elif type(detail_deg) is int:
-            highwaytypes = self.osm_highway_types()[:detail_deg]
-        else:
-            raise ValueError("Please insert a valid detail degree: None or int")
-
-        query = ''
-        for types in highwaytypes[:-1]:
-            query += f'{types}|'
-        query += highwaytypes[-1]
-        custom_filter = f"['highway'~'{query}']"
-        return custom_filter
 
     def create_overpass_query_string(self):
         """
@@ -218,8 +172,62 @@ class POIdata:
 
         return poi_df
 
-    def get_road_network(self, detail_deg=None):
-        cf = self.create_custom_filter(detail_deg)
+
+class RoadData:
+
+    def __init__(self, area, detail_deg=None):
+        self.detail_deg = detail_deg
+        self.area = area
+
+    @staticmethod
+    def osm_highway_types():
+        """
+        list of primary OSM features
+        available at https://wiki.openstreetmap.org/wiki/Key:highway
+
+        Returns
+        --------
+        osm_highways_lst : list
+        """
+        osm_highways_lst = ['motorway',
+                            'trunk',
+                            'primary',
+                            'secondary',
+                            'tertiary',
+                            'residential',
+                            'unclassified',
+                            'motorway_link',
+                            'trunk_link',
+                            'primary_link',
+                            'secondary_link',
+                            'living_street',
+                            'pedestrian',
+                            'track',
+                            'bus_guideway',
+                            'footway',
+                            'path',
+                            'service',
+                            'cycleway']
+        return osm_highways_lst
+
+    def create_custom_filter(self):
+
+        if self.detail_deg is None:
+            highwaytypes = self.osm_highway_types()
+        elif type(self.detail_deg) is int:
+            highwaytypes = self.osm_highway_types()[:self.detail_deg]
+        else:
+            raise ValueError("Please insert a valid detail degree: None or int")
+
+        query = ''
+        for types in highwaytypes[:-1]:
+            query += f'{types}|'
+        query += highwaytypes[-1]
+        custom_filter = f"['highway'~'{query}']"
+        return custom_filter
+    #TODO: think about using graph_from_polygon()-> larger city blocks at the boundary, but way faster. Maybe use .convex_hull as polygon!
+    def get_road_network(self):
+        cf = self.create_custom_filter()
         box = self.area.geometry.values[0].minimum_rotated_rectangle
         x, y = box.exterior.coords.xy
         bbox = [max(y), min(y), max(x), min(x)]
