@@ -1,14 +1,14 @@
-import numpy as np
-import pandas as pd
+from tessellation import *
 import geopandas as gpd
+import mercantile
+import shapely
+from shapely.ops import polygonize, cascaded_union
+from shapely.geometry import box, Polygon, Point, LineString, mapping, MultiPolygon
+from collections import defaultdict
 import osmnx as ox
 import h3
-import shapely
-from shapely.geometry import Point, Polygon, LineString, mapping, MultiPolygon
-from shapely.ops import polygonize, cascaded_union
-from sklearn.cluster import AgglomerativeClustering
-from collections import defaultdict
-import mercantile
+import pandas as pd
+from sklearn.cluster import KMeans, AgglomerativeClustering
 
 
 def count_poi(df, points):
@@ -68,7 +68,7 @@ def get_squares_polyfill(gdf, zoom_level):
         temp_rows = []
         for tile in tiles:
             temp_row = rows.copy()
-            square = shapely.geometry.box(*mercantile.bounds(tile))
+            square = box(*mercantile.bounds(tile))
             if square.intersects(gdf_geometry):
                 temp_row[geom_name] = square
                 temp_row["quadkey"] = mercantile.quadkey(tile)
@@ -237,6 +237,9 @@ def split_linestring(df):
                 linestrings.append(LineString([p1, p2]))
                 osmid.append(row["osmid"])
 
+    dataset = gpd.GeoDataFrame({'osmid': osmid, 'geometry': linestrings})
+    return dataset
+
 
 def explode(gdf):
     """
@@ -253,8 +256,7 @@ def explode(gdf):
     return gdf_out
 
 
-# todo --> rename hdbscan
-def get_hdscan_parameter(coordinates, threshold):
+def get_hierarchical_clustering_parameter(coordinates, threshold):
     dist_threshold = [i * 50 for i in range(2, 13)]
     for th in dist_threshold:
         model = AgglomerativeClustering(n_clusters=None, distance_threshold=th, affinity="euclidean",
@@ -267,18 +269,7 @@ def get_hdscan_parameter(coordinates, threshold):
             return th
 
 
-# We don't need this --> default=None, n= user_input
-# def get_LGU_threshold(city_admin_boundary, res):
-#     """
-#     :param city_admin_boundary: boundary polygon of the city
-#     :param res: resolution for h3 tessellation
-#     :return: number of LGU
-#     """
-#     hexagons = city_admin_boundary.h3.polyfill_resample(res)
-#     return hexagons.shape[0]
-
-
-def get_cityblocks(city):
+def get_cityblocks(city, nb_of_LGUs):
     """
     :param city: Must be a shapely.Polygon, GeoDataFrame Polygon or String e.g. "Frankfurt am Main"
     :return: GeoDataFrame with all cityblocks_tiles
@@ -290,7 +281,9 @@ def get_cityblocks(city):
         bbox = [max(y), min(y), max(x), min(x)]
     elif type(city) == str:
         df_city = get_city_polygon(city)
-        bbox = get_bbox(city)
+        box = city.geometry.values[0].minimum_rotated_rectangle
+        x, y = box.exterior.coords.xy
+        bbox = [max(y), min(y), max(x), min(x)]
         pass
     elif type(city) == gpd.GeoDataFrame:
         df_city = city.copy()
@@ -337,10 +330,8 @@ def get_cityblocks(city):
     df_hc["centroid"] = df_hc.centroid
     coord = np.column_stack([df_hc["centroid"].x, df_hc["centroid"].y])
 
-    # Think about automated resolution as threshold-> maybe depending of area size of boundary polygon
-    threshold = get_LGU_threshold(df_city, 9)
-    print(f"Threshold for nb of LGUs is {threshold}")
-    th = get_hdscan_parameter(coord, threshold)
+    print(f"Threshold for nb of LGUs is {nb_of_LGUs}")
+    th = get_hierarchical_clustering_parameter(coord, nb_of_LGUs)
 
     model = AgglomerativeClustering(n_clusters=None, distance_threshold=th, affinity='euclidean')
     model.fit(coord)

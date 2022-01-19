@@ -107,7 +107,7 @@ class Tessellation:
 
     def _get_missing_poi_categories(self, poi_list):
         """
-        Checks it the poi categories are already available in the object poi_dataframe
+        Checks if the poi categories are already available in the object poi_dataframe
         Creates a list of missing categories, which should be downloaded from OSM
 
         Parameters

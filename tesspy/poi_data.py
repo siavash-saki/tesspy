@@ -3,6 +3,8 @@ import pandas as pd
 from progressbar import progressbar
 import overpass
 import warnings
+import osmnx as ox
+from tessellation_functions import split_linestring
 
 
 class POIdata:
@@ -71,6 +73,53 @@ class POIdata:
                                     'waterway']
 
         return osm_primary_features_lst
+
+    @staticmethod
+    def osm_highway_types():
+        """
+        list of primary OSM features
+        available at https://wiki.openstreetmap.org/wiki/Key:highway
+
+        Returns
+        --------
+        osm_highways_lst : list
+        """
+        osm_highways_lst = ['motorway',
+                            'trunk',
+                            'primary',
+                            'secondary',
+                            'tertiary',
+                            'residential',
+                            'unclassified',
+                            'motorway_link',
+                            'trunk_link',
+                            'primary_link',
+                            'secondary_link',
+                            'living_street',
+                            'pedestrian',
+                            'track',
+                            'bus_guideway',
+                            'footway',
+                            'path',
+                            'service',
+                            'cycleway']
+        return osm_highways_lst
+
+    def create_custom_filter(self, detail_deg=None):
+
+        if detail_deg is None:
+            highwaytypes = self.osm_highway_types()
+        elif type(detail_deg) is int:
+            highwaytypes = self.osm_highway_types()[:detail_deg]
+        else:
+            raise ValueError("Please insert a valid detail degree: None or int")
+
+        query = ''
+        for types in highwaytypes[:-1]:
+            query += f'{types}|'
+        query += highwaytypes[-1]
+        custom_filter = f"['highway'~'{query}']"
+        return custom_filter
 
     def create_overpass_query_string(self):
         """
@@ -169,10 +218,16 @@ class POIdata:
 
         return poi_df
 
+    def get_road_network(self, detail_deg=None):
+        cf = self.create_custom_filter(detail_deg)
+        box = self.area.geometry.values[0].minimum_rotated_rectangle
+        x, y = box.exterior.coords.xy
+        bbox = [max(y), min(y), max(x), min(x)]
 
-def get_road_network(area):
-    """
-    :param area: GeoDataFrame
-    :return: GeoDataFrame
-    """
-    pass
+        G = ox.graph_from_bbox(bbox[0], bbox[1], bbox[2], bbox[3], custom_filter=cf)
+        G_projected = ox.project_graph(G, to_crs='epsg:4326')
+        G_undirected = G_projected.to_undirected()
+        G_edges_as_gdf = ox.graph_to_gdfs(G_undirected, nodes=False, edges=True)
+
+        road_network = split_linestring(G_edges_as_gdf)
+        return road_network
