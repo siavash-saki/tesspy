@@ -95,4 +95,4 @@ class TestTessObj(TestCase):
     def test_square_polyfill(self):
         df_city = tp.get_city_polygon("Frankfurt am Main")
         gdf_square = tp.square_polyfill(df_city, 15)
-        print(gdf_square.shape)
+        print(gdf_square.head())

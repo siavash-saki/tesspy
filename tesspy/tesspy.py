@@ -242,6 +242,10 @@ def square_polyfill(gdf, zoom_level):
             if square.intersects(gdf_geometry):
                 temp_row[geom_name] = square
                 temp_row["quadkey"] = mercantile.quadkey(tile)
+
+                childs = mercantile.children(tile)
+                temp_row['children_id'] = list(mercantile.quadkey(c_tile) for c_tile in childs)
+
                 temp_rows.append(temp_row)
         temp_dfs.append(pd.DataFrame(temp_rows))
 
