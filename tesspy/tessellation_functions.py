@@ -28,16 +28,18 @@ def count_poi(df, points):
         GeoDataFrame containing the tiles and the POI count
     """
 
-    points_in_polygon = gpd.sjoin(df, points, how="left", op='contains')
-    points_in_polygon['count'] = 1
-    points_in_polygon.reset_index(inplace=True)
-    tmp_a = points_in_polygon.groupby(by='tile_id').count()['count'].reset_index().sort_values(by="tile_id",
-                                                                                               ascending=True)
-    tmp_b = df.reset_index().sort_values(by="tile_id", ascending=True)
-    final_df = pd.merge(tmp_a, tmp_b, on="tile_id")
-    final_df.set_index("tile_id", inplace=True)
+    pointsInPolygon = gpd.sjoin(df, points, how="left", predicate='contains')
+    pointsInPolygon['count'] = 1
+    pointsInPolygon.reset_index(inplace=True)
+    tmp_a = pointsInPolygon.groupby(by='quadkey').count()['count'].reset_index().sort_values(by="quadkey",
+                                                                                             ascending=True)
+    tmp_b = df.reset_index().sort_values(by="quadkey", ascending=True)
+    final_df = pd.merge(tmp_a, tmp_b, on="quadkey")
 
-    return final_df
+    final_gdf = final_df[['quadkey', 'count', 'geometry', 'children_id']]
+    final_gdf = gpd.GeoDataFrame(final_gdf, geometry="geometry")
+
+    return final_gdf
 
 
 ##### squares
@@ -72,6 +74,10 @@ def get_squares_polyfill(gdf, zoom_level):
             if square.intersects(gdf_geometry):
                 temp_row[geom_name] = square
                 temp_row["quadkey"] = mercantile.quadkey(tile)
+
+                child_ids = mercantile.children(tile)
+                temp_row['children_id'] = list(mercantile.quadkey(c_tile) for c_tile in child_ids)
+
                 temp_rows.append(temp_row)
         temp_dfs.append(pd.DataFrame(temp_rows))
 
@@ -119,13 +125,13 @@ def get_h3_hexagons(gdf, resolution):
 
 ##### adaptive squares
 
-def get_adaptive_squares(gdf, threshold):
+def get_adaptive_squares(input_gdf, threshold):
     """
-    Adaptive tessellation. Create squares until the threshold is no longer exceeded.
+    Adaptive tessellation. Subdivides all squares of input tessellation where thresholdi is exceeded.
 
     Parameters
     ----------
-    gdf : GeoDataFrame
+    input_gdf : GeoDataFrame
         GeoDataFrame containing the tiles (polygons)
     threshold : int
         threshold, which controls the division of squares
@@ -136,25 +142,27 @@ def get_adaptive_squares(gdf, threshold):
         GeoDataFrame containing the squares
     """
 
+    gdf = input_gdf.copy()
     # DataFrame where the squares will be subdivided
     gdf_exceeded = gdf[gdf["count"] >= threshold]
 
-    for idx in gdf_exceeded.index:
-        # get all children (so array of length 4)
-        children = gdf_exceeded.loc[[str(idx)]]["children_id"].values[0]
-
-        # Delete the row in the overall dataframe
+    for idx, row in gdf_exceeded.iterrows():
+        children = gdf_exceeded.loc[[idx]]["children_id"].values[0]
         gdf.drop([idx], inplace=True)
 
         for child in children:
-            child_dict = Babel('bing').id_to_tile(child).to_dict()
-            child_gdf = gpd.GeoDataFrame.from_dict(child_dict, orient='index')
-            child_gdf = child_gdf.transpose()
-            child_gdf = child_gdf.set_geometry("shapely")
-            child_gdf = child_gdf.set_crs("EPSG:4326")
-            child_gdf.set_index('tile_id', inplace=True)
-            gdf = gdf.append(child_gdf)
+            new_row = row.copy()
+            child_tile = mercantile.quadkey_to_tile(child)
 
+            new_row["quadkey"] = child
+            new_row["geometry"] = box(*mercantile.bounds(child_tile))
+            grand_children = mercantile.children(child_tile)
+            new_row['children_id'] = list(mercantile.quadkey(c_tile) for c_tile in grand_children)
+
+            tmp_df = pd.DataFrame(new_row).transpose()
+            tmp_gdf = gpd.GeoDataFrame(tmp_df, geometry="geometry", crs="epsg:4326")
+            gdf = gdf.append(tmp_gdf)
+    gdf.index = gdf.reset_index(drop=True).index
     return gdf
 
 

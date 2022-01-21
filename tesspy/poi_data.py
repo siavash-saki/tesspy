@@ -175,9 +175,10 @@ class POIdata:
 
 class RoadData:
 
-    def __init__(self, area, detail_deg=None):
+    def __init__(self, area, detail_deg=None, verbose=False):
         self.detail_deg = detail_deg
         self.area = area
+        self.verbose = verbose
 
     @staticmethod
     def osm_highway_types():
@@ -213,8 +214,12 @@ class RoadData:
     def create_custom_filter(self):
 
         if self.detail_deg is None:
+            if self.verbose:
+                print("Creating custom filter for all highway types")
             highwaytypes = self.osm_highway_types()
         elif type(self.detail_deg) is int:
+            if self.verbose:
+                print("Creating custom filter for the specified detail degree")
             highwaytypes = self.osm_highway_types()[:self.detail_deg]
         else:
             raise ValueError("Please insert a valid detail degree: None or int")
@@ -224,18 +229,24 @@ class RoadData:
             query += f'{types}|'
         query += highwaytypes[-1]
         custom_filter = f"['highway'~'{query}']"
+
+        if self.verbose:
+            print(f"Created custom filter is {custom_filter}")
         return custom_filter
-    #TODO: think about using graph_from_polygon()-> larger city blocks at the boundary, but way faster. Maybe use .convex_hull as polygon!
+
     def get_road_network(self):
         cf = self.create_custom_filter()
-        box = self.area.geometry.values[0].minimum_rotated_rectangle
-        x, y = box.exterior.coords.xy
-        bbox = [max(y), min(y), max(x), min(x)]
 
-        G = ox.graph_from_bbox(bbox[0], bbox[1], bbox[2], bbox[3], custom_filter=cf)
+        if self.verbose:
+            print("Collection street network data")
+        G = ox.graph_from_polygon(self.area.boundary.convex_hull.values[0], custom_filter=cf)
         G_projected = ox.project_graph(G, to_crs='epsg:4326')
         G_undirected = G_projected.to_undirected()
         G_edges_as_gdf = ox.graph_to_gdfs(G_undirected, nodes=False, edges=True)
-
+        if self.verbose:
+            print("Splitting the linestring, such that each linestring has exactly 2 points.")
         road_network = split_linestring(G_edges_as_gdf)
+
+        if self.verbose:
+            print(f"Collected data has {len(road_network)} street segments")
         return road_network

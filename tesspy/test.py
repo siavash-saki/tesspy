@@ -5,15 +5,15 @@ import osmnx as ox
 
 from tessellation import Tessellation
 from poi_data import RoadData
-# ffm_poly = ox.geocode_to_gdf('Frankfurt am Main')
-# ffm = Tessellation(ffm_poly)
-# print(ffm.area_gdf)
+from poi_data import POIdata
+ffm = Tessellation("Frankfurt am Main")
+#ffm_Polygon = ffm.get_polygon()
+#POI_ffm = POIdata(ffm_Polygon,  ["amenity", "building"], 60, False).get_poi_data()
+#print(POI_ffm.shape)
 
-#ffm = Tessellation("Frankfurt am Main")
-#print(ffm.area_gdf)
-#road_network = RoadData(ffm.area_gdf)
-#road_data = road_network.get_road_network()
-#print(road_data.shape)
+aqk = ffm.adaptive_squares(14, poi_categories=["amenity", "building"])
+print(aqk.shape)
+
 
 
 from time import sleep

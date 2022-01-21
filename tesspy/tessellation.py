@@ -55,6 +55,7 @@ def _check_input_geodataframe(gdf):
                 else:
                     return gdf
 
+
 ## we don't need this --> input either geopandas or string
 # def get_bbox(city: str):
 #     """
@@ -240,30 +241,33 @@ class Tessellation:
             self.poi_dataframe = self.poi_dataframe.reset_index(drop=True)
 
         # data, based on which, tessellation should be done
-        # tess_data = self.poi_dataframe[self.poi_dataframe[poi_categories].sum(axis=1) > 0]
-        # points_geom = tess_data[['center_longitude', 'center_latitude']] \
-        #     .apply(lambda p: Point(p['center_longitude'], p['center_latitude']), axis=1)
-        # tess_data = gpd.GeoDataFrame(geometry=points_geom,
-        #                              data=tess_data[poi_categories],
-        #                              crs='EPSG:4326')
+        tess_data = self.poi_dataframe[self.poi_dataframe[poi_categories].sum(axis=1) > 0]
+        points_geom = tess_data[['center_longitude', 'center_latitude']] \
+            .apply(lambda p: Point(p['center_longitude'], p['center_latitude']), axis=1)
+        tess_data = gpd.GeoDataFrame(geometry=points_geom,
+                                     data=tess_data[poi_categories],
+                                     crs='EPSG:4326')
+        poi_data_aqk = tess_data.rename(columns={"points_geom": "geometry"})
 
-        # tiles = Babel("bing").polyfill(df_city.geometry.unary_union, resolution=start_resolution)
-        # df_aqk = gpd.GeoDataFrame([t.to_dict() for t in tiles], geometry='shapely')
-        # df_aqk = df_aqk.set_crs("EPSG:4326")
-        # df_aqk.set_index("tile_id", inplace=True)
-        #
-        # aqk_count = count_poi(df_aqk, poi_data)
-        # aqk_count = gpd.GeoDataFrame(aqk_count, geometry="shapely")
-        # threshold = int(np.median(aqk_count["count"].values))
-        # while max(aqk_count["count"].values) > threshold:
-        #     df_temp = adaptive_tessellation(aqk_count, threshold)
-        #     df_temp.drop(columns=["count"], inplace=True)
-        #
-        #     df_temp2 = count_poi(df_temp, poi_data)
-        #     aqk_count = gpd.GeoDataFrame(df_temp2, geometry="shapely")
-        # return aqk_count
+        df_aqk = get_squares_polyfill(self.area_gdf, start_resolution)
+        aqk_count_df = count_poi(df_aqk, poi_data_aqk)
 
-        pass
+        if not threshold:
+            if verbose:
+                print("Threshold is to be set as the median POI-count per LGU")
+            threshold = int(np.median(aqk_count_df["count"].values))
+
+        while max(aqk_count_df["count"].values) > threshold:
+            if verbose:
+                print("Threshold exceeded! LGUs will be subdivided")
+
+            df_tmp = get_adaptive_squares(aqk_count_df, threshold)
+            df_tmp.drop(columns=["count"], inplace=True)
+            df_tmp2 = count_poi(df_tmp, poi_data_aqk)
+            aqk_count_df = df_tmp2
+
+        final_aqk = gpd.sjoin(aqk_count_df, self.area_gdf)
+        return final_aqk
 
     def voronoi(self,
                 cluster_algo="k-means",
