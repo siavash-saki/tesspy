@@ -175,10 +175,11 @@ class POIdata:
 
 class RoadData:
 
-    def __init__(self, area, detail_deg=None, verbose=False):
+    def __init__(self, area, detail_deg=None, split_roads=True, verbose=False):
         self.detail_deg = detail_deg
         self.area = area
         self.verbose = verbose
+        self.split_roads = split_roads
 
     @staticmethod
     def osm_highway_types():
@@ -245,8 +246,12 @@ class RoadData:
         G_edges_as_gdf = ox.graph_to_gdfs(G_undirected, nodes=False, edges=True)
         if self.verbose:
             print("Splitting the linestring, such that each linestring has exactly 2 points.")
-        road_network = split_linestring(G_edges_as_gdf)
 
+        if self.split_roads:
+            road_network = split_linestring(G_edges_as_gdf)
+        else:
+            road_network = G_edges_as_gdf
         if self.verbose:
             print(f"Collected data has {len(road_network)} street segments")
+
         return road_network

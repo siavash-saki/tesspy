@@ -277,7 +277,40 @@ def get_hierarchical_clustering_parameter(coordinates, threshold):
             return th
 
 
+def create_blocks(road_network):
+    if hasattr(road_network, 'geometry'):
+        block_faces = list(polygonize(road_network['geometry']))
+        blocks = gpd.GeoDataFrame(geometry=block_faces).set_crs("EPSG:4326")
+        return blocks
+    else:
+        raise AttributeError('road network data need geometry attribute!')
+
+
+def get_rest_polygon(blocks, area):
+    if hasattr(blocks, "geometry") and hasattr(area, "geometry"):
+
+        merged_polygons = gpd.GeoSeries(cascaded_union(blocks["geometry"].values))
+        merged_polygons.set_crs("EPSG:4326", allow_override=True, inplace=True)
+
+        rest = area.difference(merged_polygons)
+        rest = gpd.GeoDataFrame(rest)
+        rest = rest.rename(columns={0: "geometry"}).set_geometry("geometry")
+
+        rest_polygons = explode(rest)
+        rest_polygons.reset_index(inplace=True)
+        rest_polygons.drop(columns=["level_0"], inplace=True)
+        rest_polygons.rename(columns={"level_1": "osm_id"}, inplace=True)
+
+        return rest_polygons
+
+    else:
+        raise ValueError("Intial definied city blocks and the area need a geometry attribute.")
+
+
+
+
 def get_cityblocks(city, nb_of_LGUs):
+    # TODO: Multiploygon
     """
     :param city: Must be a shapely.Polygon, GeoDataFrame Polygon or String e.g. "Frankfurt am Main"
     :return: GeoDataFrame with all cityblocks_tiles
@@ -334,6 +367,7 @@ def get_cityblocks(city, nb_of_LGUs):
     rest_poly.rename(columns={"level_1": "osm_id"}, inplace=True)
 
     new_df = PolyInCity.append(rest_poly, ignore_index=True)
+
     df_hc = new_df.to_crs('EPSG:5243')
     df_hc["centroid"] = df_hc.centroid
     coord = np.column_stack([df_hc["centroid"].x, df_hc["centroid"].y])

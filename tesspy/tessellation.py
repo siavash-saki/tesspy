@@ -386,8 +386,68 @@ class Tessellation:
 
         return df_voronoi
 
-    def city_blocks(self):
-        pass
+    def city_blocks(self,
+                    number_of_LGUs=1000,
+                    detail_deg=None,
+                    split_roads=True,
+                    verbose=False
+                    ):
+
+        if type(self.area_gdf) == MultiPolygon:
+            queried_area = self.area_gdf.convex_hull
+        else:
+            queried_area = self.area_gdf
+
+        road_data = RoadData(queried_area, detail_deg, split_roads, verbose).get_road_network()
+        if verbose:
+            print(f"Road data is collected. Overall {len(road_data)} streets are included.")
+            print("Creating initial city blocks using the road network data")
+
+        blocks = create_blocks(road_data)
+
+        polygons_in_area = gpd.sjoin(blocks, queried_area, how='inner')
+        polygons_in_area.drop(columns=["index_right"], inplace=True)
+        if verbose:
+            print(f"Filtered out {len(blocks) - len(polygons_in_area)} polygons, that where not in the area.")
+
+        rest_polygons = get_rest_polygon(polygons_in_area, queried_area)
+
+        city_blocks = polygons_in_area.append(rest_polygons)
+        city_blocks_hc = city_blocks.to_crs("EPSG:5243")
+        city_blocks_hc["centroid"] = city_blocks_hc.centroid
+
+        coordinates = np.column_stack([city_blocks_hc["centroid"].x, city_blocks_hc["centroid"].y])
+        if verbose:
+            print("Threshold for hierarchical clustering is computed.")
+        th = get_hierarchical_clustering_parameter(coordinates, number_of_LGUs)
+
+        if verbose:
+            print("Hierarchical Clustering in Progress.")
+        model = AgglomerativeClustering(n_clusters=None, distance_threshold=th, affinity='euclidean')
+        model.fit(coordinates)
+
+        city_blocks["Cluster"] = model.labels_
+        city_blocks_hc["Cluster"] = model.labels_
+        if verbose:
+            print("Merging small city blocks...")
+        merged_polys = []
+        for idx in city_blocks["Cluster"].unique():
+            tmp = city_blocks[city_blocks["Cluster"] == idx]
+            polygons = tmp["geometry"].to_numpy()
+            merged_polygon = gpd.GeoSeries(cascaded_union(polygons))
+            merged_polys.append(merged_polygon[0])
+
+        new_merged_polys = {'geometry': merged_polys}
+        merged_polys_df = gpd.GeoDataFrame(new_merged_polys, crs="EPSG:4326")
+
+        keep_df = merged_polys_df[merged_polys_df.geom_type == "Polygon"]
+        To_explode = merged_polys_df[merged_polys_df.geom_type == "MultiPolygon"]
+        explode_df = explode(To_explode)
+        explode_df = explode_df.reset_index()
+        explode_df.drop(columns=["level_0", "level_1"], inplace=True)
+        final_city_blocks = pd.concat([keep_df, explode_df])
+
+        return final_city_blocks
 
     def get_polygon(self):
         """
