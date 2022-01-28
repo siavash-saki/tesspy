@@ -138,7 +138,7 @@ class Tessellation:
         Parameters
         ----------
         resolution : int
-            Specifies the size of hexagons
+            Specifies the size of squares
             A positive number between todo: complete
 
         Returns
