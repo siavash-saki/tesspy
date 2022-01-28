@@ -421,8 +421,11 @@ class Tessellation:
             print("Threshold for hierarchical clustering is computed.")
         th = get_hierarchical_clustering_parameter(coordinates, number_of_LGUs)
 
+        if not type(th) == 'int':
+            raise ValueError("Please insert a valid threshold or increase the number of LGU.")
+
         if verbose:
-            print("Hierarchical Clustering in Progress.")
+            print(f"Hierarchical Clustering in Progress with threshold {th}.")
         model = AgglomerativeClustering(n_clusters=None, distance_threshold=th, affinity='euclidean')
         model.fit(coordinates)
 
