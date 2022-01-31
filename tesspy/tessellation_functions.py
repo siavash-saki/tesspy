@@ -107,23 +107,32 @@ def get_h3_hexagons(gdf, resolution):
         GeoDataFrame containing the hexagons
     """
     if type(gdf.geometry.iloc[0]) == Polygon:
-        area_json = mapping(gdf.geometry.iloc[0])
-        h3_index = h3.polyfill(area_json, resolution)
+        hexs = h3.polyfill(gdf.geometry[0].__geo_interface__, 8, geo_json_conformant=True)
+        polygonise = lambda hex_id: Polygon(
+                                        h3.h3_to_geo_boundary(hex_id, geo_json=True)
+                                    )
+        all_polys = gpd.GeoSeries(list(map(polygonise, hexs)),
+                                  index=hexs,
+                                  crs="EPSG:4326"
+                                  )
 
-        if len(h3_index) == 0:
-            raise ValueError("Please increase the resolution. No")
-
-        h3_polygons = [Polygon(h3.h3_to_geo_boundary(h3_idx)) for h3_idx in h3_index]
-        gdf = gpd.GeoDataFrame(geometry=h3_polygons, crs='EPSG:4326')
+        gdf = gpd.GeoDataFrame(geometry=all_polys, crs='EPSG:4326')
         return gdf
 
-    elif type(gdf.geometry.iloc[0]) == MultiPolygon:
-        gdf_exploded = gdf.explode().loc[0]
 
+    elif type(gdf.geometry.iloc[0]) == MultiPolygon:
         parts_lst = []
-        for i in range(len(gdf_exploded)):
-            part_h3 = get_h3_hexagons(gdf_exploded.iloc[[i]], resolution)
-            parts_lst.append(part_h3)
+        for idx, row in gdf.explode(index_parts=True).loc[0].iterrows():
+            hexs = h3.polyfill(row.geometry.__geo_interface__, 8, geo_json_conformant=True)
+
+            polygonise = lambda hex_id: Polygon(
+                                            h3.h3_to_geo_boundary(hex_id, geo_json=True)
+                                        )
+            all_polys = gpd.GeoSeries(list(map(polygonise, hexs)), index=hexs,crs="EPSG:4326")
+
+            gdf = gpd.GeoDataFrame(geometry=all_polys)
+
+            parts_lst.append(gdf)
 
         return pd.concat(parts_lst)
 

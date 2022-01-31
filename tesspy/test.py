@@ -6,16 +6,14 @@ import osmnx as ox
 from tessellation import Tessellation
 from poi_data import RoadData
 from poi_data import POIdata
-ffm = Tessellation("Frankfurt am Main")
-#ffm_Polygon = ffm.get_polygon()
+ffm = Tessellation("Kapstadt")
+print(len(ffm.hexagons(8)))
 #POI_ffm = POIdata(ffm_Polygon,  ["amenity", "building"], 60, False).get_poi_data()
 #print(POI_ffm.shape)
 
 #aqk = ffm.adaptive_squares(14, poi_categories=["amenity", "building"])
 #print(aqk.shape)
 
-city_blocks = ffm.city_blocks(2000, verbose=True)
-print(city_blocks.shape)
 
 from time import sleep
 from progressbar import progressbar
