@@ -109,6 +109,10 @@ def get_h3_hexagons(gdf, resolution):
     if type(gdf.geometry.iloc[0]) == Polygon:
         area_json = mapping(gdf.geometry.iloc[0])
         h3_index = h3.polyfill(area_json, resolution)
+
+        if len(h3_index) == 0:
+            raise ValueError("Please increase the resolution. No")
+
         h3_polygons = [Polygon(h3.h3_to_geo_boundary(h3_idx)) for h3_idx in h3_index]
         gdf = gpd.GeoDataFrame(geometry=h3_polygons, crs='EPSG:4326')
         return gdf
@@ -306,8 +310,6 @@ def get_rest_polygon(blocks, area):
 
     else:
         raise ValueError("Intial definied city blocks and the area need a geometry attribute.")
-
-
 
 
 def get_cityblocks(city, nb_of_LGUs):
