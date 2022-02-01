@@ -3,6 +3,7 @@ import hdbscan
 from scipy.spatial import Voronoi
 from .tessellation_functions import *
 from .poi_data import *
+import numpy as np
 
 
 # todo: return gdf with POI count
