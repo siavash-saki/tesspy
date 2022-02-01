@@ -278,7 +278,7 @@ def explode(gdf):
 
 
 def get_hierarchical_clustering_parameter(coordinates, threshold):
-    dist_threshold = [i * 50 for i in range(2, 13)]
+    dist_threshold = [i * 100 for i in range(2, 13)]
     for th in dist_threshold:
         model = AgglomerativeClustering(n_clusters=None, distance_threshold=th, affinity="euclidean",
                                         compute_full_tree=True)

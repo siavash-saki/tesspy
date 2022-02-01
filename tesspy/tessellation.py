@@ -422,6 +422,9 @@ class Tessellation:
             print("Threshold for hierarchical clustering is computed.")
         th = get_hierarchical_clustering_parameter(coordinates, number_of_LGUs)
 
+        if verbose:
+            print(f"Distance threshold for clustering is {th}.")
+
         if not type(th) == 'int':
             raise ValueError("Please insert a valid threshold or increase the number of LGU.")
 
