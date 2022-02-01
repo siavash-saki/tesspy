@@ -107,10 +107,10 @@ def get_h3_hexagons(gdf, resolution):
         GeoDataFrame containing the hexagons
     """
     if type(gdf.geometry.iloc[0]) == Polygon:
-        hexs = h3.polyfill(gdf.geometry[0].__geo_interface__, 8, geo_json_conformant=True)
+        hexs = h3.polyfill(gdf.geometry[0].__geo_interface__, resolution, geo_json_conformant=True)
         polygonise = lambda hex_id: Polygon(
-                                        h3.h3_to_geo_boundary(hex_id, geo_json=True)
-                                    )
+            h3.h3_to_geo_boundary(hex_id, geo_json=True)
+        )
         all_polys = gpd.GeoSeries(list(map(polygonise, hexs)),
                                   index=hexs,
                                   crs="EPSG:4326"
@@ -119,16 +119,15 @@ def get_h3_hexagons(gdf, resolution):
         gdf = gpd.GeoDataFrame(geometry=all_polys, crs='EPSG:4326')
         return gdf
 
-
     elif type(gdf.geometry.iloc[0]) == MultiPolygon:
         parts_lst = []
         for idx, row in gdf.explode(index_parts=True).loc[0].iterrows():
-            hexs = h3.polyfill(row.geometry.__geo_interface__, 8, geo_json_conformant=True)
+            hexs = h3.polyfill(row.geometry.__geo_interface__, resolution, geo_json_conformant=True)
 
             polygonise = lambda hex_id: Polygon(
-                                            h3.h3_to_geo_boundary(hex_id, geo_json=True)
-                                        )
-            all_polys = gpd.GeoSeries(list(map(polygonise, hexs)), index=hexs,crs="EPSG:4326")
+                h3.h3_to_geo_boundary(hex_id, geo_json=True)
+            )
+            all_polys = gpd.GeoSeries(list(map(polygonise, hexs)), index=hexs, crs="EPSG:4326")
 
             gdf = gpd.GeoDataFrame(geometry=all_polys)
 
