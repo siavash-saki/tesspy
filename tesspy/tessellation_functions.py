@@ -289,6 +289,8 @@ def get_hierarchical_clustering_parameter(coordinates, threshold):
         if nb_clusters < threshold:
             return th
 
+    return dist_threshold[0]
+
 
 def create_blocks(road_network):
     if hasattr(road_network, 'geometry'):
