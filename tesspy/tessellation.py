@@ -425,7 +425,7 @@ class Tessellation:
         if verbose:
             print(f"Distance threshold for clustering is {th}.")
 
-        if not type(th) == 'int':
+        if not th:
             raise ValueError("Please insert a valid threshold or increase the number of LGU.")
 
         if verbose:
