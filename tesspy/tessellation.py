@@ -356,7 +356,7 @@ class Tessellation:
             # TODO: Think about automating min_cluster_size e.g. x% of the initial data shape
             if verbose:
                 print('HDBSCAN Clustering... This can take a while...')
-            clustering = hdbscan.HDBSCAN(min_cluster_size=15, prediction_data=True).fit(data_locs)
+            clustering = hdbscan.HDBSCAN(min_cluster_size=min_cluster_size, prediction_data=True).fit(data_locs)
             generators = [np.mean(data_locs[clustering.labels_ == label], axis=0) for label in
                           range(clustering.labels_.max() + 1)]
 
