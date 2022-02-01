@@ -1,4 +1,4 @@
-from tessellation import *
+from .tessellation import *
 import geopandas as gpd
 import mercantile
 import shapely

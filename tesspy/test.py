@@ -3,9 +3,9 @@ import pandas as pd
 import geopandas as gpd
 import osmnx as ox
 
-from tessellation import Tessellation
-from poi_data import RoadData
-from poi_data import POIdata
+from .tessellation import Tessellation
+from .poi_data import RoadData
+from .poi_data import POIdata
 ffm = Tessellation("Kapstadt")
 print(len(ffm.hexagons(8)))
 #POI_ffm = POIdata(ffm_Polygon,  ["amenity", "building"], 60, False).get_poi_data()

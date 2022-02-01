@@ -4,7 +4,7 @@ from progressbar import progressbar
 import overpass
 import warnings
 import osmnx as ox
-from tessellation_functions import split_linestring
+from .tessellation_functions import split_linestring
 
 
 class POIdata:
