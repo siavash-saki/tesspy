@@ -1,8 +1,8 @@
 from sklearn.cluster import KMeans
 import hdbscan
 from scipy.spatial import Voronoi
-from tessellation_functions import *
-from poi_data import *
+from .tessellation_functions import *
+from .poi_data import *
 
 
 # todo: return gdf with POI count
