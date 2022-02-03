@@ -57,7 +57,7 @@ def _check_input_geodataframe(gdf):
                     return gdf
 
 
-## we don't need this --> input either geopandas or string
+# we don't need this --> input either geopandas or string
 # def get_bbox(city: str):
 #     """
 #     :param city:
@@ -91,7 +91,6 @@ class Tessellation:
     Examples
     --------
     >>> ffm= Tessellation('Frankfurt am Main')
-    todo: write examples
     """
 
     def __init__(self, area):

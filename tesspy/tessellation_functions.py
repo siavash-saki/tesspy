@@ -28,7 +28,8 @@ def count_poi(df, points):
     final_df : GeoDataFrame
         GeoDataFrame containing the tiles and the POI count
     """
-
+    # TODO: Change such that this works for every tessellation method -> groupby by sth like input index or even
+    #  geometry
     pointsInPolygon = gpd.sjoin(df, points, how="left", predicate='contains')
     pointsInPolygon['count'] = 1
     pointsInPolygon.reset_index(inplace=True)
@@ -240,7 +241,7 @@ def voronoi_polygons(sp_voronoi_obj, diameter):
 
 def split_linestring(df):
     """
-    :param df:
+    :param df: DataFrame of shapely.LineStrings containing more than two points
     :return: DataFrame with shapely.linestring with two points each
     The linestring, which are split up will have the same osmid since its still the same street
     """
@@ -321,94 +322,3 @@ def get_rest_polygon(blocks, area):
     else:
         raise ValueError("Intial definied city blocks and the area need a geometry attribute.")
 
-
-def get_cityblocks(city, nb_of_LGUs):
-    # TODO: Multiploygon
-    """
-    :param city: Must be a shapely.Polygon, GeoDataFrame Polygon or String e.g. "Frankfurt am Main"
-    :return: GeoDataFrame with all cityblocks_tiles
-    """
-    if type(city) == shapely.geometry.polygon.Polygon:
-        df_city = gpd.GeoDataFrame(geometry=[city])
-        box = city.geometry.values[0].minimum_rotated_rectangle
-        x, y = box.exterior.coords.xy
-        bbox = [max(y), min(y), max(x), min(x)]
-    elif type(city) == str:
-        df_city = get_city_polygon(city)
-        box = city.geometry.values[0].minimum_rotated_rectangle
-        x, y = box.exterior.coords.xy
-        bbox = [max(y), min(y), max(x), min(x)]
-        pass
-    elif type(city) == gpd.GeoDataFrame:
-        df_city = city.copy()
-        try:
-            [df_city["bbox_north"].values[0], df_city["bbox_south"].values[0], df_city["bbox_east"].values[0],
-             df_city["bbox_west"].values[0]]
-        except:
-            box = city.geometry.values[0].minimum_rotated_rectangle
-            x, y = box.exterior.coords.xy
-            bbox = [max(y), min(y), max(x), min(x)]
-        pass
-    else:
-        raise TypeError("City must be in format: Shapely Polygon, GeoDataFrame or String")
-
-    cf = "['highway'~'motorway|trunk|motorway_link|trunk|trunk_link|primary|secondary|" \
-         "tertiary|residential|footway|living_street|pedestrian|track|footway|path|service|cycleway']"
-    G = ox.graph_from_bbox(bbox[0], bbox[1], bbox[2], bbox[3], custom_filter=cf)
-    G_projected = ox.project_graph(G, to_crs='epsg:4326')
-    G_undirected = G_projected.to_undirected()
-    G_edges_as_gdf = ox.graph_to_gdfs(G_undirected, nodes=False, edges=True)
-
-    split_lines = split_linestring(G_edges_as_gdf)
-    block_faces = list(polygonize(split_lines['geometry']))
-    blocks = gpd.GeoDataFrame(geometry=block_faces)
-    blocks = blocks.set_crs('EPSG:4326', allow_override=True)
-
-    PolyInCity = gpd.sjoin(blocks, df_city, how='inner')
-    PolyInCity.drop(columns=["index_right"], inplace=True)
-
-    merged_polygons = gpd.GeoSeries(cascaded_union(PolyInCity["geometry"].values))
-    merged_polygons = merged_polygons.set_crs('EPSG:4326', allow_override=True)
-
-    rest = df_city.difference(merged_polygons)
-    rest = gpd.GeoDataFrame(rest)
-    rest = rest.rename(columns={0: 'geometry'}).set_geometry('geometry')
-
-    rest_poly = explode(rest)
-    rest_poly.reset_index(inplace=True)
-    rest_poly.drop(columns=["level_0"], inplace=True)
-    rest_poly.rename(columns={"level_1": "osm_id"}, inplace=True)
-
-    new_df = PolyInCity.append(rest_poly, ignore_index=True)
-
-    df_hc = new_df.to_crs('EPSG:5243')
-    df_hc["centroid"] = df_hc.centroid
-    coord = np.column_stack([df_hc["centroid"].x, df_hc["centroid"].y])
-
-    print(f"Threshold for nb of LGUs is {nb_of_LGUs}")
-    th = get_hierarchical_clustering_parameter(coord, nb_of_LGUs)
-
-    model = AgglomerativeClustering(n_clusters=None, distance_threshold=th, affinity='euclidean')
-    model.fit(coord)
-
-    new_df['Cluster'] = model.labels_
-    df_hc['Cluster'] = model.labels_
-
-    merged_polys = []
-    for idx in new_df["Cluster"].unique():
-        tmp = new_df[new_df["Cluster"] == idx]
-        polygons = tmp["geometry"].to_numpy()
-        merged_polygon = gpd.GeoSeries(cascaded_union(polygons))
-        merged_polys.append(merged_polygon[0])
-
-    new_merged_polys = {'geometry': merged_polys}
-    merged_polys_df = gpd.GeoDataFrame(new_merged_polys, crs="EPSG:4326")
-
-    keep_df = merged_polys_df[merged_polys_df.geom_type == "Polygon"]
-    To_explode = merged_polys_df[merged_polys_df.geom_type == "MultiPolygon"]
-    explode_df = explode(To_explode)
-    explode_df = explode_df.reset_index()
-    explode_df.drop(columns=["level_0", "level_1"], inplace=True)
-    overall = pd.concat([keep_df, explode_df])
-
-    return overall
