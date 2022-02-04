@@ -1,8 +1,8 @@
 from sklearn.cluster import KMeans
 import hdbscan
 from scipy.spatial import Voronoi
-from .tessellation_functions import *
-from .poi_data import *
+from tessellation_functions import *
+from poi_data import *
 import numpy as np
 
 
@@ -46,7 +46,7 @@ def _check_input_geodataframe(gdf):
         if not hasattr(gdf, "geometry"):
             raise TypeError("Geometry column missing in GeoDataFrame")
         else:
-            if type(gdf['geometry'].iloc[0]) in [Polygon, MultiPolygon]:
+            if type(gdf['geometry'].iloc[0]) not in [Polygon, MultiPolygon]:
                 raise TypeError("Geometry must be of type shapely polygon or multipolygon")
             else:
                 if gdf.crs is None:
