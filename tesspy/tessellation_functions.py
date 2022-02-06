@@ -1,11 +1,8 @@
-from .tessellation import *
 import geopandas as gpd
 import mercantile
-import shapely
 from shapely.ops import polygonize, cascaded_union
 from shapely.geometry import box, Polygon, Point, LineString, mapping, MultiPolygon
 from collections import defaultdict
-import osmnx as ox
 import h3
 import pandas as pd
 from sklearn.cluster import KMeans, AgglomerativeClustering
@@ -30,7 +27,7 @@ def count_poi(df, points):
     """
     # TODO: Change such that this works for every tessellation method -> groupby by sth like input index or even
     #  geometry
-    pointsInPolygon = gpd.sjoin(df, points, how="left", predicate='contains')
+    pointsInPolygon = gpd.sjoin(df, points, how="left", op='contains')
     pointsInPolygon['count'] = 1
     pointsInPolygon.reset_index(inplace=True)
     tmp_a = pointsInPolygon.groupby(by='quadkey').count()['count'].reset_index().sort_values(by="quadkey",
@@ -122,7 +119,7 @@ def get_h3_hexagons(gdf, resolution):
 
     elif type(gdf.geometry.iloc[0]) == MultiPolygon:
         parts_lst = []
-        for idx, row in gdf.explode(index_parts=True).loc[0].iterrows():
+        for idx, row in gdf.explode().loc[0].iterrows():
             hexs = h3.polyfill(row.geometry.__geo_interface__, resolution, geo_json_conformant=True)
 
             polygonise = lambda hex_id: Polygon(
@@ -321,4 +318,3 @@ def get_rest_polygon(blocks, area):
 
     else:
         raise ValueError("Intial definied city blocks and the area need a geometry attribute.")
-
