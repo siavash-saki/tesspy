@@ -1,10 +1,9 @@
 import numpy as np
 import pandas as pd
-from progressbar import progressbar
 import overpass
 import warnings
 import osmnx as ox
-from .tessellation_functions import split_linestring
+from tessellation_functions import split_linestring
 
 
 class POIdata:
@@ -134,10 +133,12 @@ class POIdata:
         lst_nodes = []
         lst_ways = []
 
-        if self.verbose:
-            generator = progressbar(resp['elements'])
-        else:
-            generator = resp['elements']
+        # if self.verbose:
+        #     generator = tqdm(resp['elements'])
+        # else:
+        #     generator = resp['elements']
+
+        generator = resp['elements']
 
         for item in generator:
 
