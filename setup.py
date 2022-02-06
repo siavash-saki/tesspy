@@ -11,7 +11,6 @@ INSTALL_REQUIRES = ['geopandas',
                     'sklearn',
                     'scipy',
                     'mercantile',
-                    'progressbar',
                     'overpass']
 
 setuptools.setup(
