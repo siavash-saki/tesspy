@@ -2,7 +2,7 @@
 
 
 ## Introduction 
-A package for urban areas tessellation
+A package for urban and suburban area tessellations. 
 
 ## Installation
 ```python
@@ -12,6 +12,7 @@ pip install tesspy
 See `tesspy.readthedocs.io`
 
 ## Examples
+
 ### Voronoi Polygons
 example
 
