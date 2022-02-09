@@ -57,25 +57,6 @@ def _check_input_geodataframe(gdf):
                     return gdf
 
 
-# we don't need this --> input either geopandas or string
-# def get_bbox(city: str):
-#     """
-#     :param city:
-#     :return: Array of Int which represent the bounding boy for the given city in the format
-#     [north, south,east,west]
-#     """
-#     gdf_city = ox.geocode_to_gdf(city)
-#     bbox = [gdf_city["bbox_north"].values[0],
-#             gdf_city["bbox_south"].values[0],
-#             gdf_city["bbox_east"].values[0],
-#             gdf_city["bbox_west"].values[0]]
-#     return bbox
-#
-#
-#     dataset = gpd.GeoDataFrame({"osmid": osmid, "geometry": linestrings})
-#     return dataset
-
-
 class Tessellation:
     """
     Creates a Tessellation object using a GeoDataFrame or a city name,
@@ -342,17 +323,14 @@ class Tessellation:
         tess_data = self.poi_dataframe[self.poi_dataframe[poi_categories].sum(axis=1) > 0]
         data_locs = tess_data[['center_longitude', 'center_latitude']].values
 
-        # TODO: maybe include more cluster algorithms like DBSCAN,..
         # create generators for Voronoi diagram
         if cluster_algo == "k-means":
-            # TODO: Think about automating nb of clusters
             if verbose:
                 print('K-Means Clustering...')
             clustering = KMeans(n_clusters=n_polygons).fit(data_locs)
             generators = [np.mean(data_locs[clustering.labels_ == label], axis=0) for label in range(n_polygons)]
 
         elif cluster_algo == "hdbscan":
-            # TODO: Think about automating min_cluster_size e.g. x% of the initial data shape
             if verbose:
                 print('HDBSCAN Clustering... This can take a while...')
             clustering = hdbscan.HDBSCAN(min_cluster_size=min_cluster_size, prediction_data=True).fit(data_locs)
@@ -392,7 +370,20 @@ class Tessellation:
                     split_roads=True,
                     verbose=False
                     ):
-
+        """
+        Create city bocks (tiles) using road data from the area. To collect road data and specify the highway types
+        that should be included the custom filter can be used
+        :param number_of_LGUs: int, default = 1000
+            targeted number of city blocks
+        :param detail_deg: int, default = None
+            define the number of the top (int) highway types to use in the custom filter
+        :param split_roads: bool, default = True
+            True if LineStrings should be split up such that each LineString contains exactly 2 Points
+        :param verbose : bool, default=False
+            If True, print information while computing
+        :return: geopandas.GeoDataFrame
+            GeoDataFrame with cityblock tiles
+        """
         if type(self.area_gdf) == MultiPolygon:
             queried_area = self.area_gdf.convex_hull
         else:
@@ -484,3 +475,11 @@ class Tessellation:
         list
         """
         return POIdata.osm_primary_features()
+
+    @staticmethod
+    def osm_highway_types():
+        """
+        list of all highway types
+        :return: list of highway types
+        """
+        return RoadData.osm_highway_types()

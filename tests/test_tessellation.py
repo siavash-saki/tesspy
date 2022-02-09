@@ -4,6 +4,7 @@ from tesspy.poi_data import *
 
 from time import sleep
 
+
 def test_squares():
     # different resolutions -> increasing resolution produces more squares
     city1 = Tessellation("Hamburg")

@@ -175,6 +175,24 @@ class POIdata:
 
 
 class RoadData:
+    """
+        This class creates a custom filter for the investigated area and highway types.
+        The custom filter is used to collect road data using osmnx.
+
+        Parameters
+        ----------
+        area : GeoDataFrame or str
+            GeoDataFrame must have a single shapely Polygon or MultiPolygon
+            in geometry column and its CRS must be defined.
+            str must be a name of a city, or an address of a region
+
+        detail_deg : int
+            integer to select the top (int) highway types
+        split_roads : bool
+            decide if LineStrings will be split up such that each LineString contains exactly 2 Points
+        verbose : bool
+            If True, print information while computing
+    """
 
     def __init__(self, area, detail_deg=None, split_roads=True, verbose=False):
         self.detail_deg = detail_deg
@@ -185,7 +203,7 @@ class RoadData:
     @staticmethod
     def osm_highway_types():
         """
-        list of primary OSM features
+        list of OSM highway types
         available at https://wiki.openstreetmap.org/wiki/Key:highway
 
         Returns
@@ -214,7 +232,11 @@ class RoadData:
         return osm_highways_lst
 
     def create_custom_filter(self):
-
+        """
+        Creates custom filter that is used to collect road data with osmnx. The detail_deg is used to use only the top
+        highway types.
+        :return: string with highway types that is used to collect data using osmnx
+        """
         if self.detail_deg is None:
             if self.verbose:
                 print("Creating custom filter for all highway types")
@@ -237,6 +259,12 @@ class RoadData:
         return custom_filter
 
     def get_road_network(self):
+        """
+        Collects the road network data based on the defined custom filter. The inital roaddata is based on graphs
+        and transformed into a GeoDataFrame. Within the RoadData Class the user can devide to split the data such
+        that each LineString (representing a streetsegment) contains only two points and not multiple points.
+        :return: GeoDataFrame containing road network
+        """
         cf = self.create_custom_filter()
 
         if self.verbose:

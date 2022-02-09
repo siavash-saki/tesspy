@@ -276,6 +276,16 @@ def explode(gdf):
 
 
 def get_hierarchical_clustering_parameter(coordinates, threshold):
+    """
+    This function returns the distance_threshold that is used in the hierarchical clustering algorithm. Therefor
+    different distant_threshold are tested until the hierarchical clustering return less clusters than the inpurt
+    threshold. If no dist_threshold fulfills the threshold-requirement the first tested distance_threshold is return
+    because this ditance_threshold is likely to return the most clusters (the tested dist_threshold are ascending).
+
+    :param coordinates: numpy column stock of coordinates of Data
+    :param threshold: Number of LGUs that should not be exceeded
+    :return:int that defines the distance_threshold for hierarchical clustering
+    """
     dist_threshold = [i * 100 for i in range(2, 13)]
     for th in dist_threshold:
         model = AgglomerativeClustering(n_clusters=None, distance_threshold=th, affinity="euclidean",
@@ -291,6 +301,12 @@ def get_hierarchical_clustering_parameter(coordinates, threshold):
 
 
 def create_blocks(road_network):
+    """
+    This function uses the shapely function polygonize to create blocks by using road data.
+
+    :param road_network: GeoDataFrame from RoadData class containing street segments
+    :return: GeoDataFrame with polygons, that were created by using the road data
+    """
     if hasattr(road_network, 'geometry'):
         block_faces = list(polygonize(road_network['geometry']))
         blocks = gpd.GeoDataFrame(geometry=block_faces).set_crs("EPSG:4326")
@@ -300,6 +316,20 @@ def create_blocks(road_network):
 
 
 def get_rest_polygon(blocks, area):
+    """
+    # TODO: think about making this function adapt better to islands groups with ocean and multiple polygons because
+    now the convex hull is used. That results in ocean parts becoming city blocks
+
+    This function creates the rest polygons that can occure by creating city blocks. Dead ends or vegetation at the
+    boundary of the area will not be defined as blocks because there are no road to define a block. Since the
+    tessellation should cover the whole area those "rest polygons" will be  created by substracting all blocks from the
+    area to fill these gaps. The rest_polygons are most likely a Multi-Polygon which is exploded into many polygons.
+    Using this, the city blocks method tessellates the whole area without gaps.
+
+    :param blocks:GeoDataFrame with all blocks
+    :param area: GeoDataFrame with boundary polygon
+    :return: GeoDataFrame of the rest polygons
+    """
     if hasattr(blocks, "geometry") and hasattr(area, "geometry"):
 
         merged_polygons = gpd.GeoSeries(cascaded_union(blocks["geometry"].values))
