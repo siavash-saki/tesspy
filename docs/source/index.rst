@@ -20,7 +20,6 @@ https://github.com/siavash-saki/tesspy
 
 Install
 -------
-asadasdasd
 
 You can install ``tesspy`` from PyPI using pip::
 
