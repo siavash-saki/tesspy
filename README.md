@@ -9,12 +9,11 @@ A package for urban and suburban area tessellations.
 pip install tesspy
 ```
 ## Documentation
-See `tesspy.readthedocs.io`
+The official documentation is hosted on **[ReadTheDocs](https://tesspy.readthedocs.io)**
 
 ## Examples
 Example for a germany city: Frankfurt am Main, an US-city: Key West and the capital of Nairobi. In all examples the local projection was used such that any kind of distortion is minimized. The following picutres shows the boundary polygons. 
 ![This is an image](Examples/pics/Boundary_polygons.png)
-
 
 ### Squares 
 For square based tessellations different resolution were used the get similar looking results. 
