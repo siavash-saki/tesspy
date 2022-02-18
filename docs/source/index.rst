@@ -43,5 +43,6 @@ Module index
 ------------------
 * :ref:`modindex`
 
-
+.. _@siavash-saki: http://github.com/siavash-saki
+.. _@JoHamann: http://github.com/JoHamann
 

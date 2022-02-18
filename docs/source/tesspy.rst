@@ -17,7 +17,7 @@ tesspy.tessellation
    :undoc-members:
    :show-inheritance:
 
-tessellation\_functions
+tesspy.tessellation\_functions
 -------------------------------------
 
 .. automodule:: tesspy.tessellation_functions
