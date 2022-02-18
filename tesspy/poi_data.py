@@ -1,8 +1,9 @@
 import numpy as np
 import pandas as pd
-import overpass
 import warnings
 import osmnx as ox
+import requests
+import json
 from tessellation_functions import split_linestring
 
 
@@ -106,7 +107,7 @@ class POIdata:
         for element in ['node', 'way']:
             for poi_category in self.poi_categories:
                 query_string = query_string + f'{element}[{poi_category}](poly:"{poly_str}");'
-        query_string = "[out:json];(" + query_string + ');out geom;'
+        query_string = f"[out:json][timeout:{self.timeout}];(" + query_string + ');out geom;'
 
         return query_string
 
@@ -121,22 +122,32 @@ class POIdata:
         """
 
         query_string = self.create_overpass_query_string()
+        request_header = "https://overpass-api.de/api/interpreter?data="
 
         if self.verbose:
             print('Getting data from OSM...')
-        api = overpass.API(timeout=self.timeout)
-        resp = api._get_from_overpass(query_string).json()
+
+        # sending the request
+        resp = requests.get(url=request_header+query_string)
+        if resp.status_code == 429:
+            raise RuntimeError("429 Too Many Requests:\n"
+                               "You have sent multiple requests from the same "
+                               "IP and passed the passed the fair use policy. "
+                               "Please wait a couple of minutes and then try again.")
+        elif resp.status_code == 504:
+            raise RuntimeError("504 Gateway Timeout:\n"
+                               "the server has already so much load that the request cannot be executed."
+                               "Please try again later")
+        elif resp.status_code != 200:
+            raise RuntimeError("Bad Request!")
+        else:
+            resp = json.loads(resp.text)
 
         if self.verbose:
             print('Creating POI DataFrame...')
 
         lst_nodes = []
         lst_ways = []
-
-        # if self.verbose:
-        #     generator = tqdm(resp['elements'])
-        # else:
-        #     generator = resp['elements']
 
         generator = resp['elements']
 
@@ -260,9 +271,9 @@ class RoadData:
 
     def get_road_network(self):
         """
-        Collects the road network data based on the defined custom filter. The inital roaddata is based on graphs
-        and transformed into a GeoDataFrame. Within the RoadData Class the user can devide to split the data such
-        that each LineString (representing a streetsegment) contains only two points and not multiple points.
+        Collects the road network data based on the defined custom filter. The initial road data is based on graphs
+        and transformed into a GeoDataFrame. Within the RoadData Class the user can divide to split the data such
+        that each LineString (representing a street segment) contains only two points and not multiple points.
         :return: GeoDataFrame containing road network
         """
         cf = self.create_custom_filter()
