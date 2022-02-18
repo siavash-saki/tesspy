@@ -1,6 +1,6 @@
 import geopandas as gpd
 import mercantile
-from shapely.ops import polygonize, cascaded_union
+from shapely.ops import polygonize, unary_union
 from shapely.geometry import box, Polygon, Point, LineString, mapping, MultiPolygon
 from collections import defaultdict
 import h3
@@ -334,7 +334,7 @@ def get_rest_polygon(blocks, area):
     """
     if hasattr(blocks, "geometry") and hasattr(area, "geometry"):
 
-        merged_polygons = gpd.GeoSeries(cascaded_union(blocks["geometry"].values))
+        merged_polygons = gpd.GeoSeries(unary_union(blocks["geometry"].values))
         merged_polygons.set_crs("EPSG:4326", allow_override=True, inplace=True)
 
         rest = area.difference(merged_polygons)
