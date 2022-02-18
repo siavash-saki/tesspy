@@ -173,9 +173,7 @@ def get_adaptive_squares(input_gdf, threshold):
             tmp_df = pd.DataFrame(new_row).transpose()
             tmp_gdf = gpd.GeoDataFrame(tmp_df, geometry="geometry", crs="epsg:4326")
 
-            # append is depricated
-            # gdf= pd.concat([gdf,tmp_gdf], axis=)
-            gdf = gdf.append(tmp_gdf)
+            gdf = pd.concat([gdf, tmp_gdf], axis=0)
 
     gdf.index = gdf.reset_index(drop=True).index
     return gdf
@@ -287,7 +285,7 @@ def get_hierarchical_clustering_parameter(coordinates, threshold):
     because this ditance_threshold is likely to return the most clusters (the tested dist_threshold are ascending).
 
     :param coordinates: numpy column stock of coordinates of Data
-    :param threshold: Number of LGUs that should not be exceeded
+    :param threshold: Number of Polygons that should not be exceeded
     :return:int that defines the distance_threshold for hierarchical clustering
     """
     dist_threshold = [i * 100 for i in range(2, 13)]
