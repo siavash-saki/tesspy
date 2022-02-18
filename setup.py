@@ -4,12 +4,10 @@ with open("README.md", "r") as fh:
     LONG_DESCRIPTION = fh.read()
 
 # Packages that tesspy uses explicitly:
-INSTALL_REQUIRES = ['geopandas',
+INSTALL_REQUIRES = ['geopandas >= 0.10.0',
                     'h3',
                     'osmnx',
                     'hdbscan',
-                    'sklearn',
-                    'scipy',
                     'mercantile',
                     'overpass']
 
