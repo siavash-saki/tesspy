@@ -22,7 +22,9 @@ def get_city_polygon(city: str):
     df_city : GeoDataFrame
         GeoDataFrame containing the polygon of the city
     """
-    df_city = ox.geocode_to_gdf(city)
+    with warnings.catch_warnings():
+        warnings.simplefilter('ignore')
+        df_city = ox.geocode_to_gdf(city)
     df_city = df_city[["osm_id", "geometry"]]
     df_city = df_city.rename({"osm_id": "osmid"})
     return df_city
@@ -238,13 +240,15 @@ class Tessellation:
         aqk_count_df = count_poi(df_aqk, poi_data_aqk)
 
         if not threshold:
-            if verbose:
-                print("Threshold is to be set as the median POI-count per LGU")
             threshold = int(np.median(aqk_count_df["count"].values))
-
-        while max(aqk_count_df["count"].values) > threshold:
             if verbose:
-                print("Threshold exceeded! LGUs will be subdivided")
+                print(f"Threshold={threshold}  ==> set as the median POI-count per square at the initial level")
+
+        i=start_resolution
+        while max(aqk_count_df["count"].values) > threshold:
+            i += 1
+            if verbose:
+                print(f"Threshold exceeded! Squares are subdivided into resolution {i}")
 
             df_tmp = get_adaptive_squares(aqk_count_df, threshold)
             df_tmp.drop(columns=["count"], inplace=True)
@@ -364,7 +368,7 @@ class Tessellation:
         return df_voronoi
 
     def city_blocks(self,
-                    number_of_LGUs=1000,
+                    number_of_polygons=1000,
                     detail_deg=None,
                     split_roads=True,
                     verbose=False
@@ -372,7 +376,7 @@ class Tessellation:
         """
         Create city bocks (tiles) using road data from the area. To collect road data and specify the highway types
         that should be included the custom filter can be used
-        :param number_of_LGUs: int, default = 1000
+        :param number_of_polygons: int, default = 1000
             targeted number of city blocks
         :param detail_deg: int, default = None
             define the number of the top (int) highway types to use in the custom filter
@@ -409,13 +413,13 @@ class Tessellation:
         coordinates = np.column_stack([city_blocks_hc["centroid"].x, city_blocks_hc["centroid"].y])
         if verbose:
             print("Threshold for hierarchical clustering is computed.")
-        th = get_hierarchical_clustering_parameter(coordinates, number_of_LGUs)
+        th = get_hierarchical_clustering_parameter(coordinates, number_of_polygons)
 
         if verbose:
             print(f"Distance threshold for clustering is {th}.")
 
         if not th:
-            raise ValueError("Please insert a valid threshold or increase the number of LGU.")
+            raise ValueError("Please insert a valid threshold or increase the number of Polygons.")
 
         if verbose:
             print(f"Hierarchical Clustering in Progress with threshold {th}.")
