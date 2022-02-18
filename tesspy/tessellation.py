@@ -132,6 +132,8 @@ class Tessellation:
         todo: write examples
         """
         df_qk_squares = get_squares_polyfill(self.area_gdf, resolution)
+        df_qk_squares = df_qk_squares.drop(columns=['osm_id', 'children_id'])
+
         return df_qk_squares
 
     def hexagons(self, resolution: int):
@@ -155,6 +157,8 @@ class Tessellation:
         """
 
         df_h3_hexagons = get_h3_hexagons(self.area_gdf, resolution)
+        df_h3_hexagons = df_h3_hexagons.reset_index().rename(columns={'index': 'hex_id'})
+
         return df_h3_hexagons
 
     def adaptive_squares(self,
@@ -248,6 +252,8 @@ class Tessellation:
             aqk_count_df = df_tmp2
 
         final_aqk = gpd.sjoin(aqk_count_df, self.area_gdf)
+        final_aqk = final_aqk.drop(columns=['osm_id', 'children_id', 'index_right'])
+
         return final_aqk
 
     def voronoi(self,
@@ -345,13 +351,6 @@ class Tessellation:
 
         else:
             raise ValueError("Please use a clustering algorithm: k-means, hdbscan or None")
-
-        # Building convex hulls and calculating centroids seems unnecessary
-        # we can directly compute centroids with numpy mean of points in a cluster
-        # convex_hulls = [MultiPoint(data[data["ClusterIDs"] == ID]["geometry"].values).convex_hull for ID in
-        #                 data["ClusterIDs"].unique()]
-        # gdf_generators = gpd.GeoDataFrame(geometry=convex_hulls, crs="EPSG:4326")
-        # generators = gdf_generators["geometry"].centroid
 
         # create Voronoi polygons
         if verbose:
