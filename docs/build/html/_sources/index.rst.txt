@@ -6,18 +6,42 @@
 Welcome to tesspy's documentation!
 ==================================
 
-.. include:: modules.rst
-.. include:: tesspy.rst
+Introduction
+------------
 
+tesspy is a python library for geographical tessellation. By discretizing urban areas,
+it builds local geographical units that allow further quantitative analysis. In addition
+to regular tessellation methods, such as square grid and hexagon grid, it builds irregular
+tessellations, such as voronoi diagrams and city blocks, based on OpenStreetMap geospatial data.
+
+The package is currently maintained by `@siavash-saki`_ and `@JoHamann`_.
+
+https://github.com/siavash-saki/tesspy
+
+Install
+-------
+asadasdasd
+
+You can install ``tesspy`` from PyPI using pip::
+
+   pip install tesspy
+
+Documentation contents
+----------------------
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
+   tesspy
 
-
-Indices and tables
-==================
+All functions
+------------------
 
 * :ref:`genindex`
+
+Module index
+------------------
 * :ref:`modindex`
-* :ref:`search`
+
+
+

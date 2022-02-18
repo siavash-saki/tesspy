@@ -1,10 +1,7 @@
 tesspy package
 ==============
 
-Submodules
-----------
-
-tesspy.poi\_data module
+tesspy.poi\_data
 -----------------------
 
 .. automodule:: tesspy.poi_data
@@ -12,7 +9,7 @@ tesspy.poi\_data module
    :undoc-members:
    :show-inheritance:
 
-tesspy.tessellation module
+tesspy.tessellation
 --------------------------
 
 .. automodule:: tesspy.tessellation
@@ -20,27 +17,10 @@ tesspy.tessellation module
    :undoc-members:
    :show-inheritance:
 
-tesspy.tessellation\_functions module
+tessellation\_functions
 -------------------------------------
 
 .. automodule:: tesspy.tessellation_functions
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-tesspy.test module
-------------------
-
-.. automodule:: tesspy.test
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-
-Module contents
----------------
-
-.. automodule:: tesspy
    :members:
    :undoc-members:
    :show-inheritance:
