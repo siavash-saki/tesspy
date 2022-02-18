@@ -1,11 +1,11 @@
 import geopandas as gpd
 import mercantile
-from shapely.ops import polygonize, unary_union
-from shapely.geometry import box, Polygon, Point, LineString, mapping, MultiPolygon
+from shapely.ops import polygonize, cascaded_union
+from shapely.geometry import box, Polygon, Point, LineString, MultiPolygon
 from collections import defaultdict
 import h3
 import pandas as pd
-from sklearn.cluster import KMeans, AgglomerativeClustering
+from sklearn.cluster import AgglomerativeClustering
 import numpy as np
 
 
@@ -173,8 +173,10 @@ def get_adaptive_squares(input_gdf, threshold):
             tmp_df = pd.DataFrame(new_row).transpose()
             tmp_gdf = gpd.GeoDataFrame(tmp_df, geometry="geometry", crs="epsg:4326")
 
+            # append is depricated
             # gdf= pd.concat([gdf,tmp_gdf], axis=)
             gdf = gdf.append(tmp_gdf)
+
     gdf.index = gdf.reset_index(drop=True).index
     return gdf
 
@@ -334,7 +336,7 @@ def get_rest_polygon(blocks, area):
     """
     if hasattr(blocks, "geometry") and hasattr(area, "geometry"):
 
-        merged_polygons = gpd.GeoSeries(unary_union(blocks["geometry"].values))
+        merged_polygons = gpd.GeoSeries(cascaded_union(blocks["geometry"].values))
         merged_polygons.set_crs("EPSG:4326", allow_override=True, inplace=True)
 
         rest = area.difference(merged_polygons)
