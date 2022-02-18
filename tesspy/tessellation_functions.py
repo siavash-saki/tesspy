@@ -27,7 +27,7 @@ def count_poi(df, points):
     """
     # TODO: Change such that this works for every tessellation method -> groupby by sth like input index or even
     #  geometry
-    pointsInPolygon = gpd.sjoin(df, points, how="left", op='contains')
+    pointsInPolygon = gpd.sjoin(df, points, how="left", predicate='contains')
     pointsInPolygon['count'] = 1
     pointsInPolygon.reset_index(inplace=True)
     tmp_a = pointsInPolygon.groupby(by='quadkey').count()['count'].reset_index().sort_values(by="quadkey",
@@ -119,7 +119,7 @@ def get_h3_hexagons(gdf, resolution):
 
     elif type(gdf.geometry.iloc[0]) == MultiPolygon:
         parts_lst = []
-        for idx, row in gdf.explode().loc[0].iterrows():
+        for idx, row in gdf.explode(index_parts=True).loc[0].iterrows():
             hexs = h3.polyfill(row.geometry.__geo_interface__, resolution, geo_json_conformant=True)
 
             polygonise = lambda hex_id: Polygon(
@@ -172,6 +172,8 @@ def get_adaptive_squares(input_gdf, threshold):
 
             tmp_df = pd.DataFrame(new_row).transpose()
             tmp_gdf = gpd.GeoDataFrame(tmp_df, geometry="geometry", crs="epsg:4326")
+
+            # gdf= pd.concat([gdf,tmp_gdf], axis=)
             gdf = gdf.append(tmp_gdf)
     gdf.index = gdf.reset_index(drop=True).index
     return gdf
