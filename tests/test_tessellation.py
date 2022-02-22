@@ -80,5 +80,16 @@ def test_voronoi():
 
 def test_city_blocks():
     city = Tessellation("Frankfurt")
-    city_cb = city.city_blocks(number_of_polygons=2000, verbose=True)
+    nb_LGUs = 1800
+    city_cb = city.city_blocks(number_of_polygons=nb_LGUs, verbose=True)
+    print(f"We have {len(city_cb)} - the userinput was {nb_LGUs}")
     assert hasattr(city_cb, "geometry")
+
+
+def test_new_shapely():
+    city = Tessellation("Key West")
+    city_qk = city.squares(15)
+    city_hex = city.hexagons(8)
+    city_vp = city.voronoi(cluster_algo="k-means",poi_categories=["amenity"], timeout=60, n_polygons=500, verbose=False)
+    city_aqk = city.adaptive_squares(14, poi_categories=["building"])
+    print(f"{len(city_qk)} Squares; {len(city_hex)} Hexagons; {len(city_vp)} Voronoi; {len(city_aqk)} Adaptive Squares")

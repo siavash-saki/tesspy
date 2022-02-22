@@ -244,7 +244,7 @@ class Tessellation:
             if verbose:
                 print(f"Threshold={threshold}  ==> set as the median POI-count per square at the initial level")
 
-        i=start_resolution
+        i = start_resolution
         while max(aqk_count_df["count"].values) > threshold:
             i += 1
             if verbose:
@@ -404,6 +404,7 @@ class Tessellation:
         if verbose:
             print(f"Filtered out {len(blocks) - len(polygons_in_area)} polygons, that where not in the area.")
 
+        print(f"{len(polygons_in_area)} polygons in area")
         rest_polygons = get_rest_polygon(polygons_in_area, queried_area)
 
         city_blocks = polygons_in_area.append(rest_polygons)
@@ -415,26 +416,29 @@ class Tessellation:
             print("Threshold for hierarchical clustering is computed.")
         th = get_hierarchical_clustering_parameter(coordinates, number_of_polygons)
 
-        if verbose:
-            print(f"Distance threshold for clustering is {th}.")
+        if th:
+            if verbose:
+                print(f"Distance threshold for clustering is {th}.")
 
-        if not th:
-            raise ValueError("Please insert a valid threshold or increase the number of Polygons.")
+            model = AgglomerativeClustering(n_clusters=None, distance_threshold=th, affinity='euclidean')
+            model.fit(coordinates)
+        else:
+            if verbose:
+                print(f"No threshold could match the inputs, so the nb of LGUs ({number_of_polygons}) is used.")
 
-        if verbose:
-            print(f"Hierarchical Clustering in Progress with threshold {th}.")
-        model = AgglomerativeClustering(n_clusters=None, distance_threshold=th, affinity='euclidean')
-        model.fit(coordinates)
+            model = AgglomerativeClustering(n_clusters=number_of_polygons, affinity='euclidean')
+            model.fit(coordinates)
 
         city_blocks["Cluster"] = model.labels_
         city_blocks_hc["Cluster"] = model.labels_
+
         if verbose:
             print("Merging small city blocks...")
         merged_polys = []
         for idx in city_blocks["Cluster"].unique():
             tmp = city_blocks[city_blocks["Cluster"] == idx]
             polygons = tmp["geometry"].to_numpy()
-            merged_polygon = gpd.GeoSeries(cascaded_union(polygons))
+            merged_polygon = gpd.GeoSeries(unary_union(polygons))
             merged_polys.append(merged_polygon[0])
 
         new_merged_polys = {'geometry': merged_polys}
