@@ -248,14 +248,14 @@ class RoadData:
         highway types.
         :return: string with highway types that is used to collect data using osmnx
         """
+        # Creating custom filter for all highway types
         if self.detail_deg is None:
-            if self.verbose:
-                print("Creating custom filter for all highway types")
             highwaytypes = self.osm_highway_types()
+
+        # Creating custom filter for the specified detail degree
         elif type(self.detail_deg) is int:
-            if self.verbose:
-                print("Creating custom filter for the specified detail degree")
             highwaytypes = self.osm_highway_types()[:self.detail_deg]
+
         else:
             raise ValueError("Please insert a valid detail degree: None or int")
 
@@ -266,7 +266,8 @@ class RoadData:
         custom_filter = f"['highway'~'{query}']"
 
         if self.verbose:
-            print(f"Created custom filter is {custom_filter}")
+            print(f"Selected highway type(s) are {custom_filter}")
+
         return custom_filter
 
     def get_road_network(self):
@@ -279,19 +280,21 @@ class RoadData:
         cf = self.create_custom_filter()
 
         if self.verbose:
-            print("Collection street network data")
+            print("Collecting road network data...")
         G = ox.graph_from_polygon(self.area.boundary.convex_hull.values[0], custom_filter=cf)
         G_projected = ox.project_graph(G, to_crs='epsg:4326')
         G_undirected = G_projected.to_undirected()
         G_edges_as_gdf = ox.graph_to_gdfs(G_undirected, nodes=False, edges=True)
-        if self.verbose:
-            print("Splitting the linestring, such that each linestring has exactly 2 points.")
 
         if self.split_roads:
+            if self.verbose:
+                print("Splitting the linestring, such that each linestring has exactly 2 points.")
             road_network = split_linestring(G_edges_as_gdf)
+
         else:
             road_network = G_edges_as_gdf
+
         if self.verbose:
-            print(f"Collected data has {len(road_network)} street segments")
+            print(f"Collected data has {len(road_network)} street segments.")
 
         return road_network
