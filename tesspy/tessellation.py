@@ -128,10 +128,6 @@ class Tessellation:
         -------
         df_qk_squares : pandas.DataFrame
             Dataframe containing squares
-
-        Examples
-        --------
-        todo: write examples
         """
         df_qk_squares = get_squares_polyfill(self.area_gdf, resolution)
         df_qk_squares = df_qk_squares.drop(columns=['osm_id', 'children_id'])
@@ -152,10 +148,6 @@ class Tessellation:
         -------
         df_h3_hexagons : pandas.DataFrame
             Dataframe containing hexagons
-
-        Examples
-        --------
-        todo: write examples
         """
 
         df_h3_hexagons = get_h3_hexagons(self.area_gdf, resolution)
@@ -183,7 +175,6 @@ class Tessellation:
         ----------
         start_resolution : int
             Specifies the size of initial squares
-            A positive number between todo: complete
         poi_categories : A list of OSM primary map features or 'all'
                          default=["amenity", 'building']
             'all' means all the available POI categories
@@ -208,10 +199,6 @@ class Tessellation:
         -------
         df_adaptive_squares : pandas.DataFrame
             Dataframe containing adaptive squares
-
-        Examples
-        --------
-        todo: write examples
         """
 
         # check if the categories are already available in poi_data
@@ -305,10 +292,6 @@ class Tessellation:
         -------
         df_voronoi : pandas.DataFrame
             Dataframe containing Voronoi polygons
-
-        Examples
-        --------
-        todo: write examples
         """
 
         # check if the categories are already available in poi_data
@@ -374,18 +357,25 @@ class Tessellation:
                     verbose=False
                     ):
         """
-        Create city bocks (tiles) using road data from the area. To collect road data and specify the highway types
-        that should be included the custom filter can be used
-        :param number_of_polygons: int, default = 1000
+        Create city bocks (tiles) using road data from the area.
+        To collect road data, specify the highway types
+        that should be included the custom filter can be used.
+
+        Parameters
+        ----------
+        number_of_polygons: int, default = 1000
             targeted number of city blocks
-        :param detail_deg: int, default = None
+        detail_deg: int, default = None
             define the number of the top (int) highway types to use in the custom filter
-        :param split_roads: bool, default = True
+        split_roads: bool, default = True
             True if LineStrings should be split up such that each LineString contains exactly 2 Points
-        :param verbose : bool, default=False
+        verbose : bool, default=False
             If True, print information while computing
-        :return: geopandas.GeoDataFrame
-            GeoDataFrame with cityblock tiles
+
+        Returns
+        -------
+        final_city_blocks : geopandas.GeoDataFrame
+            GeoDataFrame with city block tiles
         """
         if type(self.area_gdf) == MultiPolygon:
             queried_area = self.area_gdf.convex_hull
@@ -487,6 +477,6 @@ class Tessellation:
     def osm_highway_types():
         """
         list of all highway types
-        :return: list of highway types
+        returns list of highway types
         """
         return RoadData.osm_highway_types()
