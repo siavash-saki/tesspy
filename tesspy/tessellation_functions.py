@@ -26,8 +26,9 @@ def count_poi(df, points):
     final_df : GeoDataFrame
         GeoDataFrame containing the tiles and the POI count
     """
-    # TODO: Change such that this works for every tessellation method -> groupby by sth like input index or even
-    #  geometry
+    # TODO: Change such that this works for every tessellation method ->
+    #  groupby by sth like input index or even geometry
+
     pointsInPolygon = gpd.sjoin(df, points, how="left", predicate='contains')
     pointsInPolygon['count'] = 1
     pointsInPolygon.reset_index(inplace=True)
@@ -240,9 +241,16 @@ def voronoi_polygons(sp_voronoi_obj, diameter):
 
 def split_linestring(df):
     """
-    :param df: DataFrame of shapely.LineStrings containing more than two points
-    :return: DataFrame with shapely.linestring with two points each
-    The linestring, which are split up will have the same osmid since its still the same street
+    The linestring, which are split up will have the same osmid
+    since it's still the same street
+
+    Parameters
+    ----------
+    df: DataFrame of shapely.LineStrings containing more than two points
+
+    Returns
+    --------
+    dataset: DataFrame with shapely.linestring with two points each
     """
     linestrings = []
     osmid = []
@@ -264,10 +272,15 @@ def split_linestring(df):
 
 def explode(gdf):
     """
+    Multipolygon into multiple Polygons
 
-    :param gdf: which can have multi-part geometries that will be exploded
-    :return: GeoDataFrame with single geometries
-    example: Multipolygon -> multiple Polygons
+    Parameters
+    ----------
+    gdf: which can have multi-part geometries that will be exploded
+
+    Returns
+    --------
+    gdf_out: GeoDataFrame with single geometries
     """
     gs = gdf.explode(index_parts=True)
     gdf2 = gs.reset_index().rename(columns={0: "geometry"})
@@ -279,16 +292,25 @@ def explode(gdf):
 
 def get_hierarchical_clustering_parameter(coordinates, threshold):
     """
-    This function returns the distance_threshold that is used in the hierarchical clustering algorithm. Therefor
-    different distant_threshold are tested until the hierarchical clustering return less clusters than the inpurt
-    threshold. If no dist_threshold fulfills the threshold-requirement nothing is returned. In the main method
-    tesspy.Tessellation.city_blocks() is a differentiation between both cases. If th is an integer, the hier. Clustering
-    will use distance_threshold parameter, if th is None, the hier. Clustering will use n_clusters parameter with the
-    users input number_of_polygons
+    This function returns the distance_threshold that is used in
+    the hierarchical clustering algorithm. Therefore, different
+    distant_threshold are tested until the hierarchical clustering
+    return less clusters than the input threshold. If no dist_threshold
+    fulfills the threshold-requirement nothing is returned. In the
+    main method tesspy.Tessellation.city_blocks() is a differentiation
+    between both cases. If th is an integer, the hierarchical clustering
+    use distance_threshold parameter, if th is None, the hierarchical
+    clustering use n_clusters parameter with the users input
+    number_of_polygons
 
-    :param coordinates: numpy column stock of coordinates of Data
-    :param threshold: Number of Polygons that should not be exceeded
-    :return:int that defines the distance_threshold for hierarchical clustering
+    Parameters
+    ----------
+    coordinates: numpy column stock of coordinates of Data
+    threshold: Number of Polygons that should not be exceeded
+
+    Returns
+    --------
+    th: int, defines the distance_threshold for hierarchical clustering
     """
     dist_threshold = [i * 100 for i in range(2, 13)]
     for th in dist_threshold:
@@ -304,10 +326,16 @@ def get_hierarchical_clustering_parameter(coordinates, threshold):
 
 def create_blocks(road_network):
     """
-    This function uses the shapely function polygonize to create blocks by using road data.
+    This function uses the shapely function polygonize to create
+    blocks by using road data.
 
-    :param road_network: GeoDataFrame from RoadData class containing street segments
-    :return: GeoDataFrame with polygons, that were created by using the road data
+    Parameters
+    ----------
+    road_network: GeoDataFrame from RoadData class containing street segments
+
+    Returns
+    --------
+    blocks: GeoDataFrame with polygons, that were created by using the road data
     """
     if hasattr(road_network, 'geometry'):
         block_faces = list(polygonize(road_network['geometry']))
@@ -318,25 +346,27 @@ def create_blocks(road_network):
 
 
 def get_rest_polygon(blocks, area):
+    # TODO: think about making this function adapt better to islands
+    #  groups with ocean and multiple polygons because now the convex
+    #  hull is used. That results in ocean parts becoming city blocks
     """
-    # TODO: think about making this function adapt better to islands groups with ocean and multiple polygons because
-    now the convex hull is used. That results in ocean parts becoming city blocks
-
-    This function creates the rest polygons that can occure by creating city blocks. Dead ends or vegetation at the
+    This function creates the rest polygons that can occur by creating city blocks. Dead ends or vegetation at the
     boundary of the area will not be defined as blocks because there are no road to define a block. Since the
-    tessellation should cover the whole area those "rest polygons" will be  created by substracting all blocks from the
+    tessellation should cover the whole area those "rest polygons" will be  created by subtracting all blocks from the
     area to fill these gaps. The rest_polygons are most likely a Multi-Polygon which is exploded into many polygons.
     Using this, the city blocks method tessellates the whole area without gaps.
 
-    :param blocks:GeoDataFrame with all blocks
-    :param area: GeoDataFrame with boundary polygon
-    :return: GeoDataFrame of the rest polygons
+    Parameters
+    ----------
+    blocks: GeoDataFrame with all blocks
+    area: GeoDataFrame with boundary polygon
+
+    Returns
+    --------
+    rest_polygons: GeoDataFrame of the rest polygons
     """
 
-    print("Creating the Restpolygon")
     if hasattr(blocks, "geometry") and hasattr(area, "geometry"):
-
-        print(f"blocks has attribute geometry and len {len(blocks)}")
 
         blocks["geometry"] = blocks["geometry"].apply(lambda x: make_valid(x))
 
@@ -355,4 +385,4 @@ def get_rest_polygon(blocks, area):
         return rest_polygons
 
     else:
-        raise ValueError("Intial definied city blocks and the area need a geometry attribute.")
+        raise ValueError("Initial defined city blocks and the area need a geometry attribute.")
