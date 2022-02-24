@@ -351,25 +351,26 @@ class Tessellation:
         return df_voronoi
 
     def city_blocks(self,
-                    number_of_polygons=1000,
+                    number_of_polygons=None,
                     detail_deg=None,
                     split_roads=True,
                     verbose=False
                     ):
         """
         Create city bocks (tiles) using road data from the area.
-        To collect road data, specify the highway types
-        that should be included the custom filter can be used.
+        To collect road data, specify the highway types by
+        modifying detail_deg
 
         Parameters
         ----------
-        number_of_polygons: int, default = 1000
-            targeted number of city blocks
+        number_of_polygons: int, default = None
+            targeted number of city blocks, this is an approximation
+            the final number of polygons can vary slightly
         detail_deg: int, default = None
-            define the number of the top (int) highway types to use in the custom filter
+            define the number of the top (osm) highway types to use for creating city blocks
         split_roads: bool, default = True
-            True if LineStrings should be split up such that each LineString contains exactly 2 Points
-        verbose : bool, default=False
+            if True, LineStrings should be split up such that each LineString contains exactly 2 Points
+        verbose : bool, default = False
             If True, print information while computing
 
         Returns
@@ -384,46 +385,62 @@ class Tessellation:
 
         road_data = RoadData(queried_area, detail_deg, split_roads, verbose).get_road_network()
         if verbose:
-            print(f"Road data is collected. Overall {len(road_data)} streets are included.")
-            print("Creating initial city blocks using the road network data")
+            # print(f"Road data is collected. Overall {len(road_data)} streets are included.")
+            print("Creating initial city blocks using the road network data...")
 
         blocks = create_blocks(road_data)
 
         polygons_in_area = gpd.sjoin(blocks, queried_area, how='inner')
         polygons_in_area.drop(columns=["index_right"], inplace=True)
-        if verbose:
-            print(f"Filtered out {len(blocks) - len(polygons_in_area)} polygons, that where not in the area.")
+        # if verbose:
+        #     print(f"Filtered out {len(blocks) - len(polygons_in_area)} polygons, that where not in the area.")
 
-        print(f"{len(polygons_in_area)} polygons in area")
         rest_polygons = get_rest_polygon(polygons_in_area, queried_area)
 
-        city_blocks = polygons_in_area.append(rest_polygons)
-        city_blocks_hc = city_blocks.to_crs("EPSG:5243")
-        city_blocks_hc["centroid"] = city_blocks_hc.centroid
+        city_blocks = pd.concat([polygons_in_area, rest_polygons])
 
-        coordinates = np.column_stack([city_blocks_hc["centroid"].x, city_blocks_hc["centroid"].y])
-        if verbose:
-            print("Threshold for hierarchical clustering is computed.")
-        th = get_hierarchical_clustering_parameter(coordinates, number_of_polygons)
+        if not number_of_polygons:
+            city_blocks = city_blocks[['geometry']].reset_index(drop=True)
+            return city_blocks
 
-        if th:
-            if verbose:
-                print(f"Distance threshold for clustering is {th}.")
+        # city_blocks_hc = city_blocks.to_crs("EPSG:5243")
+        # city_blocks_hc["centroid"] = city_blocks_hc.centroid
+        #
+        # coordinates = np.column_stack([city_blocks_hc["centroid"].x, city_blocks_hc["centroid"].y])
+        #
+        #
+        # if verbose:
+        #     print("Threshold for hierarchical clustering is computed.")
+        # th = get_hierarchical_clustering_parameter(coordinates, number_of_polygons)
+        #
+        # if th:
+        #     if verbose:
+        #         print(f"Distance threshold for clustering is {th}.")
+        #
+        #     model = AgglomerativeClustering(n_clusters=None, distance_threshold=th, affinity='euclidean')
+        #     model.fit(coordinates)
+        # else:
+        #     if verbose:
+        #         print(f"No threshold could match the inputs, so the nb of LGUs ({number_of_polygons}) is used.")
 
-            model = AgglomerativeClustering(n_clusters=None, distance_threshold=th, affinity='euclidean')
-            model.fit(coordinates)
-        else:
-            if verbose:
-                print(f"No threshold could match the inputs, so the nb of LGUs ({number_of_polygons}) is used.")
-
-            model = AgglomerativeClustering(n_clusters=number_of_polygons, affinity='euclidean')
-            model.fit(coordinates)
-
-        city_blocks["Cluster"] = model.labels_
-        city_blocks_hc["Cluster"] = model.labels_
+        if number_of_polygons > len(city_blocks):
+            raise ValueError(f'Cannot extract more city blocks than initial city blocks!'
+                             f'Initial city blocks are {len(city_blocks)}, desired city blocks are {number_of_polygons}'
+                             f'Choose a value less than {len(city_blocks)}.')
 
         if verbose:
             print("Merging small city blocks...")
+
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+            city_blocks["centroid"] = city_blocks.centroid
+        coordinates = np.column_stack([city_blocks["centroid"].x, city_blocks["centroid"].y])
+        model = AgglomerativeClustering(n_clusters=number_of_polygons, affinity='euclidean')
+        model.fit(coordinates)
+
+        city_blocks["Cluster"] = model.labels_
+        # city_blocks_hc["Cluster"] = model.labels_
+
         merged_polys = []
         for idx in city_blocks["Cluster"].unique():
             tmp = city_blocks[city_blocks["Cluster"] == idx]
@@ -435,11 +452,12 @@ class Tessellation:
         merged_polys_df = gpd.GeoDataFrame(new_merged_polys, crs="EPSG:4326")
 
         keep_df = merged_polys_df[merged_polys_df.geom_type == "Polygon"]
-        To_explode = merged_polys_df[merged_polys_df.geom_type == "MultiPolygon"]
-        explode_df = explode(To_explode)
+        to_explode = merged_polys_df[merged_polys_df.geom_type == "MultiPolygon"]
+        explode_df = explode(to_explode)
         explode_df = explode_df.reset_index()
         explode_df.drop(columns=["level_0", "level_1"], inplace=True)
         final_city_blocks = pd.concat([keep_df, explode_df])
+        final_city_blocks = final_city_blocks[['geometry']].reset_index(drop=True)
 
         return final_city_blocks
 
