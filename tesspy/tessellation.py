@@ -351,7 +351,7 @@ class Tessellation:
         return df_voronoi
 
     def city_blocks(self,
-                    number_of_polygons=None,
+                    n_polygons=None,
                     detail_deg=None,
                     split_roads=True,
                     verbose=False
@@ -363,7 +363,7 @@ class Tessellation:
 
         Parameters
         ----------
-        number_of_polygons: int, default = None
+        n_polygons: int, default = None
             targeted number of city blocks, this is an approximation
             the final number of polygons can vary slightly
         detail_deg: int, default = None
@@ -399,7 +399,7 @@ class Tessellation:
 
         city_blocks = pd.concat([polygons_in_area, rest_polygons])
 
-        if not number_of_polygons:
+        if not n_polygons:
             city_blocks = city_blocks[['geometry']].reset_index(drop=True)
             return city_blocks
 
@@ -411,7 +411,7 @@ class Tessellation:
         #
         # if verbose:
         #     print("Threshold for hierarchical clustering is computed.")
-        # th = get_hierarchical_clustering_parameter(coordinates, number_of_polygons)
+        # th = get_hierarchical_clustering_parameter(coordinates, n_polygons)
         #
         # if th:
         #     if verbose:
@@ -421,11 +421,11 @@ class Tessellation:
         #     model.fit(coordinates)
         # else:
         #     if verbose:
-        #         print(f"No threshold could match the inputs, so the nb of LGUs ({number_of_polygons}) is used.")
+        #         print(f"No threshold could match the inputs, so the nb of LGUs ({n_polygons}) is used.")
 
-        if number_of_polygons > len(city_blocks):
+        if n_polygons > len(city_blocks):
             raise ValueError(f'Cannot extract more city blocks than initial city blocks!'
-                             f'Initial city blocks are {len(city_blocks)}, desired city blocks are {number_of_polygons}'
+                             f'Initial city blocks are {len(city_blocks)}, desired city blocks are {n_polygons}'
                              f'Choose a value less than {len(city_blocks)}.')
 
         if verbose:
@@ -435,7 +435,7 @@ class Tessellation:
             warnings.simplefilter('ignore')
             city_blocks["centroid"] = city_blocks.centroid
         coordinates = np.column_stack([city_blocks["centroid"].x, city_blocks["centroid"].y])
-        model = AgglomerativeClustering(n_clusters=number_of_polygons, affinity='euclidean')
+        model = AgglomerativeClustering(n_clusters=n_polygons, affinity='euclidean')
         model.fit(coordinates)
 
         city_blocks["Cluster"] = model.labels_
