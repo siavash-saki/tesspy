@@ -5,9 +5,39 @@
 A package for urban and suburban area tessellations. 
 
 ## Installation
-```python
+You can install ``tesspy`` from PyPI using pip:
+```
 pip install tesspy
 ```
+
+and from conda:
+```
+conda install -c conda-forge tesspy
+```
+
+
+
+## Creating a new environment for tesspy
+
+`tesspy` depends on `geopandas`, which could make the installation sometimes tricky because of the conflicts with the current packages. Therefore, we recommend creating a new clean environment and installing the dependencies from the conda-forge channel.
+
+
+Create a new environment:
+```shell
+conda create -n tesspy_env -c conda-forge
+```
+
+Activate this environment:
+```shell
+conda activate tesspy_env
+```
+
+Install tesspy from conda-forge channel:
+```shell
+conda install -c conda-forge tesspy
+```
+
+
 ## Documentation
 The official documentation is hosted on **[ReadTheDocs](https://tesspy.readthedocs.io)**
 
@@ -39,6 +69,5 @@ For City Blocks all highway-types were used
 Contribution is welcome!
 
 ## Acknowledgements
-ReLUT, HOLM
-
+`tesspy` is the result of the research project [ClusterMobil](https://www.frankfurt-university.de/de/hochschule/fachbereich-1-architektur-bauingenieurwesen-geomatik/forschungsinstitut-ffin/fachgruppen-des-ffin/fg-neue-mobilitat/relut/forschungsprojekte-relut/clustermobil/) conducted by the [Research Lab for Urban Transport](https://www.frankfurt-university.de/en/about-us/faculty-1-architecture-civil-engineering-geomatics/research-institute-ffin/specialist-groups-of-the-ffin/specialist-group-new-mobility/relut/). This research project is funded by the state of Hesse and [HOLM](https://frankfurt-holm.de/) funding under the “Innovations in Logistics and Mobility” measure of the Hessian Ministry of Economics, Energy, Transport and Housing. [HA Project No.: 1017/21-19]
 
