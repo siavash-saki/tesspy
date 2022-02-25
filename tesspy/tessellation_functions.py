@@ -301,7 +301,7 @@ def get_hierarchical_clustering_parameter(coordinates, threshold):
     between both cases. If th is an integer, the hierarchical clustering
     use distance_threshold parameter, if th is None, the hierarchical
     clustering use n_clusters parameter with the users input
-    number_of_polygons
+    n_polygons
 
     Parameters
     ----------

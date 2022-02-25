@@ -81,7 +81,7 @@ def test_voronoi():
 def test_city_blocks():
     city = Tessellation("Frankfurt")
     nb_LGUs = 1800
-    city_cb = city.city_blocks(number_of_polygons=nb_LGUs, verbose=True)
+    city_cb = city.city_blocks(n_polygons=nb_LGUs, verbose=True)
     print(f"We have {len(city_cb)} - the userinput was {nb_LGUs}")
     assert hasattr(city_cb, "geometry")
 
