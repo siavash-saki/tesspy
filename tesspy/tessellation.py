@@ -96,17 +96,14 @@ class Tessellation:
 
         Parameters
         ----------
-        poi_list : list or 'all'
+        poi_list : list
             A list of passed POI categories
-            'all' means all the available POI categories
 
         Returns
         -------
         missing_poi_categories : list
             A list containing the POI categories which should be downloaded
         """
-        if poi_list == 'all':
-            poi_list = self.osm_primary_features()
 
         missing_poi_categories = []
         for poi_category in poi_list:
@@ -201,6 +198,9 @@ class Tessellation:
             Dataframe containing adaptive squares
         """
 
+        if poi_categories == 'all':
+            poi_categories = self.osm_primary_features()
+
         # check if the categories are already available in poi_data
         # find the ones which are not available and should be downloaded from OSM
         missing_poi_categories = self._get_missing_poi_categories(poi_categories)
@@ -294,6 +294,9 @@ class Tessellation:
             Dataframe containing Voronoi polygons
         """
 
+        if poi_categories == 'all':
+            poi_categories = self.osm_primary_features()
+
         # check if the categories are already available in poi_data
         # find the ones which are not available and should be downloaded from OSM
         missing_poi_categories = self._get_missing_poi_categories(poi_categories)
@@ -331,7 +334,7 @@ class Tessellation:
                           range(clustering.labels_.max() + 1)]
 
         elif cluster_algo is None:
-            if len(tess_data["ClusterIDs"]) > 5000:
+            if len(tess_data) > 5000:
                 raise ValueError("Too many generators for Voronoi diagram. Please select a clustering algorithm")
             else:
                 generators = data_locs
@@ -474,8 +477,12 @@ class Tessellation:
         return self.poi_dataframe
 
     def get_road_network(self):
+        # todo: get road data
         """
-        returns the road network data in GeoDataFrame format
+        Returns
+        --------
+        road_network : geopandas.GeoDataFrame
+            the road network data in GeoDataFrame format
         """
         return self.road_network
 
