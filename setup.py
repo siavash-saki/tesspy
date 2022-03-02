@@ -5,11 +5,10 @@ with open("README.md", "r") as fh:
 
 # Packages that tesspy uses explicitly:
 INSTALL_REQUIRES = ['geopandas >= 0.10.0',
-                    'h3',
+                    'h3',  # h3-py
                     'osmnx',
                     'hdbscan',
-                    'mercantile',
-                    'overpass']
+                    'mercantile']
 
 setuptools.setup(
     name="tesspy",
