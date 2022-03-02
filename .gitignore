@@ -6,3 +6,6 @@ tesspy.egg-info
 venv
 tutorials/.ipynb_checkpoints
 tesspy/.ipynb_checkpoints
+/Examples/cache/
+/Examples/.ipynb_checkpoints/
+/tests/cache/
