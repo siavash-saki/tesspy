@@ -1,10 +1,20 @@
 import numpy as np
 import pandas as pd
+import geopandas as gpd
 import warnings
 import osmnx as ox
 import requests
 import json
+from shapely.geometry import Point
 from tessellation_functions import split_linestring
+
+
+def geom_ceil(coordinate, precision=4):
+    return np.true_divide(np.ceil(coordinate * 10 ** precision), 10 ** precision)
+
+
+def geom_floor(coordinate, precision=4):
+    return np.true_divide(np.floor(coordinate * 10 ** precision), 10 ** precision)
 
 
 class POIdata:
@@ -27,6 +37,7 @@ class POIdata:
     """
 
     def __init__(self, area, poi_categories, timeout, verbose):
+        self.area_buffered = None
         self.area = area
         self.poi_categories = poi_categories
         self.timeout = timeout
@@ -74,7 +85,6 @@ class POIdata:
 
         return osm_primary_features_lst
 
-
     def create_overpass_query_string(self):
         """
         creates the query string to be passed to overpass
@@ -86,14 +96,22 @@ class POIdata:
         # make the query area a bit larger
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
-            area = self.area.buffer(0.008).simplify(0.005)
+            self.area_buffered = self.area.buffer(0.008).simplify(0.005)
+
+        xy = np.array(self.area_buffered.iloc[0].exterior.coords)
 
         # make polygon string for OSM overpass query
-        xy = np.array(area.iloc[0].exterior.coords)
-        poly_str = ''
-        for lat, lon in zip(xy[:, 1], xy[:, 0]):
-            poly_str = poly_str + str(lat) + ' ' + str(lon) + ' '
-        poly_str = poly_str.strip()
+        # Using the polygon, fewer data are retrieved, and it's faster but request is long can can lead to 414
+        # poly_str = ''
+        # for lat, lon in zip(xy[:, 1], xy[:, 0]):
+        #     poly_str = poly_str + str(lat) + ' ' + str(lon) + ' '
+        # poly_str = poly_str.strip()
+
+        # make bounding box for OSM overpass query
+        lat_min = geom_floor(np.min(xy[:, 0]))
+        lon_min = geom_floor(np.min(xy[:, 1]))
+        lat_max = geom_ceil(np.max(xy[:, 0]))
+        lon_max = geom_ceil(np.max(xy[:, 1]))
 
         # if poi not in primary --> error
         # todo: is this necessary?
@@ -106,8 +124,16 @@ class POIdata:
         query_string = ''
         for element in ['node', 'way']:
             for poi_category in self.poi_categories:
-                query_string = query_string + f'{element}[{poi_category}](poly:"{poly_str}");'
-        query_string = f"[out:json][timeout:{self.timeout}];(" + query_string + ');out geom;'
+                # query with polygon
+                # query_string = query_string + f'{element}[{poi_category}](poly:"{poly_str}");'
+                # query with bounding box
+                query_string = query_string + f'{element}[{poi_category}];'
+
+        # query_string = f"[out:json][timeout:{self.timeout}];(" + query_string + ');out geom;'
+        query_string = f"[bbox][out:json][timeout:{self.timeout}];(" \
+                       + query_string \
+                       + ');out geom;' \
+                       + f'&bbox={lat_min},{lon_min},{lat_max},{lon_max}'
 
         return query_string
 
@@ -128,7 +154,7 @@ class POIdata:
             print('Getting data from OSM...')
 
         # sending the request
-        resp = requests.get(url=request_header+query_string)
+        resp = requests.get(url=request_header + query_string)
         if resp.status_code == 429:
             raise RuntimeError("429 Too Many Requests:\n"
                                "You have sent multiple requests from the same "
@@ -178,9 +204,24 @@ class POIdata:
 
         poi_df = pd.concat([ways_df, nodes_df]).fillna(False)
 
+        # add POI categories with no data to poi_df
+        for poi_category in self.poi_categories:
+            if not hasattr(poi_df, poi_category):
+                poi_df[poi_category] = False
+
+        # prettify poi_df by sorting columns
         first_cols = ['type', 'geometry', 'tags', 'center_latitude', 'center_longitude']
         second_cols = sorted(poi_df.columns.drop(first_cols))
         poi_df = poi_df[first_cols + second_cols]
+        poi_df = poi_df.reset_index(drop=True)
+
+        # Keep only the POI within the area
+        poi_geo_df = gpd.GeoDataFrame(
+            geometry=[Point(coords) for coords in poi_df[['center_longitude', 'center_latitude']].values],
+            crs='EPSG:4326')
+        area_buffered_gdf = gpd.GeoDataFrame(geometry=self.area_buffered, crs='epsg:4326')
+        idx_to_keep = gpd.sjoin(poi_geo_df, area_buffered_gdf, predicate='within').index
+        poi_df = poi_df.loc[idx_to_keep]
 
         return poi_df
 
