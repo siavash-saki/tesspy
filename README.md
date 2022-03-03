@@ -1,9 +1,10 @@
 # tesspy
 
-<img align="right" src="docs/readme_pics/logo.png">
-tesspy is a python library for urban areas tessellation. 
+<img align="right" src="docs/readme_pics/logo.jpg">
 
-The process of discretization of space into subspaces without overlaps and gaps is called tessellation. Tessellation is essential in understanding geographical space and provides a framework for analyzing geospatial data. Different tessellation methods are implemented in tesspy. The first group are regular tessellation methods: Square grid and hexagon grid. Second group are irregular tessellation methods based on gespatial data. These methods are: adaptive squares, Voronoi diagrams and city blocks. The geospatial data used for tessellation is retrieved from the OpenStreetMap database.
+`tesspy` is a python library for urban areas tessellation. 
+
+The process of discretization of space into subspaces without overlaps and gaps is called tessellation. Tessellation is essential in understanding geographical space and provides a framework for analyzing geospatial data. Different tessellation methods are implemented in `tesspy`. The first group are regular tessellation methods: Square grid and hexagon grid. Second group are irregular tessellation methods based on gespatial data. These methods are: adaptive squares, Voronoi diagrams and city blocks. The geospatial data used for tessellation is retrieved from the OpenStreetMap database.
 
 
 ## Installation
@@ -12,7 +13,7 @@ You can install ``tesspy`` from PyPI using pip (**Not Recommended**):
 pip install tesspy
 ```
 
-and from conda:
+and from conda (**Recommended**):
 ```
 conda install -c conda-forge tesspy
 ```
@@ -62,12 +63,18 @@ ffm_sqruares = ffm.squares(resolution=15)
 ```python
 ffm_hex_8 = ffm.hexagons(resolution=8)
 ```
-![hexagon_tessellation](docs/readme_pics/Hexagons.png)
+
+<img align="left" width="400" height="400" src="docs/readme_pics/Hexagons.png">
+ </p>
+
+
 ### Adaptive Squares
 ```python
 ffm_asq = ffm.adaptive_squares(start_resolution=14, threshold=100, poi_categories=['amenity'])
 ```
-![hexagon_tessellation](docs/readme_pics/Adaptive_Squares.png)
+![hexagon_tessellation](docs/readme_pics/Hexagons.png)
+
+![adaptive_squares_tessellation](docs/readme_pics/Adaptive_Squares.png)
 
 ### Voronoi Polygons
 ```python
