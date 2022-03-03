@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tesspy.poi_data &mdash; tesspy 0.0.1 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> tesspy
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tesspy.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../functions.html">All Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Contribution.html">Contribution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Acknowledgements.html">Acknowledgements</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">tesspy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      <li>tesspy.poi_data</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for tesspy.poi_data</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">geopandas</span> <span class="k">as</span> <span class="nn">gpd</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">import</span> <span class="nn">osmnx</span> <span class="k">as</span> <span class="nn">ox</span>
+<span class="kn">import</span> <span class="nn">requests</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">from</span> <span class="nn">shapely.geometry</span> <span class="kn">import</span> <span class="n">Point</span>
+<span class="kn">from</span> <span class="nn">tessellation_functions</span> <span class="kn">import</span> <span class="n">split_linestring</span>
+
+
+<div class="viewcode-block" id="geom_ceil"><a class="viewcode-back" href="../../tesspy.html#tesspy.poi_data.geom_ceil">[docs]</a><span class="k">def</span> <span class="nf">geom_ceil</span><span class="p">(</span><span class="n">coordinate</span><span class="p">,</span> <span class="n">precision</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">true_divide</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">coordinate</span> <span class="o">*</span> <span class="mi">10</span> <span class="o">**</span> <span class="n">precision</span><span class="p">),</span> <span class="mi">10</span> <span class="o">**</span> <span class="n">precision</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="geom_floor"><a class="viewcode-back" href="../../tesspy.html#tesspy.poi_data.geom_floor">[docs]</a><span class="k">def</span> <span class="nf">geom_floor</span><span class="p">(</span><span class="n">coordinate</span><span class="p">,</span> <span class="n">precision</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">true_divide</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">coordinate</span> <span class="o">*</span> <span class="mi">10</span> <span class="o">**</span> <span class="n">precision</span><span class="p">),</span> <span class="mi">10</span> <span class="o">**</span> <span class="n">precision</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="POIdata"><a class="viewcode-back" href="../../tesspy.html#tesspy.poi_data.POIdata">[docs]</a><span class="k">class</span> <span class="nc">POIdata</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class creates a query for the investigated area and POI categories.</span>
+<span class="sd">    The query is sent to osm using overpass API and the data is retrieved.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    area : GeoDataFrame or str</span>
+<span class="sd">        GeoDataFrame must have a single shapely Polygon or MultiPolygon</span>
+<span class="sd">        in geometry column and its CRS must be defined.</span>
+<span class="sd">        str must be a name of a city, or an address of a region</span>
+
+<span class="sd">    poi_categories : A list of OSM primary map features or &#39;all&#39;</span>
+<span class="sd">    timeout : int</span>
+<span class="sd">        The TCP connection timeout for the overpass request</span>
+<span class="sd">    verbose : bool</span>
+<span class="sd">        If True, print information while computing</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">area</span><span class="p">,</span> <span class="n">poi_categories</span><span class="p">,</span> <span class="n">timeout</span><span class="p">,</span> <span class="n">verbose</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">area_buffered</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">area</span> <span class="o">=</span> <span class="n">area</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">poi_categories</span> <span class="o">=</span> <span class="n">poi_categories</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timeout</span> <span class="o">=</span> <span class="n">timeout</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">verbose</span>
+
+<div class="viewcode-block" id="POIdata.osm_primary_features"><a class="viewcode-back" href="../../tesspy.html#tesspy.poi_data.POIdata.osm_primary_features">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">osm_primary_features</span><span class="p">():</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        list of primary OSM features</span>
+<span class="sd">        available at https://wiki.openstreetmap.org/wiki/Map_features</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        --------</span>
+<span class="sd">        osm_primary_features_lst : list</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">osm_primary_features_lst</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;aerialway&#39;</span><span class="p">,</span>
+                                    <span class="s1">&#39;aeroway&#39;</span><span class="p">,</span>
+                                    <span class="s1">&#39;amenity&#39;</span><span class="p">,</span>
+                                    <span class="s1">&#39;barrier&#39;</span><span class="p">,</span>
+                                    <span class="s1">&#39;boundary&#39;</span><span class="p">,</span>
+                                    <span class="s1">&#39;building&#39;</span><span class="p">,</span>
+                                    <span class="s1">&#39;craft&#39;</span><span class="p">,</span>
+                                    <span class="s1">&#39;emergency&#39;</span><span class="p">,</span>
+                                    <span class="s1">&#39;geological&#39;</span><span class="p">,</span>
+                                    <span class="s1">&#39;healthcare&#39;</span><span class="p">,</span>
+                                    <span class="s1">&#39;highway&#39;</span><span class="p">,</span>
+                                    <span class="s1">&#39;historic&#39;</span><span class="p">,</span>
+                                    <span class="s1">&#39;landuse&#39;</span><span class="p">,</span>
+                                    <span class="s1">&#39;leisure&#39;</span><span class="p">,</span>
+                                    <span class="s1">&#39;man_made&#39;</span><span class="p">,</span>
+                                    <span class="s1">&#39;military&#39;</span><span class="p">,</span>
+                                    <span class="s1">&#39;natural&#39;</span><span class="p">,</span>
+                                    <span class="s1">&#39;office&#39;</span><span class="p">,</span>
+                                    <span class="s1">&#39;place&#39;</span><span class="p">,</span>
+                                    <span class="s1">&#39;power&#39;</span><span class="p">,</span>
+                                    <span class="s1">&#39;public_transport&#39;</span><span class="p">,</span>
+                                    <span class="s1">&#39;railway&#39;</span><span class="p">,</span>
+                                    <span class="s1">&#39;route&#39;</span><span class="p">,</span>
+                                    <span class="s1">&#39;shop&#39;</span><span class="p">,</span>
+                                    <span class="s1">&#39;sport&#39;</span><span class="p">,</span>
+                                    <span class="s1">&#39;telecom&#39;</span><span class="p">,</span>
+                                    <span class="s1">&#39;tourism&#39;</span><span class="p">,</span>
+                                    <span class="s1">&#39;water&#39;</span><span class="p">,</span>
+                                    <span class="s1">&#39;waterway&#39;</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">osm_primary_features_lst</span></div>
+
+<div class="viewcode-block" id="POIdata.create_overpass_query_string"><a class="viewcode-back" href="../../tesspy.html#tesspy.poi_data.POIdata.create_overpass_query_string">[docs]</a>    <span class="k">def</span> <span class="nf">create_overpass_query_string</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        creates the query string to be passed to overpass</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        --------</span>
+<span class="sd">        query_string : str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># make the query area a bit larger</span>
+        <span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s1">&#39;ignore&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">area_buffered</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="o">.</span><span class="n">buffer</span><span class="p">(</span><span class="mf">0.008</span><span class="p">)</span><span class="o">.</span><span class="n">simplify</span><span class="p">(</span><span class="mf">0.005</span><span class="p">)</span>
+
+        <span class="n">xy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">area_buffered</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">exterior</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
+
+        <span class="c1"># make polygon string for OSM overpass query</span>
+        <span class="c1"># Using the polygon, fewer data are retrieved, and it&#39;s faster but request is long can can lead to 414</span>
+        <span class="c1"># poly_str = &#39;&#39;</span>
+        <span class="c1"># for lat, lon in zip(xy[:, 1], xy[:, 0]):</span>
+        <span class="c1">#     poly_str = poly_str + str(lat) + &#39; &#39; + str(lon) + &#39; &#39;</span>
+        <span class="c1"># poly_str = poly_str.strip()</span>
+
+        <span class="c1"># make bounding box for OSM overpass query</span>
+        <span class="n">lat_min</span> <span class="o">=</span> <span class="n">geom_floor</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">xy</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]))</span>
+        <span class="n">lon_min</span> <span class="o">=</span> <span class="n">geom_floor</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">xy</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]))</span>
+        <span class="n">lat_max</span> <span class="o">=</span> <span class="n">geom_ceil</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">xy</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]))</span>
+        <span class="n">lon_max</span> <span class="o">=</span> <span class="n">geom_ceil</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">xy</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]))</span>
+
+        <span class="c1"># if poi not in primary --&gt; error</span>
+        <span class="c1"># todo: is this necessary?</span>
+        <span class="k">for</span> <span class="n">poi_category</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">poi_categories</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">poi_category</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">osm_primary_features</span><span class="p">():</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">poi_category</span><span class="si">}</span><span class="s1"> is not a valid POI primary category. See a list of OSM primary &#39;</span>
+                                 <span class="sa">f</span><span class="s1">&#39;features with Tessellation.osm_primary_features()&#39;</span><span class="p">)</span>
+
+        <span class="c1"># create query string for overpass</span>
+        <span class="n">query_string</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;node&#39;</span><span class="p">,</span> <span class="s1">&#39;way&#39;</span><span class="p">]:</span>
+            <span class="k">for</span> <span class="n">poi_category</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">poi_categories</span><span class="p">:</span>
+                <span class="c1"># query with polygon</span>
+                <span class="c1"># query_string = query_string + f&#39;{element}[{poi_category}](poly:&quot;{poly_str}&quot;);&#39;</span>
+                <span class="c1"># query with bounding box</span>
+                <span class="n">query_string</span> <span class="o">=</span> <span class="n">query_string</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">element</span><span class="si">}</span><span class="s1">[</span><span class="si">{</span><span class="n">poi_category</span><span class="si">}</span><span class="s1">];&#39;</span>
+
+        <span class="c1"># query_string = f&quot;[out:json][timeout:{self.timeout}];(&quot; + query_string + &#39;);out geom;&#39;</span>
+        <span class="n">query_string</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;[bbox][out:json][timeout:</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">timeout</span><span class="si">}</span><span class="s2">];(&quot;</span> \
+                       <span class="o">+</span> <span class="n">query_string</span> \
+                       <span class="o">+</span> <span class="s1">&#39;);out geom;&#39;</span> \
+                       <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;&amp;bbox=</span><span class="si">{</span><span class="n">lat_min</span><span class="si">}</span><span class="s1">,</span><span class="si">{</span><span class="n">lon_min</span><span class="si">}</span><span class="s1">,</span><span class="si">{</span><span class="n">lat_max</span><span class="si">}</span><span class="s1">,</span><span class="si">{</span><span class="n">lon_max</span><span class="si">}</span><span class="s1">&#39;</span>
+
+        <span class="k">return</span> <span class="n">query_string</span></div>
+
+<div class="viewcode-block" id="POIdata.get_poi_data"><a class="viewcode-back" href="../../tesspy.html#tesspy.poi_data.POIdata.get_poi_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_poi_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        sends the query to osm using the overpass API and gets the data</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        --------</span>
+<span class="sd">        poi_df : pandas.DataFrame</span>
+<span class="sd">            A dataframe containing the POI, POI type, and coordinates</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">query_string</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_overpass_query_string</span><span class="p">()</span>
+        <span class="n">request_header</span> <span class="o">=</span> <span class="s2">&quot;https://overpass-api.de/api/interpreter?data=&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Getting data from OSM...&#39;</span><span class="p">)</span>
+
+        <span class="c1"># sending the request</span>
+        <span class="n">resp</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="n">request_header</span> <span class="o">+</span> <span class="n">query_string</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">resp</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">429</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;429 Too Many Requests:</span><span class="se">\n</span><span class="s2">&quot;</span>
+                               <span class="s2">&quot;You have sent multiple requests from the same &quot;</span>
+                               <span class="s2">&quot;IP and passed the passed the fair use policy. &quot;</span>
+                               <span class="s2">&quot;Please wait a couple of minutes and then try again.&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">resp</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">504</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;504 Gateway Timeout:</span><span class="se">\n</span><span class="s2">&quot;</span>
+                               <span class="s2">&quot;the server has already so much load that the request cannot be executed.&quot;</span>
+                               <span class="s2">&quot;Please try again later&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">resp</span><span class="o">.</span><span class="n">status_code</span> <span class="o">!=</span> <span class="mi">200</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Bad Request!&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">resp</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">resp</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Creating POI DataFrame...&#39;</span><span class="p">)</span>
+
+        <span class="n">lst_nodes</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">lst_ways</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">generator</span> <span class="o">=</span> <span class="n">resp</span><span class="p">[</span><span class="s1">&#39;elements&#39;</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">generator</span><span class="p">:</span>
+
+            <span class="k">for</span> <span class="n">cat</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">poi_categories</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">cat</span> <span class="ow">in</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;tags&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                    <span class="n">item</span><span class="p">[</span><span class="n">cat</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;node&#39;</span><span class="p">:</span>
+                <span class="n">lst_nodes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;way&#39;</span><span class="p">:</span>
+                <span class="n">item</span><span class="p">[</span><span class="s1">&#39;center_latitude&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">([</span><span class="n">point</span><span class="p">[</span><span class="s1">&#39;lat&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;geometry&#39;</span><span class="p">]])</span>
+                <span class="n">item</span><span class="p">[</span><span class="s1">&#39;center_longitude&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">([</span><span class="n">point</span><span class="p">[</span><span class="s1">&#39;lon&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;geometry&#39;</span><span class="p">]])</span>
+                <span class="n">lst_ways</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Cleaning POI DataFrame...&#39;</span><span class="p">)</span>
+
+        <span class="n">nodes_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">lst_nodes</span><span class="p">)</span>
+        <span class="n">ways_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">lst_ways</span><span class="p">)</span>
+
+        <span class="n">nodes_df</span><span class="p">[</span><span class="s1">&#39;geometry&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nodes_df</span><span class="p">[[</span><span class="s1">&#39;lon&#39;</span><span class="p">,</span> <span class="s1">&#39;lat&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="p">[{</span><span class="s1">&#39;lat&#39;</span><span class="p">:</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;lat&#39;</span><span class="p">],</span> <span class="s1">&#39;lon&#39;</span><span class="p">:</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;lon&#39;</span><span class="p">]}],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">nodes_df</span> <span class="o">=</span> <span class="n">nodes_df</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;lat&#39;</span><span class="p">:</span> <span class="s1">&#39;center_latitude&#39;</span><span class="p">,</span> <span class="s1">&#39;lon&#39;</span><span class="p">:</span> <span class="s1">&#39;center_longitude&#39;</span><span class="p">})</span>
+        <span class="n">nodes_df</span> <span class="o">=</span> <span class="n">nodes_df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])</span>
+        <span class="n">ways_df</span> <span class="o">=</span> <span class="n">ways_df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">,</span> <span class="s1">&#39;bounds&#39;</span><span class="p">,</span> <span class="s1">&#39;nodes&#39;</span><span class="p">])</span>
+
+        <span class="n">poi_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">ways_df</span><span class="p">,</span> <span class="n">nodes_df</span><span class="p">])</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="c1"># add POI categories with no data to poi_df</span>
+        <span class="k">for</span> <span class="n">poi_category</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">poi_categories</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">poi_df</span><span class="p">,</span> <span class="n">poi_category</span><span class="p">):</span>
+                <span class="n">poi_df</span><span class="p">[</span><span class="n">poi_category</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="c1"># prettify poi_df by sorting columns</span>
+        <span class="n">first_cols</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">,</span> <span class="s1">&#39;geometry&#39;</span><span class="p">,</span> <span class="s1">&#39;tags&#39;</span><span class="p">,</span> <span class="s1">&#39;center_latitude&#39;</span><span class="p">,</span> <span class="s1">&#39;center_longitude&#39;</span><span class="p">]</span>
+        <span class="n">second_cols</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">poi_df</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">first_cols</span><span class="p">))</span>
+        <span class="n">poi_df</span> <span class="o">=</span> <span class="n">poi_df</span><span class="p">[</span><span class="n">first_cols</span> <span class="o">+</span> <span class="n">second_cols</span><span class="p">]</span>
+        <span class="n">poi_df</span> <span class="o">=</span> <span class="n">poi_df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># Keep only the POI within the area</span>
+        <span class="n">poi_geo_df</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span>
+            <span class="n">geometry</span><span class="o">=</span><span class="p">[</span><span class="n">Point</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span> <span class="k">for</span> <span class="n">coords</span> <span class="ow">in</span> <span class="n">poi_df</span><span class="p">[[</span><span class="s1">&#39;center_longitude&#39;</span><span class="p">,</span> <span class="s1">&#39;center_latitude&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">values</span><span class="p">],</span>
+            <span class="n">crs</span><span class="o">=</span><span class="s1">&#39;EPSG:4326&#39;</span><span class="p">)</span>
+        <span class="n">area_buffered_gdf</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">geometry</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">area_buffered</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="s1">&#39;epsg:4326&#39;</span><span class="p">)</span>
+        <span class="n">idx_to_keep</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">sjoin</span><span class="p">(</span><span class="n">poi_geo_df</span><span class="p">,</span> <span class="n">area_buffered_gdf</span><span class="p">,</span> <span class="n">predicate</span><span class="o">=</span><span class="s1">&#39;within&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">index</span>
+        <span class="n">poi_df</span> <span class="o">=</span> <span class="n">poi_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">idx_to_keep</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">poi_df</span></div></div>
+
+
+<div class="viewcode-block" id="RoadData"><a class="viewcode-back" href="../../tesspy.html#tesspy.poi_data.RoadData">[docs]</a><span class="k">class</span> <span class="nc">RoadData</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This class creates a custom filter for the investigated area and highway types.</span>
+<span class="sd">        The custom filter is used to collect road data using osmnx.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        area : GeoDataFrame or str</span>
+<span class="sd">            GeoDataFrame must have a single shapely Polygon or MultiPolygon</span>
+<span class="sd">            in geometry column and its CRS must be defined.</span>
+<span class="sd">            str must be a name of a city, or an address of a region</span>
+
+<span class="sd">        detail_deg : int</span>
+<span class="sd">            integer to select the top (int) highway types</span>
+<span class="sd">        split_roads : bool</span>
+<span class="sd">            decide if LineStrings will be split up such that each LineString contains exactly 2 Points</span>
+<span class="sd">        verbose : bool</span>
+<span class="sd">            If True, print information while computing</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">area</span><span class="p">,</span> <span class="n">detail_deg</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">split_roads</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">detail_deg</span> <span class="o">=</span> <span class="n">detail_deg</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">area</span> <span class="o">=</span> <span class="n">area</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">verbose</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">split_roads</span> <span class="o">=</span> <span class="n">split_roads</span>
+
+<div class="viewcode-block" id="RoadData.osm_highway_types"><a class="viewcode-back" href="../../tesspy.html#tesspy.poi_data.RoadData.osm_highway_types">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">osm_highway_types</span><span class="p">():</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        list of OSM highway types</span>
+<span class="sd">        available at https://wiki.openstreetmap.org/wiki/Key:highway</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        --------</span>
+<span class="sd">        osm_highways_lst : list</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">osm_highways_lst</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;motorway&#39;</span><span class="p">,</span>
+                            <span class="s1">&#39;trunk&#39;</span><span class="p">,</span>
+                            <span class="s1">&#39;primary&#39;</span><span class="p">,</span>
+                            <span class="s1">&#39;secondary&#39;</span><span class="p">,</span>
+                            <span class="s1">&#39;tertiary&#39;</span><span class="p">,</span>
+                            <span class="s1">&#39;residential&#39;</span><span class="p">,</span>
+                            <span class="s1">&#39;unclassified&#39;</span><span class="p">,</span>
+                            <span class="s1">&#39;motorway_link&#39;</span><span class="p">,</span>
+                            <span class="s1">&#39;trunk_link&#39;</span><span class="p">,</span>
+                            <span class="s1">&#39;primary_link&#39;</span><span class="p">,</span>
+                            <span class="s1">&#39;secondary_link&#39;</span><span class="p">,</span>
+                            <span class="s1">&#39;living_street&#39;</span><span class="p">,</span>
+                            <span class="s1">&#39;pedestrian&#39;</span><span class="p">,</span>
+                            <span class="s1">&#39;track&#39;</span><span class="p">,</span>
+                            <span class="s1">&#39;bus_guideway&#39;</span><span class="p">,</span>
+                            <span class="s1">&#39;footway&#39;</span><span class="p">,</span>
+                            <span class="s1">&#39;path&#39;</span><span class="p">,</span>
+                            <span class="s1">&#39;service&#39;</span><span class="p">,</span>
+                            <span class="s1">&#39;cycleway&#39;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">osm_highways_lst</span></div>
+
+<div class="viewcode-block" id="RoadData.create_custom_filter"><a class="viewcode-back" href="../../tesspy.html#tesspy.poi_data.RoadData.create_custom_filter">[docs]</a>    <span class="k">def</span> <span class="nf">create_custom_filter</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates custom filter that is used to collect road data with osmnx. The detail_deg is used to use only the top</span>
+<span class="sd">        highway types.</span>
+<span class="sd">        :return: string with highway types that is used to collect data using osmnx</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Creating custom filter for all highway types</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">detail_deg</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">highwaytypes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">osm_highway_types</span><span class="p">()</span>
+
+        <span class="c1"># Creating custom filter for the specified detail degree</span>
+        <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">detail_deg</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">int</span><span class="p">:</span>
+            <span class="n">highwaytypes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">osm_highway_types</span><span class="p">()[:</span><span class="bp">self</span><span class="o">.</span><span class="n">detail_deg</span><span class="p">]</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Please insert a valid detail degree: None or int&quot;</span><span class="p">)</span>
+
+        <span class="n">query</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">types</span> <span class="ow">in</span> <span class="n">highwaytypes</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="n">query</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">types</span><span class="si">}</span><span class="s1">|&#39;</span>
+        <span class="n">query</span> <span class="o">+=</span> <span class="n">highwaytypes</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">custom_filter</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;[&#39;highway&#39;~&#39;</span><span class="si">{</span><span class="n">query</span><span class="si">}</span><span class="s2">&#39;]&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Selected highway type(s) are </span><span class="si">{</span><span class="n">custom_filter</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">custom_filter</span></div>
+
+<div class="viewcode-block" id="RoadData.get_road_network"><a class="viewcode-back" href="../../tesspy.html#tesspy.poi_data.RoadData.get_road_network">[docs]</a>    <span class="k">def</span> <span class="nf">get_road_network</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Collects the road network data based on the defined custom filter. The initial road data is based on graphs</span>
+<span class="sd">        and transformed into a GeoDataFrame. Within the RoadData Class the user can divide to split the data such</span>
+<span class="sd">        that each LineString (representing a street segment) contains only two points and not multiple points.</span>
+<span class="sd">        :return: GeoDataFrame containing road network</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_custom_filter</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Collecting road network data...&quot;</span><span class="p">)</span>
+        <span class="n">graph</span> <span class="o">=</span> <span class="n">ox</span><span class="o">.</span><span class="n">graph_from_polygon</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">area</span><span class="o">.</span><span class="n">boundary</span><span class="o">.</span><span class="n">convex_hull</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">custom_filter</span><span class="o">=</span><span class="n">cf</span><span class="p">)</span>
+
+        <span class="n">graph_projected</span> <span class="o">=</span> <span class="n">ox</span><span class="o">.</span><span class="n">project_graph</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">to_crs</span><span class="o">=</span><span class="s1">&#39;epsg:4326&#39;</span><span class="p">)</span>
+        <span class="n">graph_undirected</span> <span class="o">=</span> <span class="n">graph_projected</span><span class="o">.</span><span class="n">to_undirected</span><span class="p">()</span>
+        <span class="n">graph_edges_as_gdf</span> <span class="o">=</span> <span class="n">ox</span><span class="o">.</span><span class="n">graph_to_gdfs</span><span class="p">(</span><span class="n">graph_undirected</span><span class="p">,</span> <span class="n">nodes</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">edges</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Collected data has </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">graph_edges_as_gdf</span><span class="p">)</span><span class="si">}</span><span class="s2"> street segments.&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">graph_edges_as_gdf</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, tesspy developers.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

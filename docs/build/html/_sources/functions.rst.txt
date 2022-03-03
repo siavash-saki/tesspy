@@ -1,0 +1,4 @@
+All functions
++++++++++++++++
+
+* :ref:`genindex`

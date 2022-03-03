@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tesspy.tessellation_functions &mdash; tesspy 0.0.1 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> tesspy
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tesspy.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../functions.html">All Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Contribution.html">Contribution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Acknowledgements.html">Acknowledgements</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">tesspy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      <li>tesspy.tessellation_functions</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for tesspy.tessellation_functions</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">geopandas</span> <span class="k">as</span> <span class="nn">gpd</span>
+<span class="kn">import</span> <span class="nn">mercantile</span>
+<span class="kn">from</span> <span class="nn">shapely.ops</span> <span class="kn">import</span> <span class="n">polygonize</span><span class="p">,</span> <span class="n">unary_union</span>
+<span class="kn">from</span> <span class="nn">shapely.geometry</span> <span class="kn">import</span> <span class="n">box</span><span class="p">,</span> <span class="n">Polygon</span><span class="p">,</span> <span class="n">Point</span><span class="p">,</span> <span class="n">LineString</span><span class="p">,</span> <span class="n">MultiPolygon</span>
+<span class="kn">from</span> <span class="nn">shapely.validation</span> <span class="kn">import</span> <span class="n">make_valid</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+<span class="kn">import</span> <span class="nn">h3</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">sklearn.cluster</span> <span class="kn">import</span> <span class="n">AgglomerativeClustering</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+
+<div class="viewcode-block" id="count_poi"><a class="viewcode-back" href="../../tesspy.html#tesspy.tessellation_functions.count_poi">[docs]</a><span class="k">def</span> <span class="nf">count_poi</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">points</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Counts the number POI in each tile</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    df : GeoDataFrame</span>
+<span class="sd">        GeoDataFrame containing the tiles (polygons)</span>
+<span class="sd">    points : GeoDataFrame</span>
+<span class="sd">        GeoDataFrame containing the POI</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    --------</span>
+<span class="sd">    final_df : GeoDataFrame</span>
+<span class="sd">        GeoDataFrame containing the tiles and the POI count</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># TODO: Change such that this works for every tessellation method -&gt;</span>
+    <span class="c1">#  groupby by sth like input index or even geometry</span>
+
+    <span class="n">pointsInPolygon</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">sjoin</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">points</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span> <span class="n">predicate</span><span class="o">=</span><span class="s1">&#39;contains&#39;</span><span class="p">)</span>
+    <span class="n">pointsInPolygon</span><span class="p">[</span><span class="s1">&#39;count&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">pointsInPolygon</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">tmp_a</span> <span class="o">=</span> <span class="n">pointsInPolygon</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s1">&#39;quadkey&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">()[</span><span class="s1">&#39;count&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s2">&quot;quadkey&quot;</span><span class="p">,</span>
+                                                                                             <span class="n">ascending</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">tmp_b</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s2">&quot;quadkey&quot;</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">final_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">tmp_a</span><span class="p">,</span> <span class="n">tmp_b</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="s2">&quot;quadkey&quot;</span><span class="p">)</span>
+
+    <span class="n">final_gdf</span> <span class="o">=</span> <span class="n">final_df</span><span class="p">[[</span><span class="s1">&#39;quadkey&#39;</span><span class="p">,</span> <span class="s1">&#39;count&#39;</span><span class="p">,</span> <span class="s1">&#39;geometry&#39;</span><span class="p">,</span> <span class="s1">&#39;children_id&#39;</span><span class="p">]]</span>
+    <span class="n">final_gdf</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">final_gdf</span><span class="p">,</span> <span class="n">geometry</span><span class="o">=</span><span class="s2">&quot;geometry&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">final_gdf</span></div>
+
+
+<span class="c1">##### squares</span>
+
+<div class="viewcode-block" id="get_squares_polyfill"><a class="viewcode-back" href="../../tesspy.html#tesspy.tessellation_functions.get_squares_polyfill">[docs]</a><span class="k">def</span> <span class="nf">get_squares_polyfill</span><span class="p">(</span><span class="n">gdf</span><span class="p">,</span> <span class="n">zoom_level</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Square tessellation based on the quadKeys concept</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    gdf : GeoDataFrame</span>
+<span class="sd">        GeoDataFrame containing the tiles (polygons)</span>
+<span class="sd">    zoom_level : int</span>
+<span class="sd">        Resolution, which controls the square sizes</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    --------</span>
+<span class="sd">    gdf : GeoDataFrame</span>
+<span class="sd">        GeoDataFrame containing the squares</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">geom_name</span> <span class="o">=</span> <span class="n">gdf</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">name</span>
+    <span class="n">temp_dfs</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">rows</span> <span class="ow">in</span> <span class="n">gdf</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+        <span class="n">gdf_geometry</span> <span class="o">=</span> <span class="n">rows</span><span class="p">[</span><span class="n">geom_name</span><span class="p">]</span>
+        <span class="n">bbox</span> <span class="o">=</span> <span class="n">gdf_geometry</span><span class="o">.</span><span class="n">bounds</span>
+        <span class="n">tiles</span> <span class="o">=</span> <span class="n">mercantile</span><span class="o">.</span><span class="n">tiles</span><span class="p">(</span><span class="n">bbox</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">bbox</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">bbox</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">bbox</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">zoom_level</span><span class="p">)</span>
+        <span class="n">temp_rows</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">tile</span> <span class="ow">in</span> <span class="n">tiles</span><span class="p">:</span>
+            <span class="n">temp_row</span> <span class="o">=</span> <span class="n">rows</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="n">square</span> <span class="o">=</span> <span class="n">box</span><span class="p">(</span><span class="o">*</span><span class="n">mercantile</span><span class="o">.</span><span class="n">bounds</span><span class="p">(</span><span class="n">tile</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">square</span><span class="o">.</span><span class="n">intersects</span><span class="p">(</span><span class="n">gdf_geometry</span><span class="p">):</span>
+                <span class="n">temp_row</span><span class="p">[</span><span class="n">geom_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">square</span>
+                <span class="n">temp_row</span><span class="p">[</span><span class="s2">&quot;quadkey&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mercantile</span><span class="o">.</span><span class="n">quadkey</span><span class="p">(</span><span class="n">tile</span><span class="p">)</span>
+
+                <span class="n">child_ids</span> <span class="o">=</span> <span class="n">mercantile</span><span class="o">.</span><span class="n">children</span><span class="p">(</span><span class="n">tile</span><span class="p">)</span>
+                <span class="n">temp_row</span><span class="p">[</span><span class="s1">&#39;children_id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">mercantile</span><span class="o">.</span><span class="n">quadkey</span><span class="p">(</span><span class="n">c_tile</span><span class="p">)</span> <span class="k">for</span> <span class="n">c_tile</span> <span class="ow">in</span> <span class="n">child_ids</span><span class="p">)</span>
+
+                <span class="n">temp_rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">temp_row</span><span class="p">)</span>
+        <span class="n">temp_dfs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">temp_rows</span><span class="p">))</span>
+
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">temp_dfs</span><span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">geometry</span><span class="o">=</span><span class="n">geom_name</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="s2">&quot;epsg:4326&quot;</span><span class="p">)</span></div>
+
+
+<span class="c1">##### hexagons</span>
+
+<div class="viewcode-block" id="get_h3_hexagons"><a class="viewcode-back" href="../../tesspy.html#tesspy.tessellation_functions.get_h3_hexagons">[docs]</a><span class="k">def</span> <span class="nf">get_h3_hexagons</span><span class="p">(</span><span class="n">gdf</span><span class="p">,</span> <span class="n">resolution</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Hexagon tessellation based on the h3 implementation of Uber</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    gdf : GeoDataFrame</span>
+<span class="sd">        GeoDataFrame containing the tiles (polygons)</span>
+<span class="sd">    resolution : int</span>
+<span class="sd">        Resolution, which controls the hexagon sizes</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    --------</span>
+<span class="sd">    gdf : GeoDataFrame</span>
+<span class="sd">        GeoDataFrame containing the hexagons</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">gdf</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">==</span> <span class="n">Polygon</span><span class="p">:</span>
+        <span class="n">hexs</span> <span class="o">=</span> <span class="n">h3</span><span class="o">.</span><span class="n">polyfill</span><span class="p">(</span><span class="n">gdf</span><span class="o">.</span><span class="n">geometry</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">__geo_interface__</span><span class="p">,</span> <span class="n">resolution</span><span class="p">,</span> <span class="n">geo_json_conformant</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">polygonise</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">hex_id</span><span class="p">:</span> <span class="n">Polygon</span><span class="p">(</span>
+            <span class="n">h3</span><span class="o">.</span><span class="n">h3_to_geo_boundary</span><span class="p">(</span><span class="n">hex_id</span><span class="p">,</span> <span class="n">geo_json</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">all_polys</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoSeries</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">polygonise</span><span class="p">,</span> <span class="n">hexs</span><span class="p">)),</span>
+                                  <span class="n">index</span><span class="o">=</span><span class="n">hexs</span><span class="p">,</span>
+                                  <span class="n">crs</span><span class="o">=</span><span class="s2">&quot;EPSG:4326&quot;</span>
+                                  <span class="p">)</span>
+
+        <span class="n">gdf</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">geometry</span><span class="o">=</span><span class="n">all_polys</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="s1">&#39;EPSG:4326&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">gdf</span>
+
+    <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">gdf</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">==</span> <span class="n">MultiPolygon</span><span class="p">:</span>
+        <span class="n">parts_lst</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">gdf</span><span class="o">.</span><span class="n">explode</span><span class="p">(</span><span class="n">index_parts</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+            <span class="n">hexs</span> <span class="o">=</span> <span class="n">h3</span><span class="o">.</span><span class="n">polyfill</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">__geo_interface__</span><span class="p">,</span> <span class="n">resolution</span><span class="p">,</span> <span class="n">geo_json_conformant</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+            <span class="n">polygonise</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">hex_id</span><span class="p">:</span> <span class="n">Polygon</span><span class="p">(</span>
+                <span class="n">h3</span><span class="o">.</span><span class="n">h3_to_geo_boundary</span><span class="p">(</span><span class="n">hex_id</span><span class="p">,</span> <span class="n">geo_json</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">all_polys</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoSeries</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">polygonise</span><span class="p">,</span> <span class="n">hexs</span><span class="p">)),</span> <span class="n">index</span><span class="o">=</span><span class="n">hexs</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="s2">&quot;EPSG:4326&quot;</span><span class="p">)</span>
+
+            <span class="n">gdf</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">geometry</span><span class="o">=</span><span class="n">all_polys</span><span class="p">)</span>
+
+            <span class="n">parts_lst</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">gdf</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">parts_lst</span><span class="p">)</span></div>
+
+
+<span class="c1">##### adaptive squares</span>
+
+<div class="viewcode-block" id="get_adaptive_squares"><a class="viewcode-back" href="../../tesspy.html#tesspy.tessellation_functions.get_adaptive_squares">[docs]</a><span class="k">def</span> <span class="nf">get_adaptive_squares</span><span class="p">(</span><span class="n">input_gdf</span><span class="p">,</span> <span class="n">threshold</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Adaptive tessellation. Subdivides all squares of input tessellation where thresholdi is exceeded.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    input_gdf : GeoDataFrame</span>
+<span class="sd">        GeoDataFrame containing the tiles (polygons)</span>
+<span class="sd">    threshold : int</span>
+<span class="sd">        threshold, which controls the division of squares</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    --------</span>
+<span class="sd">    gdf : GeoDataFrame</span>
+<span class="sd">        GeoDataFrame containing the squares</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">gdf</span> <span class="o">=</span> <span class="n">input_gdf</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="c1"># DataFrame where the squares will be subdivided</span>
+    <span class="n">gdf_exceeded</span> <span class="o">=</span> <span class="n">gdf</span><span class="p">[</span><span class="n">gdf</span><span class="p">[</span><span class="s2">&quot;count&quot;</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">threshold</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">gdf_exceeded</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+        <span class="n">children</span> <span class="o">=</span> <span class="n">gdf_exceeded</span><span class="o">.</span><span class="n">loc</span><span class="p">[[</span><span class="n">idx</span><span class="p">]][</span><span class="s2">&quot;children_id&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">gdf</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="n">idx</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">children</span><span class="p">:</span>
+            <span class="n">new_row</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="n">child_tile</span> <span class="o">=</span> <span class="n">mercantile</span><span class="o">.</span><span class="n">quadkey_to_tile</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
+
+            <span class="n">new_row</span><span class="p">[</span><span class="s2">&quot;quadkey&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">child</span>
+            <span class="n">new_row</span><span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">box</span><span class="p">(</span><span class="o">*</span><span class="n">mercantile</span><span class="o">.</span><span class="n">bounds</span><span class="p">(</span><span class="n">child_tile</span><span class="p">))</span>
+            <span class="n">grand_children</span> <span class="o">=</span> <span class="n">mercantile</span><span class="o">.</span><span class="n">children</span><span class="p">(</span><span class="n">child_tile</span><span class="p">)</span>
+            <span class="n">new_row</span><span class="p">[</span><span class="s1">&#39;children_id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">mercantile</span><span class="o">.</span><span class="n">quadkey</span><span class="p">(</span><span class="n">c_tile</span><span class="p">)</span> <span class="k">for</span> <span class="n">c_tile</span> <span class="ow">in</span> <span class="n">grand_children</span><span class="p">)</span>
+
+            <span class="n">tmp_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">new_row</span><span class="p">)</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
+            <span class="n">tmp_gdf</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">tmp_df</span><span class="p">,</span> <span class="n">geometry</span><span class="o">=</span><span class="s2">&quot;geometry&quot;</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="s2">&quot;epsg:4326&quot;</span><span class="p">)</span>
+
+            <span class="n">gdf</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">gdf</span><span class="p">,</span> <span class="n">tmp_gdf</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="n">gdf</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">gdf</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">index</span>
+    <span class="k">return</span> <span class="n">gdf</span></div>
+
+
+<span class="c1">##### voronoi diagram</span>
+
+<div class="viewcode-block" id="voronoi_polygons"><a class="viewcode-back" href="../../tesspy.html#tesspy.tessellation_functions.voronoi_polygons">[docs]</a><span class="k">def</span> <span class="nf">voronoi_polygons</span><span class="p">(</span><span class="n">sp_voronoi_obj</span><span class="p">,</span> <span class="n">diameter</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Voronoi Diagram. Create Voronoi polygons based on scipy Voronoi object</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    sp_voronoi_obj : scipy.spatial.Voronoi</span>
+<span class="sd">        scipy Voronoi object is created using the point coordinates</span>
+<span class="sd">    diameter : float</span>
+<span class="sd">        controls the size of infinite polygons. It should be large enough</span>
+<span class="sd">        depending on the input values.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    --------</span>
+<span class="sd">    gdf : shapely.Polygon</span>
+<span class="sd">        Voronoi polygon</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">centroid</span> <span class="o">=</span> <span class="n">sp_voronoi_obj</span><span class="o">.</span><span class="n">points</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="n">ridge_direction</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">q</span><span class="p">),</span> <span class="n">rv</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">sp_voronoi_obj</span><span class="o">.</span><span class="n">ridge_points</span><span class="p">,</span> <span class="n">sp_voronoi_obj</span><span class="o">.</span><span class="n">ridge_vertices</span><span class="p">):</span>
+        <span class="n">u</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">rv</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">u</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="n">tangent</span> <span class="o">=</span> <span class="n">sp_voronoi_obj</span><span class="o">.</span><span class="n">points</span><span class="p">[</span><span class="n">q</span><span class="p">]</span> <span class="o">-</span> <span class="n">sp_voronoi_obj</span><span class="o">.</span><span class="n">points</span><span class="p">[</span><span class="n">p</span><span class="p">]</span>
+            <span class="n">normal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="n">tangent</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">tangent</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">tangent</span><span class="p">)</span>
+            <span class="n">midpoint</span> <span class="o">=</span> <span class="n">sp_voronoi_obj</span><span class="o">.</span><span class="n">points</span><span class="p">[[</span><span class="n">p</span><span class="p">,</span> <span class="n">q</span><span class="p">]]</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">direction</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">midpoint</span> <span class="o">-</span> <span class="n">centroid</span><span class="p">,</span> <span class="n">normal</span><span class="p">))</span> <span class="o">*</span> <span class="n">normal</span>
+            <span class="n">ridge_direction</span><span class="p">[</span><span class="n">p</span><span class="p">,</span> <span class="n">v</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">direction</span><span class="p">)</span>
+            <span class="n">ridge_direction</span><span class="p">[</span><span class="n">q</span><span class="p">,</span> <span class="n">v</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">direction</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">sp_voronoi_obj</span><span class="o">.</span><span class="n">point_region</span><span class="p">):</span>
+        <span class="n">region</span> <span class="o">=</span> <span class="n">sp_voronoi_obj</span><span class="o">.</span><span class="n">regions</span><span class="p">[</span><span class="n">r</span><span class="p">]</span>
+        <span class="k">if</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">region</span><span class="p">:</span>
+            <span class="c1"># finite regions</span>
+            <span class="k">yield</span> <span class="n">Polygon</span><span class="p">(</span><span class="n">sp_voronoi_obj</span><span class="o">.</span><span class="n">vertices</span><span class="p">[</span><span class="n">region</span><span class="p">])</span>
+            <span class="k">continue</span>
+
+        <span class="c1"># infinite regions</span>
+        <span class="n">inf_vertex_id</span> <span class="o">=</span> <span class="n">region</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">previous_vertex_id</span> <span class="o">=</span> <span class="n">region</span><span class="p">[(</span><span class="n">inf_vertex_id</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">region</span><span class="p">)]</span>
+        <span class="n">next_vertex_id</span> <span class="o">=</span> <span class="n">region</span><span class="p">[(</span><span class="n">inf_vertex_id</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">region</span><span class="p">)]</span>
+        <span class="k">if</span> <span class="n">previous_vertex_id</span> <span class="o">==</span> <span class="n">next_vertex_id</span><span class="p">:</span>
+            <span class="n">dir_j</span><span class="p">,</span> <span class="n">dir_k</span> <span class="o">=</span> <span class="n">ridge_direction</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">previous_vertex_id</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">dir_j</span><span class="p">,</span> <span class="o">=</span> <span class="n">ridge_direction</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">previous_vertex_id</span><span class="p">]</span>
+            <span class="n">dir_k</span><span class="p">,</span> <span class="o">=</span> <span class="n">ridge_direction</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">next_vertex_id</span><span class="p">]</span>
+
+        <span class="n">length</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">diameter</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">dir_j</span> <span class="o">+</span> <span class="n">dir_k</span><span class="p">)</span>
+
+        <span class="n">finite_part</span> <span class="o">=</span> <span class="n">sp_voronoi_obj</span><span class="o">.</span><span class="n">vertices</span><span class="p">[</span><span class="n">region</span><span class="p">[</span><span class="n">inf_vertex_id</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:]</span> <span class="o">+</span> <span class="n">region</span><span class="p">[:</span><span class="n">inf_vertex_id</span><span class="p">]]</span>
+        <span class="n">extra_edge</span> <span class="o">=</span> <span class="p">[</span><span class="n">sp_voronoi_obj</span><span class="o">.</span><span class="n">vertices</span><span class="p">[</span><span class="n">previous_vertex_id</span><span class="p">]</span> <span class="o">+</span> <span class="n">dir_j</span> <span class="o">*</span> <span class="n">length</span><span class="p">,</span>
+                      <span class="n">sp_voronoi_obj</span><span class="o">.</span><span class="n">vertices</span><span class="p">[</span><span class="n">next_vertex_id</span><span class="p">]</span> <span class="o">+</span> <span class="n">dir_k</span> <span class="o">*</span> <span class="n">length</span><span class="p">]</span>
+        <span class="k">yield</span> <span class="n">Polygon</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">finite_part</span><span class="p">,</span> <span class="n">extra_edge</span><span class="p">)))</span></div>
+
+
+<span class="c1">##### city blocks</span>
+
+<div class="viewcode-block" id="split_linestring"><a class="viewcode-back" href="../../tesspy.html#tesspy.tessellation_functions.split_linestring">[docs]</a><span class="k">def</span> <span class="nf">split_linestring</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The linestring, which are split up will have the same osmid</span>
+<span class="sd">    since it&#39;s still the same street</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    df: DataFrame of shapely.LineStrings containing more than two points</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    --------</span>
+<span class="sd">    dataset: DataFrame with shapely.linestring with two points each</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">linestrings</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">osmid</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">linestrings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">])</span>
+            <span class="n">osmid</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;osmid&quot;</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="n">p1</span> <span class="o">=</span> <span class="n">Point</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+                <span class="n">p2</span> <span class="o">=</span> <span class="n">Point</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+                <span class="n">linestrings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">LineString</span><span class="p">([</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">]))</span>
+                <span class="n">osmid</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;osmid&quot;</span><span class="p">])</span>
+
+    <span class="n">dataset</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">({</span><span class="s1">&#39;osmid&#39;</span><span class="p">:</span> <span class="n">osmid</span><span class="p">,</span> <span class="s1">&#39;geometry&#39;</span><span class="p">:</span> <span class="n">linestrings</span><span class="p">})</span>
+    <span class="k">return</span> <span class="n">dataset</span></div>
+
+
+<div class="viewcode-block" id="explode"><a class="viewcode-back" href="../../tesspy.html#tesspy.tessellation_functions.explode">[docs]</a><span class="k">def</span> <span class="nf">explode</span><span class="p">(</span><span class="n">gdf</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Multipolygon into multiple Polygons</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    gdf: which can have multi-part geometries that will be exploded</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    --------</span>
+<span class="sd">    gdf_out: GeoDataFrame with single geometries</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">gs</span> <span class="o">=</span> <span class="n">gdf</span><span class="o">.</span><span class="n">explode</span><span class="p">(</span><span class="n">index_parts</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">gdf2</span> <span class="o">=</span> <span class="n">gs</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="s2">&quot;geometry&quot;</span><span class="p">})</span>
+    <span class="n">gdf_out</span> <span class="o">=</span> <span class="n">gdf2</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">gdf</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s2">&quot;geometry&quot;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">left_on</span><span class="o">=</span><span class="s2">&quot;level_0&quot;</span><span class="p">,</span> <span class="n">right_index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="p">)</span>
+    <span class="n">gdf_out</span> <span class="o">=</span> <span class="n">gdf_out</span><span class="o">.</span><span class="n">set_index</span><span class="p">([</span><span class="s2">&quot;level_0&quot;</span><span class="p">,</span> <span class="s2">&quot;level_1&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">set_geometry</span><span class="p">(</span><span class="s2">&quot;geometry&quot;</span><span class="p">)</span>
+    <span class="n">gdf_out</span><span class="o">.</span><span class="n">crs</span> <span class="o">=</span> <span class="n">gdf</span><span class="o">.</span><span class="n">crs</span>
+    <span class="k">return</span> <span class="n">gdf_out</span></div>
+
+
+<div class="viewcode-block" id="get_hierarchical_clustering_parameter"><a class="viewcode-back" href="../../tesspy.html#tesspy.tessellation_functions.get_hierarchical_clustering_parameter">[docs]</a><span class="k">def</span> <span class="nf">get_hierarchical_clustering_parameter</span><span class="p">(</span><span class="n">coordinates</span><span class="p">,</span> <span class="n">threshold</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function returns the distance_threshold that is used in</span>
+<span class="sd">    the hierarchical clustering algorithm. Therefore, different</span>
+<span class="sd">    distant_threshold are tested until the hierarchical clustering</span>
+<span class="sd">    return less clusters than the input threshold. If no dist_threshold</span>
+<span class="sd">    fulfills the threshold-requirement nothing is returned. In the</span>
+<span class="sd">    main method tesspy.Tessellation.city_blocks() is a differentiation</span>
+<span class="sd">    between both cases. If th is an integer, the hierarchical clustering</span>
+<span class="sd">    use distance_threshold parameter, if th is None, the hierarchical</span>
+<span class="sd">    clustering use n_clusters parameter with the users input</span>
+<span class="sd">    n_polygons</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    coordinates: numpy column stock of coordinates of Data</span>
+<span class="sd">    threshold: Number of Polygons that should not be exceeded</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    --------</span>
+<span class="sd">    th: int, defines the distance_threshold for hierarchical clustering</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">dist_threshold</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="o">*</span> <span class="mi">100</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">13</span><span class="p">)]</span>
+    <span class="k">for</span> <span class="n">th</span> <span class="ow">in</span> <span class="n">dist_threshold</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">AgglomerativeClustering</span><span class="p">(</span><span class="n">n_clusters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">distance_threshold</span><span class="o">=</span><span class="n">th</span><span class="p">,</span> <span class="n">affinity</span><span class="o">=</span><span class="s2">&quot;euclidean&quot;</span><span class="p">,</span>
+                                        <span class="n">compute_full_tree</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span>
+        <span class="n">labels</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">labels_</span>
+        <span class="n">nb_clusters</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">labels</span><span class="p">))</span> <span class="o">-</span> <span class="p">(</span><span class="mi">1</span> <span class="k">if</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">in</span> <span class="n">labels</span> <span class="k">else</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">nb_clusters</span> <span class="o">&lt;</span> <span class="n">threshold</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">th</span></div>
+
+
+<div class="viewcode-block" id="create_blocks"><a class="viewcode-back" href="../../tesspy.html#tesspy.tessellation_functions.create_blocks">[docs]</a><span class="k">def</span> <span class="nf">create_blocks</span><span class="p">(</span><span class="n">road_network</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function uses the shapely function polygonize to create</span>
+<span class="sd">    blocks by using road data.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    road_network: GeoDataFrame from RoadData class containing street segments</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    --------</span>
+<span class="sd">    blocks: GeoDataFrame with polygons, that were created by using the road data</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">road_network</span><span class="p">,</span> <span class="s1">&#39;geometry&#39;</span><span class="p">):</span>
+        <span class="n">block_faces</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">polygonize</span><span class="p">(</span><span class="n">road_network</span><span class="p">[</span><span class="s1">&#39;geometry&#39;</span><span class="p">]))</span>
+        <span class="n">blocks</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">geometry</span><span class="o">=</span><span class="n">block_faces</span><span class="p">)</span><span class="o">.</span><span class="n">set_crs</span><span class="p">(</span><span class="s2">&quot;EPSG:4326&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">blocks</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s1">&#39;road network data need geometry attribute!&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_rest_polygon"><a class="viewcode-back" href="../../tesspy.html#tesspy.tessellation_functions.get_rest_polygon">[docs]</a><span class="k">def</span> <span class="nf">get_rest_polygon</span><span class="p">(</span><span class="n">blocks</span><span class="p">,</span> <span class="n">area</span><span class="p">):</span>
+    <span class="c1"># TODO: think about making this function adapt better to islands</span>
+    <span class="c1">#  groups with ocean and multiple polygons because now the convex</span>
+    <span class="c1">#  hull is used. That results in ocean parts becoming city blocks</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function creates the rest polygons that can occur by creating city blocks. Dead ends or vegetation at the</span>
+<span class="sd">    boundary of the area will not be defined as blocks because there are no road to define a block. Since the</span>
+<span class="sd">    tessellation should cover the whole area those &quot;rest polygons&quot; will be  created by subtracting all blocks from the</span>
+<span class="sd">    area to fill these gaps. The rest_polygons are most likely a Multi-Polygon which is exploded into many polygons.</span>
+<span class="sd">    Using this, the city blocks method tessellates the whole area without gaps.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    blocks: GeoDataFrame with all blocks</span>
+<span class="sd">    area: GeoDataFrame with boundary polygon</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    --------</span>
+<span class="sd">    rest_polygons: GeoDataFrame of the rest polygons</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">blocks</span><span class="p">,</span> <span class="s2">&quot;geometry&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">area</span><span class="p">,</span> <span class="s2">&quot;geometry&quot;</span><span class="p">):</span>
+
+        <span class="n">blocks</span><span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">blocks</span><span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">make_valid</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+
+        <span class="n">merged_polygons</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoSeries</span><span class="p">(</span><span class="n">unary_union</span><span class="p">(</span><span class="n">blocks</span><span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">))</span>
+        <span class="n">merged_polygons</span><span class="o">.</span><span class="n">set_crs</span><span class="p">(</span><span class="s2">&quot;EPSG:4326&quot;</span><span class="p">,</span> <span class="n">allow_override</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">rest</span> <span class="o">=</span> <span class="n">area</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">merged_polygons</span><span class="p">)</span>
+        <span class="n">rest</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">rest</span><span class="p">)</span>
+        <span class="n">rest</span> <span class="o">=</span> <span class="n">rest</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="s2">&quot;geometry&quot;</span><span class="p">})</span><span class="o">.</span><span class="n">set_geometry</span><span class="p">(</span><span class="s2">&quot;geometry&quot;</span><span class="p">)</span>
+
+        <span class="n">rest_polygons</span> <span class="o">=</span> <span class="n">explode</span><span class="p">(</span><span class="n">rest</span><span class="p">)</span>
+        <span class="n">rest_polygons</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">rest_polygons</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;level_0&quot;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">rest_polygons</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;level_1&quot;</span><span class="p">:</span> <span class="s2">&quot;osm_id&quot;</span><span class="p">},</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">rest_polygons</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Initial defined city blocks and the area need a geometry attribute.&quot;</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, tesspy developers.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tesspy package &mdash; tesspy 0.0.1 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="All functions" href="functions.html" />
+    <link rel="prev" title="Clustering Urban Areas" href="example_notebooks/06_Clustering_Urban_Areas.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> tesspy
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples.html">Examples</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-tesspy.poi_data">tesspy.poi_data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-tesspy.tessellation">tesspy.tessellation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-tesspy.tessellation_functions">tesspy.tessellation_functions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="functions.html">All Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Contribution.html">Contribution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Acknowledgements.html">Acknowledgements</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">tesspy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>tesspy package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/tesspy.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="tesspy-package">
+<h1>tesspy package<a class="headerlink" href="#tesspy-package" title="Permalink to this headline"></a></h1>
+<div class="section" id="module-tesspy.poi_data">
+<span id="tesspy-poi-data"></span><h2>tesspy.poi_data<a class="headerlink" href="#module-tesspy.poi_data" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="tesspy.poi_data.POIdata">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tesspy.poi_data.</span></span><span class="sig-name descname"><span class="pre">POIdata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">area</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">poi_categories</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tesspy/poi_data.html#POIdata"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tesspy.poi_data.POIdata" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>This class creates a query for the investigated area and POI categories.
+The query is sent to osm using overpass API and the data is retrieved.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>area</strong> (<em>GeoDataFrame</em><em> or </em><em>str</em>) – GeoDataFrame must have a single shapely Polygon or MultiPolygon
+in geometry column and its CRS must be defined.
+str must be a name of a city, or an address of a region</p></li>
+<li><p><strong>poi_categories</strong> (<em>A list of OSM primary map features</em><em> or </em><em>'all'</em>) – </p></li>
+<li><p><strong>timeout</strong> (<em>int</em>) – The TCP connection timeout for the overpass request</p></li>
+<li><p><strong>verbose</strong> (<em>bool</em>) – If True, print information while computing</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="tesspy.poi_data.POIdata.create_overpass_query_string">
+<span class="sig-name descname"><span class="pre">create_overpass_query_string</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/tesspy/poi_data.html#POIdata.create_overpass_query_string"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tesspy.poi_data.POIdata.create_overpass_query_string" title="Permalink to this definition"></a></dt>
+<dd><p>creates the query string to be passed to overpass</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>query_string</strong></p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tesspy.poi_data.POIdata.get_poi_data">
+<span class="sig-name descname"><span class="pre">get_poi_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/tesspy/poi_data.html#POIdata.get_poi_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tesspy.poi_data.POIdata.get_poi_data" title="Permalink to this definition"></a></dt>
+<dd><p>sends the query to osm using the overpass API and gets the data</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>poi_df</strong> – A dataframe containing the POI, POI type, and coordinates</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>pandas.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tesspy.poi_data.POIdata.osm_primary_features">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">osm_primary_features</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/tesspy/poi_data.html#POIdata.osm_primary_features"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tesspy.poi_data.POIdata.osm_primary_features" title="Permalink to this definition"></a></dt>
+<dd><p>list of primary OSM features
+available at <a class="reference external" href="https://wiki.openstreetmap.org/wiki/Map_features">https://wiki.openstreetmap.org/wiki/Map_features</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>osm_primary_features_lst</strong></p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="tesspy.poi_data.RoadData">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tesspy.poi_data.</span></span><span class="sig-name descname"><span class="pre">RoadData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">area</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">detail_deg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">split_roads</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tesspy/poi_data.html#RoadData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tesspy.poi_data.RoadData" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>This class creates a custom filter for the investigated area and highway types.
+The custom filter is used to collect road data using osmnx.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>area</strong> (<em>GeoDataFrame</em><em> or </em><em>str</em>) – GeoDataFrame must have a single shapely Polygon or MultiPolygon
+in geometry column and its CRS must be defined.
+str must be a name of a city, or an address of a region</p></li>
+<li><p><strong>detail_deg</strong> (<em>int</em>) – integer to select the top (int) highway types</p></li>
+<li><p><strong>split_roads</strong> (<em>bool</em>) – decide if LineStrings will be split up such that each LineString contains exactly 2 Points</p></li>
+<li><p><strong>verbose</strong> (<em>bool</em>) – If True, print information while computing</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="tesspy.poi_data.RoadData.create_custom_filter">
+<span class="sig-name descname"><span class="pre">create_custom_filter</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/tesspy/poi_data.html#RoadData.create_custom_filter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tesspy.poi_data.RoadData.create_custom_filter" title="Permalink to this definition"></a></dt>
+<dd><p>Creates custom filter that is used to collect road data with osmnx. The detail_deg is used to use only the top
+highway types.
+:return: string with highway types that is used to collect data using osmnx</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tesspy.poi_data.RoadData.get_road_network">
+<span class="sig-name descname"><span class="pre">get_road_network</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/tesspy/poi_data.html#RoadData.get_road_network"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tesspy.poi_data.RoadData.get_road_network" title="Permalink to this definition"></a></dt>
+<dd><p>Collects the road network data based on the defined custom filter. The initial road data is based on graphs
+and transformed into a GeoDataFrame. Within the RoadData Class the user can divide to split the data such
+that each LineString (representing a street segment) contains only two points and not multiple points.
+:return: GeoDataFrame containing road network</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tesspy.poi_data.RoadData.osm_highway_types">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">osm_highway_types</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/tesspy/poi_data.html#RoadData.osm_highway_types"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tesspy.poi_data.RoadData.osm_highway_types" title="Permalink to this definition"></a></dt>
+<dd><p>list of OSM highway types
+available at <a class="reference external" href="https://wiki.openstreetmap.org/wiki/Key:highway">https://wiki.openstreetmap.org/wiki/Key:highway</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>osm_highways_lst</strong></p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tesspy.poi_data.geom_ceil">
+<span class="sig-prename descclassname"><span class="pre">tesspy.poi_data.</span></span><span class="sig-name descname"><span class="pre">geom_ceil</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coordinate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">precision</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tesspy/poi_data.html#geom_ceil"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tesspy.poi_data.geom_ceil" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tesspy.poi_data.geom_floor">
+<span class="sig-prename descclassname"><span class="pre">tesspy.poi_data.</span></span><span class="sig-name descname"><span class="pre">geom_floor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coordinate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">precision</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tesspy/poi_data.html#geom_floor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tesspy.poi_data.geom_floor" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-tesspy.tessellation">
+<span id="tesspy-tessellation"></span><h2>tesspy.tessellation<a class="headerlink" href="#module-tesspy.tessellation" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="tesspy.tessellation.Tessellation">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tesspy.tessellation.</span></span><span class="sig-name descname"><span class="pre">Tessellation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">area</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tesspy/tessellation.html#Tessellation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tesspy.tessellation.Tessellation" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Creates a Tessellation object using a GeoDataFrame or a city name,
+which allows for different tessellation methods</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>area</strong> (<em>GeoDataFrame</em><em> or </em><em>str</em>) – GeoDataFrame must have a single shaply Polygon or MultiPolygon
+in geometry column and its CRS must be defined.
+str must be a name of a city, or an address of a region</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ffm</span><span class="o">=</span> <span class="n">Tessellation</span><span class="p">(</span><span class="s1">&#39;Frankfurt am Main&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="tesspy.tessellation.Tessellation.adaptive_squares">
+<span class="sig-name descname"><span class="pre">adaptive_squares</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start_resolution</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">poi_categories</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">['amenity',</span> <span class="pre">'building']</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">60</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tesspy/tessellation.html#Tessellation.adaptive_squares"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tesspy.tessellation.Tessellation.adaptive_squares" title="Permalink to this definition"></a></dt>
+<dd><p>Generate adaptive squares based on the input POI data.
+Squares are created at the start resolution. Each square is broken
+into four smaller squares while the number of its POI exceeds the
+threshold.
+POI categories should be a list of OSM primary map features.
+A complete list can be found on the OSM website:
+<a class="reference external" href="https://wiki.openstreetmap.org/wiki/Map_features">https://wiki.openstreetmap.org/wiki/Map_features</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>start_resolution</strong> (<em>int</em>) – Specifies the size of initial squares</p></li>
+<li><p><strong>poi_categories</strong> (<em>A list of OSM primary map features</em><em> or </em><em>'all'</em>) – default=[“amenity”, ‘building’]
+‘all’ means all the available POI categories
+Possible values in the list: [‘aerialway’, ‘aeroway’,
+‘amenity’, ‘barrier’, ‘boundary’, ‘building’, ‘craft’,
+‘emergency’, ‘geological’, ‘healthcare’, ‘highway’,
+‘historic’, ‘landuse’, ‘leisure’, ‘man_made’, ‘military’,
+‘natural’, ‘office’, ‘place’, ‘power’, ‘public_transport’,
+‘railway’, ‘route’, ‘shop’, ‘sport’, ‘telecom’, ‘tourism’,
+‘water’, ‘waterway’]</p></li>
+<li><p><strong>threshold</strong> (<em>int</em><em>, </em><em>default=None</em>) – Threshold for the number of POI in a single square. If square
+has more, it is divided into four squares. If None passed, the
+median number of POI per square in the initial level is used
+as threshold.</p></li>
+<li><p><strong>timeout</strong> (<em>int</em><em>, </em><em>default=60</em>) – The TCP connection timeout for the request</p></li>
+<li><p><strong>verbose</strong> (<em>bool</em><em>, </em><em>default=False</em>) – If True, print information while computing</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>df_adaptive_squares</strong> – Dataframe containing adaptive squares</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pandas.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tesspy.tessellation.Tessellation.city_blocks">
+<span class="sig-name descname"><span class="pre">city_blocks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_polygons</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">detail_deg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">split_roads</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tesspy/tessellation.html#Tessellation.city_blocks"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tesspy.tessellation.Tessellation.city_blocks" title="Permalink to this definition"></a></dt>
+<dd><p>Create city bocks (tiles) using road data from the area.
+To collect road data, specify the highway types by
+modifying detail_deg</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n_polygons</strong> (<em>int</em><em>, </em><em>default = None</em>) – targeted number of city blocks, this is an approximation
+the final number of polygons can vary slightly</p></li>
+<li><p><strong>detail_deg</strong> (<em>int</em><em>, </em><em>default = None</em>) – define the number of the top (osm) highway types to use for creating city blocks</p></li>
+<li><p><strong>split_roads</strong> (<em>bool</em><em>, </em><em>default = True</em>) – if True, LineStrings are split up such that each LineString contains exactly 2 Points
+This usually make the polygonizing more robust but slower.</p></li>
+<li><p><strong>verbose</strong> (<em>bool</em><em>, </em><em>default = False</em>) – If True, print information while computing</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>final_city_blocks</strong> – GeoDataFrame with city block tiles</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>geopandas.GeoDataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tesspy.tessellation.Tessellation.get_poi_data">
+<span class="sig-name descname"><span class="pre">get_poi_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/tesspy/tessellation.html#Tessellation.get_poi_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tesspy.tessellation.Tessellation.get_poi_data" title="Permalink to this definition"></a></dt>
+<dd><p>returns the POI data in GeoDataFrame format</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tesspy.tessellation.Tessellation.get_polygon">
+<span class="sig-name descname"><span class="pre">get_polygon</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/tesspy/tessellation.html#Tessellation.get_polygon"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tesspy.tessellation.Tessellation.get_polygon" title="Permalink to this definition"></a></dt>
+<dd><p>returns the area polygon in GeoDataFrame format</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tesspy.tessellation.Tessellation.get_road_network">
+<span class="sig-name descname"><span class="pre">get_road_network</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/tesspy/tessellation.html#Tessellation.get_road_network"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tesspy.tessellation.Tessellation.get_road_network" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>road_network</strong> – the road network data in GeoDataFrame format</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>geopandas.GeoDataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tesspy.tessellation.Tessellation.hexagons">
+<span class="sig-name descname"><span class="pre">hexagons</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resolution</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tesspy/tessellation.html#Tessellation.hexagons"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tesspy.tessellation.Tessellation.hexagons" title="Permalink to this definition"></a></dt>
+<dd><p>Generate hexagon grid laying over the area</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>resolution</strong> (<em>int</em>) – Specifies the size of hexagons
+A positive number between todo: complete</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>df_h3_hexagons</strong> – Dataframe containing hexagons</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pandas.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tesspy.tessellation.Tessellation.osm_highway_types">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">osm_highway_types</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/tesspy/tessellation.html#Tessellation.osm_highway_types"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tesspy.tessellation.Tessellation.osm_highway_types" title="Permalink to this definition"></a></dt>
+<dd><p>list of all highway types
+returns list of highway types</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tesspy.tessellation.Tessellation.osm_primary_features">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">osm_primary_features</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/tesspy/tessellation.html#Tessellation.osm_primary_features"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tesspy.tessellation.Tessellation.osm_primary_features" title="Permalink to this definition"></a></dt>
+<dd><p>list of primary OSM features
+available at <a class="reference external" href="https://wiki.openstreetmap.org/wiki/Map_features">https://wiki.openstreetmap.org/wiki/Map_features</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tesspy.tessellation.Tessellation.squares">
+<span class="sig-name descname"><span class="pre">squares</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resolution</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tesspy/tessellation.html#Tessellation.squares"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tesspy.tessellation.Tessellation.squares" title="Permalink to this definition"></a></dt>
+<dd><p>Generate square grid laying over the area</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>resolution</strong> (<em>int</em>) – Specifies the size of squares
+A positive number between todo: complete</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>df_qk_squares</strong> – Dataframe containing squares</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pandas.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tesspy.tessellation.Tessellation.voronoi">
+<span class="sig-name descname"><span class="pre">voronoi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cluster_algo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'k-means'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">poi_categories</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">['amenity',</span> <span class="pre">'building']</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">60</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_polygons</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_cluster_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">15</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tesspy/tessellation.html#Tessellation.voronoi"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tesspy.tessellation.Tessellation.voronoi" title="Permalink to this definition"></a></dt>
+<dd><p>Generate Voronoi polygons based on the input POI data.
+POI categories should be a list of OSM primary map features.
+A complete list can be found on the OSM website:
+<a class="reference external" href="https://wiki.openstreetmap.org/wiki/Map_features">https://wiki.openstreetmap.org/wiki/Map_features</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cluster_algo</strong> (<em>{'k-means'</em><em>, </em><em>'hdbscan'</em><em>, </em><em>None}</em><em>, </em><em>default='k-means'</em>) – Algorithm for clustering the POI data before creating
+Voronoi generators. If None passed, POI data are
+directly used as generators.</p></li>
+<li><p><strong>poi_categories</strong> (<em>A list of OSM primary map features</em><em> or </em><em>'all'</em>) – default=[“amenity”, ‘building’]
+‘all’ means all the available POI categories
+Possible values in the list: [‘aerialway’, ‘aeroway’,
+‘amenity’, ‘barrier’, ‘boundary’, ‘building’, ‘craft’,
+‘emergency’, ‘geological’, ‘healthcare’, ‘highway’,
+‘historic’, ‘landuse’, ‘leisure’, ‘man_made’, ‘military’,
+‘natural’, ‘office’, ‘place’, ‘power’, ‘public_transport’,
+‘railway’, ‘route’, ‘shop’, ‘sport’, ‘telecom’, ‘tourism’,
+‘water’, ‘waterway’]</p></li>
+<li><p><strong>timeout</strong> (<em>int</em><em>, </em><em>default=60</em>) – The TCP connection timeout for the request</p></li>
+<li><p><strong>n_polygons</strong> (<em>int</em><em>, </em><em>default=100</em>) – Only when cluster_algo=”k-means”, approximate number of
+polygons to be created. Positive number and less than
+the initial POI numbers</p></li>
+<li><p><strong>min_cluster_size</strong> (<em>int</em><em>, </em><em>default=15</em>) – Only when cluster_algo=”hdbscan”, minimum cluster size
+Positive number</p></li>
+<li><p><strong>verbose</strong> (<em>bool</em><em>, </em><em>default=False</em>) – If True, print information while computing</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>df_voronoi</strong> – Dataframe containing Voronoi polygons</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pandas.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tesspy.tessellation.get_city_polygon">
+<span class="sig-prename descclassname"><span class="pre">tesspy.tessellation.</span></span><span class="sig-name descname"><span class="pre">get_city_polygon</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">city</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tesspy/tessellation.html#get_city_polygon"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tesspy.tessellation.get_city_polygon" title="Permalink to this definition"></a></dt>
+<dd><p>Gets the polygon of a city or an area</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>city</strong> (<em>str</em>) – city must be a name of a city, or an address of a region</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>df_city</strong> – GeoDataFrame containing the polygon of the city</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>GeoDataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-tesspy.tessellation_functions">
+<span id="tesspy-tessellation-functions"></span><h2>tesspy.tessellation_functions<a class="headerlink" href="#module-tesspy.tessellation_functions" title="Permalink to this headline"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="tesspy.tessellation_functions.count_poi">
+<span class="sig-prename descclassname"><span class="pre">tesspy.tessellation_functions.</span></span><span class="sig-name descname"><span class="pre">count_poi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">points</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tesspy/tessellation_functions.html#count_poi"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tesspy.tessellation_functions.count_poi" title="Permalink to this definition"></a></dt>
+<dd><p>Counts the number POI in each tile</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<em>GeoDataFrame</em>) – GeoDataFrame containing the tiles (polygons)</p></li>
+<li><p><strong>points</strong> (<em>GeoDataFrame</em>) – GeoDataFrame containing the POI</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>final_df</strong> – GeoDataFrame containing the tiles and the POI count</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>GeoDataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tesspy.tessellation_functions.create_blocks">
+<span class="sig-prename descclassname"><span class="pre">tesspy.tessellation_functions.</span></span><span class="sig-name descname"><span class="pre">create_blocks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">road_network</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tesspy/tessellation_functions.html#create_blocks"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tesspy.tessellation_functions.create_blocks" title="Permalink to this definition"></a></dt>
+<dd><p>This function uses the shapely function polygonize to create
+blocks by using road data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>road_network</strong> (<em>GeoDataFrame from RoadData class containing street segments</em>) – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>blocks</strong></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>GeoDataFrame with polygons, that were created by using the road data</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tesspy.tessellation_functions.explode">
+<span class="sig-prename descclassname"><span class="pre">tesspy.tessellation_functions.</span></span><span class="sig-name descname"><span class="pre">explode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gdf</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tesspy/tessellation_functions.html#explode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tesspy.tessellation_functions.explode" title="Permalink to this definition"></a></dt>
+<dd><p>Multipolygon into multiple Polygons</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>gdf</strong> (<em>which can have multi-part geometries that will be exploded</em>) – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>gdf_out</strong></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>GeoDataFrame with single geometries</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tesspy.tessellation_functions.get_adaptive_squares">
+<span class="sig-prename descclassname"><span class="pre">tesspy.tessellation_functions.</span></span><span class="sig-name descname"><span class="pre">get_adaptive_squares</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_gdf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tesspy/tessellation_functions.html#get_adaptive_squares"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tesspy.tessellation_functions.get_adaptive_squares" title="Permalink to this definition"></a></dt>
+<dd><p>Adaptive tessellation. Subdivides all squares of input tessellation where thresholdi is exceeded.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_gdf</strong> (<em>GeoDataFrame</em>) – GeoDataFrame containing the tiles (polygons)</p></li>
+<li><p><strong>threshold</strong> (<em>int</em>) – threshold, which controls the division of squares</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>gdf</strong> – GeoDataFrame containing the squares</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>GeoDataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tesspy.tessellation_functions.get_h3_hexagons">
+<span class="sig-prename descclassname"><span class="pre">tesspy.tessellation_functions.</span></span><span class="sig-name descname"><span class="pre">get_h3_hexagons</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gdf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resolution</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tesspy/tessellation_functions.html#get_h3_hexagons"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tesspy.tessellation_functions.get_h3_hexagons" title="Permalink to this definition"></a></dt>
+<dd><p>Hexagon tessellation based on the h3 implementation of Uber</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>gdf</strong> (<em>GeoDataFrame</em>) – GeoDataFrame containing the tiles (polygons)</p></li>
+<li><p><strong>resolution</strong> (<em>int</em>) – Resolution, which controls the hexagon sizes</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>gdf</strong> – GeoDataFrame containing the hexagons</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>GeoDataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tesspy.tessellation_functions.get_hierarchical_clustering_parameter">
+<span class="sig-prename descclassname"><span class="pre">tesspy.tessellation_functions.</span></span><span class="sig-name descname"><span class="pre">get_hierarchical_clustering_parameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coordinates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tesspy/tessellation_functions.html#get_hierarchical_clustering_parameter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tesspy.tessellation_functions.get_hierarchical_clustering_parameter" title="Permalink to this definition"></a></dt>
+<dd><p>This function returns the distance_threshold that is used in
+the hierarchical clustering algorithm. Therefore, different
+distant_threshold are tested until the hierarchical clustering
+return less clusters than the input threshold. If no dist_threshold
+fulfills the threshold-requirement nothing is returned. In the
+main method tesspy.Tessellation.city_blocks() is a differentiation
+between both cases. If th is an integer, the hierarchical clustering
+use distance_threshold parameter, if th is None, the hierarchical
+clustering use n_clusters parameter with the users input
+n_polygons</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>coordinates</strong> (<em>numpy column stock of coordinates of Data</em>) – </p></li>
+<li><p><strong>threshold</strong> (<em>Number of Polygons that should not be exceeded</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>th</strong></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>int, defines the distance_threshold for hierarchical clustering</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tesspy.tessellation_functions.get_rest_polygon">
+<span class="sig-prename descclassname"><span class="pre">tesspy.tessellation_functions.</span></span><span class="sig-name descname"><span class="pre">get_rest_polygon</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">blocks</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">area</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tesspy/tessellation_functions.html#get_rest_polygon"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tesspy.tessellation_functions.get_rest_polygon" title="Permalink to this definition"></a></dt>
+<dd><p>This function creates the rest polygons that can occur by creating city blocks. Dead ends or vegetation at the
+boundary of the area will not be defined as blocks because there are no road to define a block. Since the
+tessellation should cover the whole area those “rest polygons” will be  created by subtracting all blocks from the
+area to fill these gaps. The rest_polygons are most likely a Multi-Polygon which is exploded into many polygons.
+Using this, the city blocks method tessellates the whole area without gaps.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>blocks</strong> (<em>GeoDataFrame with all blocks</em>) – </p></li>
+<li><p><strong>area</strong> (<em>GeoDataFrame with boundary polygon</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>rest_polygons</strong></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>GeoDataFrame of the rest polygons</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tesspy.tessellation_functions.get_squares_polyfill">
+<span class="sig-prename descclassname"><span class="pre">tesspy.tessellation_functions.</span></span><span class="sig-name descname"><span class="pre">get_squares_polyfill</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gdf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zoom_level</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tesspy/tessellation_functions.html#get_squares_polyfill"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tesspy.tessellation_functions.get_squares_polyfill" title="Permalink to this definition"></a></dt>
+<dd><p>Square tessellation based on the quadKeys concept</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>gdf</strong> (<em>GeoDataFrame</em>) – GeoDataFrame containing the tiles (polygons)</p></li>
+<li><p><strong>zoom_level</strong> (<em>int</em>) – Resolution, which controls the square sizes</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>gdf</strong> – GeoDataFrame containing the squares</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>GeoDataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tesspy.tessellation_functions.split_linestring">
+<span class="sig-prename descclassname"><span class="pre">tesspy.tessellation_functions.</span></span><span class="sig-name descname"><span class="pre">split_linestring</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tesspy/tessellation_functions.html#split_linestring"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tesspy.tessellation_functions.split_linestring" title="Permalink to this definition"></a></dt>
+<dd><p>The linestring, which are split up will have the same osmid
+since it’s still the same street</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>df</strong> (<em>DataFrame of shapely.LineStrings containing more than two points</em>) – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>dataset</strong></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>DataFrame with shapely.linestring with two points each</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tesspy.tessellation_functions.voronoi_polygons">
+<span class="sig-prename descclassname"><span class="pre">tesspy.tessellation_functions.</span></span><span class="sig-name descname"><span class="pre">voronoi_polygons</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sp_voronoi_obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">diameter</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tesspy/tessellation_functions.html#voronoi_polygons"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tesspy.tessellation_functions.voronoi_polygons" title="Permalink to this definition"></a></dt>
+<dd><p>Voronoi Diagram. Create Voronoi polygons based on scipy Voronoi object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sp_voronoi_obj</strong> (<em>scipy.spatial.Voronoi</em>) – scipy Voronoi object is created using the point coordinates</p></li>
+<li><p><strong>diameter</strong> (<em>float</em>) – controls the size of infinite polygons. It should be large enough
+depending on the input values.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>gdf</strong> – Voronoi polygon</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>shapely.Polygon</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="example_notebooks/06_Clustering_Urban_Areas.html" class="btn btn-neutral float-left" title="Clustering Urban Areas" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="functions.html" class="btn btn-neutral float-right" title="All functions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, tesspy developers.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

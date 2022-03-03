@@ -1,0 +1,4 @@
+Acknowledgements
++++++++++++++++++
+
+``tesspy`` is the result of the research project `ClusterMobil <https://www.frankfurt-university.de/de/hochschule/fachbereich-1-architektur-bauingenieurwesen-geomatik/forschungsinstitut-ffin/fachgruppen-des-ffin/fg-neue-mobilitat/relut/forschungsprojekte-relut/clustermobil/>`_ conducted by the `Research Lab for Urban Transport <https://www.frankfurt-university.de/en/about-us/faculty-1-architecture-civil-engineering-geomatics/research-institute-ffin/specialist-groups-of-the-ffin/specialist-group-new-mobility/relut/>`_. This research project is funded by the state of Hesse and `HOLM <https://frankfurt-holm.de/>`_ funding under the “Innovations in Logistics and Mobility” measure of the Hessian Ministry of Economics, Energy, Transport and Housing. [HA Project No.: 1017/21-19]

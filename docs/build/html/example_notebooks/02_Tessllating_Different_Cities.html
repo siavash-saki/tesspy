@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tessllating Different Cities &mdash; tesspy 0.0.1 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Voronoi Diagrams" href="03_Voronoi_Diagrams.html" />
+    <link rel="prev" title="Getting Started: Tessellation of Frankfurt am Main" href="01_Getting_Started.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> tesspy
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Introduction</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../Examples.html">Examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="01_Getting_Started.html">01 Getting Started</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">02 Tessllating Different_Cities</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#Getting-city-polygons">Getting city polygons</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Squares">Squares</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Hexagons">Hexagons</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Adaptive-squares">Adaptive squares</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Voronoi-Diagrams">Voronoi Diagrams</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#City-Blocks">City Blocks</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="03_Voronoi_Diagrams.html">03 Voronoi Diagrams</a></li>
+<li class="toctree-l2"><a class="reference internal" href="04_City_Blocks.html">04 City Blocks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="05_Analyze_Urban_Areas.html">05 Analyze Urban Areas</a></li>
+<li class="toctree-l2"><a class="reference internal" href="06_Clustering_Urban_Areas.html">06 Clustering Urban Areas</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../tesspy.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../functions.html">All Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Contribution.html">Contribution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Acknowledgements.html">Acknowledgements</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">tesspy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../Examples.html">Examples</a> &raquo;</li>
+      <li>Tessllating Different Cities</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/example_notebooks/02_Tessllating_Different_Cities.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  
+<style>
+/* CSS for nbsphinx extension */
+
+/* remove conflicting styling from Sphinx themes */
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt *,
+div.nbinput.container div.input_area pre,
+div.nboutput.container div.output_area pre,
+div.nbinput.container div.input_area .highlight,
+div.nboutput.container div.output_area .highlight {
+    border: none;
+    padding: 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+div.nbinput.container > div[class*=highlight],
+div.nboutput.container > div[class*=highlight] {
+    margin: 0;
+}
+
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt * {
+    background: none;
+}
+
+div.nboutput.container div.output_area .highlight,
+div.nboutput.container div.output_area pre {
+    background: unset;
+}
+
+div.nboutput.container div.output_area div.highlight {
+    color: unset;  /* override Pygments text color */
+}
+
+/* avoid gaps between output lines */
+div.nboutput.container div[class*=highlight] pre {
+    line-height: normal;
+}
+
+/* input/output containers */
+div.nbinput.container,
+div.nboutput.container {
+    display: -webkit-flex;
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+    width: 100%;
+}
+@media (max-width: 540px) {
+    div.nbinput.container,
+    div.nboutput.container {
+        flex-direction: column;
+    }
+}
+
+/* input container */
+div.nbinput.container {
+    padding-top: 5px;
+}
+
+/* last container */
+div.nblast.container {
+    padding-bottom: 5px;
+}
+
+/* input prompt */
+div.nbinput.container div.prompt pre {
+    color: #307FC1;
+}
+
+/* output prompt */
+div.nboutput.container div.prompt pre {
+    color: #BF5B3D;
+}
+
+/* all prompts */
+div.nbinput.container div.prompt,
+div.nboutput.container div.prompt {
+    width: 4.5ex;
+    padding-top: 5px;
+    position: relative;
+    user-select: none;
+}
+
+div.nbinput.container div.prompt > div,
+div.nboutput.container div.prompt > div {
+    position: absolute;
+    right: 0;
+    margin-right: 0.3ex;
+}
+
+@media (max-width: 540px) {
+    div.nbinput.container div.prompt,
+    div.nboutput.container div.prompt {
+        width: unset;
+        text-align: left;
+        padding: 0.4em;
+    }
+    div.nboutput.container div.prompt.empty {
+        padding: 0;
+    }
+
+    div.nbinput.container div.prompt > div,
+    div.nboutput.container div.prompt > div {
+        position: unset;
+    }
+}
+
+/* disable scrollbars on prompts */
+div.nbinput.container div.prompt pre,
+div.nboutput.container div.prompt pre {
+    overflow: hidden;
+}
+
+/* input/output area */
+div.nbinput.container div.input_area,
+div.nboutput.container div.output_area {
+    -webkit-flex: 1;
+    flex: 1;
+    overflow: auto;
+}
+@media (max-width: 540px) {
+    div.nbinput.container div.input_area,
+    div.nboutput.container div.output_area {
+        width: 100%;
+    }
+}
+
+/* input area */
+div.nbinput.container div.input_area {
+    border: 1px solid #e0e0e0;
+    border-radius: 2px;
+    /*background: #f5f5f5;*/
+}
+
+/* override MathJax center alignment in output cells */
+div.nboutput.container div[class*=MathJax] {
+    text-align: left !important;
+}
+
+/* override sphinx.ext.imgmath center alignment in output cells */
+div.nboutput.container div.math p {
+    text-align: left;
+}
+
+/* standard error */
+div.nboutput.container div.output_area.stderr {
+    background: #fdd;
+}
+
+/* ANSI colors */
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-default-inverse-fg { color: #FFFFFF; }
+.ansi-default-inverse-bg { background-color: #000000; }
+
+.ansi-bold { font-weight: bold; }
+.ansi-underline { text-decoration: underline; }
+
+
+div.nbinput.container div.input_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight].math,
+div.nboutput.container div.output_area.rendered_html,
+div.nboutput.container div.output_area > div.output_javascript,
+div.nboutput.container div.output_area:not(.rendered_html) > img{
+    padding: 5px;
+    margin: 0;
+}
+
+/* fix copybtn overflow problem in chromium (needed for 'sphinx_copybutton') */
+div.nbinput.container div.input_area > div[class^='highlight'],
+div.nboutput.container div.output_area > div[class^='highlight']{
+    overflow-y: hidden;
+}
+
+/* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
+.prompt .copybtn {
+    display: none;
+}
+
+/* Some additional styling taken form the Jupyter notebook CSS */
+div.rendered_html table {
+  border: none;
+  border-collapse: collapse;
+  border-spacing: 0;
+  color: black;
+  font-size: 12px;
+  table-layout: fixed;
+}
+div.rendered_html thead {
+  border-bottom: 1px solid black;
+  vertical-align: bottom;
+}
+div.rendered_html tr,
+div.rendered_html th,
+div.rendered_html td {
+  text-align: right;
+  vertical-align: middle;
+  padding: 0.5em 0.5em;
+  line-height: normal;
+  white-space: normal;
+  max-width: none;
+  border: none;
+}
+div.rendered_html th {
+  font-weight: bold;
+}
+div.rendered_html tbody tr:nth-child(odd) {
+  background: #f5f5f5;
+}
+div.rendered_html tbody tr:hover {
+  background: rgba(66, 165, 245, 0.2);
+}
+
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="Tessllating-Different-Cities">
+<h1>Tessllating Different Cities<a class="headerlink" href="#Tessllating-Different-Cities" title="Permalink to this headline"></a></h1>
+<p>This notebook demonstrates how the implemented tessellation methods function for different cities. We select a wide variety of cities on different continents. For example, cities that consist of multipolygons and islands are also considered.</p>
+<p>Selected cities are <code class="docutils literal notranslate"><span class="pre">Barcelona</span></code>, <code class="docutils literal notranslate"><span class="pre">Key</span> <span class="pre">West</span></code>, <code class="docutils literal notranslate"><span class="pre">Nairobi</span></code>, <code class="docutils literal notranslate"><span class="pre">Tehran</span></code>.</p>
+<p>To run this notebook, in addition to <code class="docutils literal notranslate"><span class="pre">tesspy</span></code>, you need <code class="docutils literal notranslate"><span class="pre">contextily</span></code> for basemap visualization. This package is only used to enhance visualization and has no effect on tessellation.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">tesspy</span> <span class="kn">import</span> <span class="n">Tessellation</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">contextily</span> <span class="k">as</span> <span class="nn">ctx</span>
+
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">sleep</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Shapely 1.8.1 makes pandas to produce many warnings; this is to get rid of these warnings</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="Getting-city-polygons">
+<h2>Getting city polygons<a class="headerlink" href="#Getting-city-polygons" title="Permalink to this headline"></a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create a tessellation object for each city</span>
+<span class="n">barcelona</span> <span class="o">=</span> <span class="n">Tessellation</span><span class="p">(</span><span class="s1">&#39;Barcelona, Spain&#39;</span><span class="p">)</span>
+<span class="n">key_west</span> <span class="o">=</span> <span class="n">Tessellation</span><span class="p">(</span><span class="s1">&#39;Key West, United States&#39;</span><span class="p">)</span>
+<span class="n">nairobi</span> <span class="o">=</span> <span class="n">Tessellation</span><span class="p">(</span><span class="s1">&#39;Nairobi, Kenia&#39;</span><span class="p">)</span>
+<span class="n">tehran</span> <span class="o">=</span> <span class="n">Tessellation</span><span class="p">(</span><span class="s1">&#39;Tehran, Iran&#39;</span><span class="p">)</span>
+
+<span class="c1"># get polygone of the investigated area</span>
+<span class="n">barcelona_polygon</span> <span class="o">=</span> <span class="n">barcelona</span><span class="o">.</span><span class="n">get_polygon</span><span class="p">()</span>
+<span class="n">key_west_polygon</span> <span class="o">=</span> <span class="n">key_west</span><span class="o">.</span><span class="n">get_polygon</span><span class="p">()</span>
+<span class="n">nairobi_polygon</span> <span class="o">=</span> <span class="n">nairobi</span><span class="o">.</span><span class="n">get_polygon</span><span class="p">()</span>
+<span class="n">tehran_polygon</span> <span class="o">=</span> <span class="n">tehran</span><span class="o">.</span><span class="n">get_polygon</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># visualization of areas</span>
+<span class="n">cities_polygons</span><span class="o">=</span> <span class="p">[</span><span class="n">barcelona_polygon</span><span class="p">,</span> <span class="n">key_west_polygon</span><span class="p">,</span> <span class="n">nairobi_polygon</span><span class="p">,</span> <span class="n">tehran_polygon</span><span class="p">]</span>
+<span class="n">cities_names</span><span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Barcelona, Spain&#39;</span><span class="p">,</span> <span class="s1">&#39;Key West, United States&#39;</span><span class="p">,</span> <span class="s1">&#39;Nairobi, Kenia&#39;</span><span class="p">,</span> <span class="s1">&#39;Tehran, Iran&#39;</span><span class="p">]</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">axs</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span><span class="mi">15</span><span class="p">))</span>
+
+<span class="k">for</span> <span class="n">ax</span><span class="p">,</span> <span class="n">city_polygon</span><span class="p">,</span> <span class="n">city_name</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">axs</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">cities_polygons</span><span class="p">,</span> <span class="n">cities_names</span><span class="p">):</span>
+    <span class="n">city_polygon</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="s1">&#39;EPSG:3857&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+    <span class="n">ctx</span><span class="o">.</span><span class="n">add_basemap</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">ctx</span><span class="o">.</span><span class="n">providers</span><span class="o">.</span><span class="n">CartoDB</span><span class="o">.</span><span class="n">Voyager</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_axis_off</span><span class="p">()</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">city_name</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_02_Tessllating_Different_Cities_5_0.png" src="../_images/example_notebooks_02_Tessllating_Different_Cities_5_0.png" />
+</div>
+</div>
+</div>
+<div class="section" id="Squares">
+<h2>Squares<a class="headerlink" href="#Squares" title="Permalink to this headline"></a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Creating square tessellation</span>
+
+<span class="n">barcelona_squares</span> <span class="o">=</span> <span class="n">barcelona</span><span class="o">.</span><span class="n">squares</span><span class="p">(</span><span class="mi">14</span><span class="p">)</span>
+<span class="n">key_west_squares</span> <span class="o">=</span> <span class="n">key_west</span><span class="o">.</span><span class="n">squares</span><span class="p">(</span><span class="mi">16</span><span class="p">)</span>
+<span class="n">nairobi_squares</span> <span class="o">=</span> <span class="n">nairobi</span><span class="o">.</span><span class="n">squares</span><span class="p">(</span><span class="mi">14</span><span class="p">)</span>
+<span class="n">tehran_squares</span> <span class="o">=</span> <span class="n">tehran</span><span class="o">.</span><span class="n">squares</span><span class="p">(</span><span class="mi">14</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># visualization of square tessellation</span>
+
+<span class="n">cities_squares</span><span class="o">=</span> <span class="p">[</span><span class="n">barcelona_squares</span><span class="p">,</span> <span class="n">key_west_squares</span><span class="p">,</span> <span class="n">nairobi_squares</span><span class="p">,</span> <span class="n">tehran_squares</span><span class="p">]</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">axs</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span><span class="mi">15</span><span class="p">))</span>
+
+<span class="k">for</span> <span class="n">ax</span><span class="p">,</span> <span class="n">city_polygon</span><span class="p">,</span> <span class="n">city_name</span><span class="p">,</span> <span class="n">city_square</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">axs</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">cities_polygons</span><span class="p">,</span> <span class="n">cities_names</span><span class="p">,</span> <span class="n">cities_squares</span><span class="p">):</span>
+    <span class="n">city_square</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="s1">&#39;EPSG:3857&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">city_polygon</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="s1">&#39;EPSG:3857&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+    <span class="n">ctx</span><span class="o">.</span><span class="n">add_basemap</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">ctx</span><span class="o">.</span><span class="n">providers</span><span class="o">.</span><span class="n">CartoDB</span><span class="o">.</span><span class="n">Voyager</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_axis_off</span><span class="p">()</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">city_name</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_02_Tessllating_Different_Cities_8_0.png" src="../_images/example_notebooks_02_Tessllating_Different_Cities_8_0.png" />
+</div>
+</div>
+</div>
+<div class="section" id="Hexagons">
+<h2>Hexagons<a class="headerlink" href="#Hexagons" title="Permalink to this headline"></a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Creating hexagons tessellation</span>
+
+<span class="n">barcelona_hexagons</span> <span class="o">=</span> <span class="n">barcelona</span><span class="o">.</span><span class="n">hexagons</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span>
+<span class="n">key_west_hexagons</span> <span class="o">=</span> <span class="n">key_west</span><span class="o">.</span><span class="n">hexagons</span><span class="p">(</span><span class="mi">9</span><span class="p">)</span>
+<span class="n">nairobi_hexagons</span> <span class="o">=</span> <span class="n">nairobi</span><span class="o">.</span><span class="n">hexagons</span><span class="p">(</span><span class="mi">7</span><span class="p">)</span>
+<span class="n">tehran_hexagons</span> <span class="o">=</span> <span class="n">tehran</span><span class="o">.</span><span class="n">hexagons</span><span class="p">(</span><span class="mi">7</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># visualization of hexagons tessellation</span>
+
+<span class="n">cities_hexagons</span><span class="o">=</span> <span class="p">[</span><span class="n">barcelona_hexagons</span><span class="p">,</span> <span class="n">key_west_hexagons</span><span class="p">,</span> <span class="n">nairobi_hexagons</span><span class="p">,</span> <span class="n">tehran_hexagons</span><span class="p">]</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">axs</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span><span class="mi">15</span><span class="p">))</span>
+
+<span class="k">for</span> <span class="n">ax</span><span class="p">,</span> <span class="n">city_polygon</span><span class="p">,</span> <span class="n">city_name</span><span class="p">,</span> <span class="n">city_hexagon</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">axs</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">cities_polygons</span><span class="p">,</span> <span class="n">cities_names</span><span class="p">,</span> <span class="n">cities_hexagons</span><span class="p">):</span>
+    <span class="n">city_hexagon</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="s1">&#39;EPSG:3857&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">city_polygon</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="s1">&#39;EPSG:3857&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+    <span class="n">ctx</span><span class="o">.</span><span class="n">add_basemap</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">ctx</span><span class="o">.</span><span class="n">providers</span><span class="o">.</span><span class="n">CartoDB</span><span class="o">.</span><span class="n">Voyager</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_axis_off</span><span class="p">()</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">city_name</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_02_Tessllating_Different_Cities_11_0.png" src="../_images/example_notebooks_02_Tessllating_Different_Cities_11_0.png" />
+</div>
+</div>
+</div>
+<div class="section" id="Adaptive-squares">
+<h2>Adaptive squares<a class="headerlink" href="#Adaptive-squares" title="Permalink to this headline"></a></h2>
+<p>In order to retrieve data from OpenStreetMap, we need to follow the fair use policy of overpass to avoid useing up all server resources. If we send several requests consequently with the same IP, we get error. Therefore, after each request, we wait 60 second to send the next request.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Creating adaptive squares tessellation</span>
+
+<span class="n">barcelona_asq</span> <span class="o">=</span> <span class="n">barcelona</span><span class="o">.</span><span class="n">adaptive_squares</span><span class="p">(</span><span class="n">start_resolution</span><span class="o">=</span><span class="mi">14</span><span class="p">,</span> <span class="n">poi_categories</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;amenity&quot;</span><span class="p">])</span>
+<span class="n">sleep</span><span class="p">(</span><span class="mi">60</span><span class="p">)</span>
+<span class="n">key_west_asq</span> <span class="o">=</span> <span class="n">key_west</span><span class="o">.</span><span class="n">adaptive_squares</span><span class="p">(</span><span class="n">start_resolution</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">poi_categories</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;amenity&quot;</span><span class="p">],</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">40</span><span class="p">)</span>
+<span class="n">sleep</span><span class="p">(</span><span class="mi">60</span><span class="p">)</span>
+<span class="n">nairobi_asq</span> <span class="o">=</span> <span class="n">nairobi</span><span class="o">.</span><span class="n">adaptive_squares</span><span class="p">(</span><span class="n">start_resolution</span><span class="o">=</span><span class="mi">13</span><span class="p">,</span> <span class="n">poi_categories</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;amenity&quot;</span><span class="p">],</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">150</span><span class="p">)</span>
+<span class="n">sleep</span><span class="p">(</span><span class="mi">60</span><span class="p">)</span>
+<span class="n">tehran_asq</span> <span class="o">=</span> <span class="n">tehran</span><span class="o">.</span><span class="n">adaptive_squares</span><span class="p">(</span><span class="n">start_resolution</span><span class="o">=</span><span class="mi">13</span><span class="p">,</span> <span class="n">poi_categories</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;amenity&quot;</span><span class="p">],</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># visualization of adaptive squares tessellation</span>
+
+<span class="n">cities_asq</span><span class="o">=</span> <span class="p">[</span><span class="n">barcelona_asq</span><span class="p">,</span> <span class="n">key_west_asq</span><span class="p">,</span> <span class="n">nairobi_asq</span><span class="p">,</span> <span class="n">tehran_asq</span><span class="p">]</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">axs</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span><span class="mi">15</span><span class="p">))</span>
+
+<span class="k">for</span> <span class="n">ax</span><span class="p">,</span> <span class="n">city_polygon</span><span class="p">,</span> <span class="n">city_name</span><span class="p">,</span> <span class="n">city_asq</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">axs</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">cities_polygons</span><span class="p">,</span> <span class="n">cities_names</span><span class="p">,</span> <span class="n">cities_asq</span><span class="p">):</span>
+    <span class="n">city_asq</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="s1">&#39;EPSG:3857&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">city_polygon</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="s1">&#39;EPSG:3857&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+    <span class="n">ctx</span><span class="o">.</span><span class="n">add_basemap</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">ctx</span><span class="o">.</span><span class="n">providers</span><span class="o">.</span><span class="n">CartoDB</span><span class="o">.</span><span class="n">Voyager</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_axis_off</span><span class="p">()</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">city_name</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_02_Tessllating_Different_Cities_15_0.png" src="../_images/example_notebooks_02_Tessllating_Different_Cities_15_0.png" />
+</div>
+</div>
+</div>
+<div class="section" id="Voronoi-Diagrams">
+<h2>Voronoi Diagrams<a class="headerlink" href="#Voronoi-Diagrams" title="Permalink to this headline"></a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Creating voronoi tessellation</span>
+
+<span class="n">barcelona_vor</span> <span class="o">=</span> <span class="n">barcelona</span><span class="o">.</span><span class="n">voronoi</span><span class="p">(</span><span class="n">n_polygons</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">poi_categories</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;building&quot;</span><span class="p">])</span>
+<span class="n">sleep</span><span class="p">(</span><span class="mi">60</span><span class="p">)</span>
+<span class="n">key_west_vor</span> <span class="o">=</span> <span class="n">key_west</span><span class="o">.</span><span class="n">voronoi</span><span class="p">(</span><span class="n">n_polygons</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">poi_categories</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;building&quot;</span><span class="p">])</span>
+<span class="n">sleep</span><span class="p">(</span><span class="mi">90</span><span class="p">)</span>
+<span class="n">nairobi_vor</span> <span class="o">=</span> <span class="n">nairobi</span><span class="o">.</span><span class="n">voronoi</span><span class="p">(</span><span class="n">n_polygons</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">poi_categories</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;building&quot;</span><span class="p">])</span>
+<span class="n">sleep</span><span class="p">(</span><span class="mi">120</span><span class="p">)</span>
+<span class="n">tehran_vor</span> <span class="o">=</span> <span class="n">tehran</span><span class="o">.</span><span class="n">voronoi</span><span class="p">(</span><span class="n">n_polygons</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span> <span class="n">poi_categories</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;building&quot;</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># visualization of voronoi tessellation</span>
+
+<span class="n">cities_vor</span><span class="o">=</span> <span class="p">[</span><span class="n">barcelona_vor</span><span class="p">,</span> <span class="n">key_west_vor</span><span class="p">,</span> <span class="n">nairobi_vor</span><span class="p">,</span> <span class="n">tehran_vor</span><span class="p">]</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">axs</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span><span class="mi">15</span><span class="p">))</span>
+
+<span class="k">for</span> <span class="n">ax</span><span class="p">,</span> <span class="n">city_polygon</span><span class="p">,</span> <span class="n">city_name</span><span class="p">,</span> <span class="n">city_vor</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">axs</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">cities_polygons</span><span class="p">,</span> <span class="n">cities_names</span><span class="p">,</span> <span class="n">cities_vor</span><span class="p">):</span>
+    <span class="n">city_vor</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="s1">&#39;EPSG:3857&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">city_polygon</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="s1">&#39;EPSG:3857&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+    <span class="n">ctx</span><span class="o">.</span><span class="n">add_basemap</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">ctx</span><span class="o">.</span><span class="n">providers</span><span class="o">.</span><span class="n">CartoDB</span><span class="o">.</span><span class="n">Voyager</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_axis_off</span><span class="p">()</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">city_name</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_02_Tessllating_Different_Cities_18_0.png" src="../_images/example_notebooks_02_Tessllating_Different_Cities_18_0.png" />
+</div>
+</div>
+</div>
+<div class="section" id="City-Blocks">
+<h2>City Blocks<a class="headerlink" href="#City-Blocks" title="Permalink to this headline"></a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Creating city blocks tessellation</span>
+
+<span class="n">sleep</span><span class="p">(</span><span class="mi">60</span><span class="p">)</span>
+<span class="n">barcelona_blks</span> <span class="o">=</span> <span class="n">barcelona</span><span class="o">.</span><span class="n">city_blocks</span><span class="p">(</span><span class="n">n_polygons</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">detail_deg</span><span class="o">=</span><span class="mi">11</span><span class="p">)</span>
+<span class="n">sleep</span><span class="p">(</span><span class="mi">60</span><span class="p">)</span>
+<span class="n">key_west_blks</span> <span class="o">=</span> <span class="n">key_west</span><span class="o">.</span><span class="n">city_blocks</span><span class="p">()</span>
+<span class="n">sleep</span><span class="p">(</span><span class="mi">60</span><span class="p">)</span>
+<span class="n">nairobi_blks</span> <span class="o">=</span> <span class="n">nairobi</span><span class="o">.</span><span class="n">city_blocks</span><span class="p">(</span><span class="n">n_polygons</span><span class="o">=</span><span class="mi">500</span><span class="p">)</span>
+<span class="n">sleep</span><span class="p">(</span><span class="mi">60</span><span class="p">)</span>
+<span class="n">tehran_blks</span> <span class="o">=</span> <span class="n">tehran</span><span class="o">.</span><span class="n">city_blocks</span><span class="p">(</span><span class="n">n_polygons</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">detail_deg</span><span class="o">=</span><span class="mi">11</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># visualization of city blocks tessellation</span>
+
+<span class="n">cities_blks</span><span class="o">=</span> <span class="p">[</span><span class="n">barcelona_blks</span><span class="p">,</span> <span class="n">key_west_blks</span><span class="p">,</span> <span class="n">nairobi_blks</span><span class="p">,</span> <span class="n">tehran_blks</span><span class="p">]</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">axs</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span><span class="mi">15</span><span class="p">))</span>
+
+<span class="k">for</span> <span class="n">ax</span><span class="p">,</span> <span class="n">city_polygon</span><span class="p">,</span> <span class="n">city_name</span><span class="p">,</span> <span class="n">city_blks</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">axs</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">cities_polygons</span><span class="p">,</span> <span class="n">cities_names</span><span class="p">,</span> <span class="n">cities_blks</span><span class="p">):</span>
+    <span class="n">city_blks</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="s1">&#39;EPSG:3857&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">city_polygon</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="s1">&#39;EPSG:3857&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+    <span class="n">ctx</span><span class="o">.</span><span class="n">add_basemap</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">ctx</span><span class="o">.</span><span class="n">providers</span><span class="o">.</span><span class="n">CartoDB</span><span class="o">.</span><span class="n">Voyager</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_axis_off</span><span class="p">()</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">city_name</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="01_Getting_Started.html" class="btn btn-neutral float-left" title="Getting Started: Tessellation of Frankfurt am Main" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="03_Voronoi_Diagrams.html" class="btn btn-neutral float-right" title="Voronoi Diagrams" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, tesspy developers.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

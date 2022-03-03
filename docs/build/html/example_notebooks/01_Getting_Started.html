@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Getting Started: Tessellation of Frankfurt am Main &mdash; tesspy 0.0.1 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Tessllating Different Cities" href="02_Tessllating_Different_Cities.html" />
+    <link rel="prev" title="Examples" href="../Examples.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> tesspy
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Introduction</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../Examples.html">Examples</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">01 Getting Started</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#Import-Tessellation">Import Tessellation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Defining-the-area">Defining the area</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Squares">Squares</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#hexagons">hexagons</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Adaptive-squares">Adaptive squares</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Voronoi-Diagrams">Voronoi-Diagrams</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#City-blocks">City blocks</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="02_Tessllating_Different_Cities.html">02 Tessllating Different_Cities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="03_Voronoi_Diagrams.html">03 Voronoi Diagrams</a></li>
+<li class="toctree-l2"><a class="reference internal" href="04_City_Blocks.html">04 City Blocks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="05_Analyze_Urban_Areas.html">05 Analyze Urban Areas</a></li>
+<li class="toctree-l2"><a class="reference internal" href="06_Clustering_Urban_Areas.html">06 Clustering Urban Areas</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../tesspy.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../functions.html">All Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Contribution.html">Contribution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Acknowledgements.html">Acknowledgements</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">tesspy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../Examples.html">Examples</a> &raquo;</li>
+      <li>Getting Started: Tessellation of Frankfurt am Main</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/example_notebooks/01_Getting_Started.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  
+<style>
+/* CSS for nbsphinx extension */
+
+/* remove conflicting styling from Sphinx themes */
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt *,
+div.nbinput.container div.input_area pre,
+div.nboutput.container div.output_area pre,
+div.nbinput.container div.input_area .highlight,
+div.nboutput.container div.output_area .highlight {
+    border: none;
+    padding: 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+div.nbinput.container > div[class*=highlight],
+div.nboutput.container > div[class*=highlight] {
+    margin: 0;
+}
+
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt * {
+    background: none;
+}
+
+div.nboutput.container div.output_area .highlight,
+div.nboutput.container div.output_area pre {
+    background: unset;
+}
+
+div.nboutput.container div.output_area div.highlight {
+    color: unset;  /* override Pygments text color */
+}
+
+/* avoid gaps between output lines */
+div.nboutput.container div[class*=highlight] pre {
+    line-height: normal;
+}
+
+/* input/output containers */
+div.nbinput.container,
+div.nboutput.container {
+    display: -webkit-flex;
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+    width: 100%;
+}
+@media (max-width: 540px) {
+    div.nbinput.container,
+    div.nboutput.container {
+        flex-direction: column;
+    }
+}
+
+/* input container */
+div.nbinput.container {
+    padding-top: 5px;
+}
+
+/* last container */
+div.nblast.container {
+    padding-bottom: 5px;
+}
+
+/* input prompt */
+div.nbinput.container div.prompt pre {
+    color: #307FC1;
+}
+
+/* output prompt */
+div.nboutput.container div.prompt pre {
+    color: #BF5B3D;
+}
+
+/* all prompts */
+div.nbinput.container div.prompt,
+div.nboutput.container div.prompt {
+    width: 4.5ex;
+    padding-top: 5px;
+    position: relative;
+    user-select: none;
+}
+
+div.nbinput.container div.prompt > div,
+div.nboutput.container div.prompt > div {
+    position: absolute;
+    right: 0;
+    margin-right: 0.3ex;
+}
+
+@media (max-width: 540px) {
+    div.nbinput.container div.prompt,
+    div.nboutput.container div.prompt {
+        width: unset;
+        text-align: left;
+        padding: 0.4em;
+    }
+    div.nboutput.container div.prompt.empty {
+        padding: 0;
+    }
+
+    div.nbinput.container div.prompt > div,
+    div.nboutput.container div.prompt > div {
+        position: unset;
+    }
+}
+
+/* disable scrollbars on prompts */
+div.nbinput.container div.prompt pre,
+div.nboutput.container div.prompt pre {
+    overflow: hidden;
+}
+
+/* input/output area */
+div.nbinput.container div.input_area,
+div.nboutput.container div.output_area {
+    -webkit-flex: 1;
+    flex: 1;
+    overflow: auto;
+}
+@media (max-width: 540px) {
+    div.nbinput.container div.input_area,
+    div.nboutput.container div.output_area {
+        width: 100%;
+    }
+}
+
+/* input area */
+div.nbinput.container div.input_area {
+    border: 1px solid #e0e0e0;
+    border-radius: 2px;
+    /*background: #f5f5f5;*/
+}
+
+/* override MathJax center alignment in output cells */
+div.nboutput.container div[class*=MathJax] {
+    text-align: left !important;
+}
+
+/* override sphinx.ext.imgmath center alignment in output cells */
+div.nboutput.container div.math p {
+    text-align: left;
+}
+
+/* standard error */
+div.nboutput.container div.output_area.stderr {
+    background: #fdd;
+}
+
+/* ANSI colors */
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-default-inverse-fg { color: #FFFFFF; }
+.ansi-default-inverse-bg { background-color: #000000; }
+
+.ansi-bold { font-weight: bold; }
+.ansi-underline { text-decoration: underline; }
+
+
+div.nbinput.container div.input_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight].math,
+div.nboutput.container div.output_area.rendered_html,
+div.nboutput.container div.output_area > div.output_javascript,
+div.nboutput.container div.output_area:not(.rendered_html) > img{
+    padding: 5px;
+    margin: 0;
+}
+
+/* fix copybtn overflow problem in chromium (needed for 'sphinx_copybutton') */
+div.nbinput.container div.input_area > div[class^='highlight'],
+div.nboutput.container div.output_area > div[class^='highlight']{
+    overflow-y: hidden;
+}
+
+/* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
+.prompt .copybtn {
+    display: none;
+}
+
+/* Some additional styling taken form the Jupyter notebook CSS */
+div.rendered_html table {
+  border: none;
+  border-collapse: collapse;
+  border-spacing: 0;
+  color: black;
+  font-size: 12px;
+  table-layout: fixed;
+}
+div.rendered_html thead {
+  border-bottom: 1px solid black;
+  vertical-align: bottom;
+}
+div.rendered_html tr,
+div.rendered_html th,
+div.rendered_html td {
+  text-align: right;
+  vertical-align: middle;
+  padding: 0.5em 0.5em;
+  line-height: normal;
+  white-space: normal;
+  max-width: none;
+  border: none;
+}
+div.rendered_html th {
+  font-weight: bold;
+}
+div.rendered_html tbody tr:nth-child(odd) {
+  background: #f5f5f5;
+}
+div.rendered_html tbody tr:hover {
+  background: rgba(66, 165, 245, 0.2);
+}
+
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="Getting-Started:-Tessellation-of-Frankfurt-am-Main">
+<h1>Getting Started: Tessellation of Frankfurt am Main<a class="headerlink" href="#Getting-Started:-Tessellation-of-Frankfurt-am-Main" title="Permalink to this headline"></a></h1>
+<p>This example shows the basic functions of <code class="docutils literal notranslate"><span class="pre">tesspy</span></code>, which are five types of tessellations: square, hexagon, adaptive squares, voronoi diagrams and city blocks. We have selected the city of <strong>Frankfurt am Main</strong> in Germany to demonstrate tessellation.</p>
+<div class="section" id="Import-Tessellation">
+<h2>Import Tessellation<a class="headerlink" href="#Import-Tessellation" title="Permalink to this headline"></a></h2>
+<p>We start by importing the <code class="docutils literal notranslate"><span class="pre">Tessellation</span></code> object from <code class="docutils literal notranslate"><span class="pre">tesspy</span></code> module:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">tessellation</span> <span class="kn">import</span> <span class="n">Tessellation</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">warnings</span>
+<span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="Defining-the-area">
+<h2>Defining the area<a class="headerlink" href="#Defining-the-area" title="Permalink to this headline"></a></h2>
+<p>There are different ways to define the area. The most straightforward way is passing an address.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ffm</span><span class="o">=</span> <span class="n">Tessellation</span><span class="p">(</span><span class="s1">&#39;Frankfurt am Main&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>With <code class="docutils literal notranslate"><span class="pre">.get_polygon()</span></code> method, we can retrieve the polygon. This is in the form of a GeoPandas GeoDataFrame. We visualize the polygon to make sure data collection was successful and correct:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ffm</span><span class="o">.</span><span class="n">get_polygon</span><span class="p">()</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">))</span><span class="o">.</span><span class="n">set_axis_off</span><span class="p">();</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_01_Getting_Started_8_0.png" src="../_images/example_notebooks_01_Getting_Started_8_0.png" />
+</div>
+</div>
+<p>The polygon shows the city of Frankfurt. Note that the <code class="docutils literal notranslate"><span class="pre">CRS</span></code> of the GeoPandas is <code class="docutils literal notranslate"><span class="pre">EPSG:4326</span></code>. We can double-check that:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">ffm</span><span class="o">.</span><span class="n">get_polygon</span><span class="p">()</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+epsg:4326
+</pre></div></div>
+</div>
+<p>It is already ready for tessellation.</p>
+</div>
+<div class="section" id="Squares">
+<h2>Squares<a class="headerlink" href="#Squares" title="Permalink to this headline"></a></h2>
+<p>The first tessellation method is the square grid. It creates (almost) equal squares that cover the whole area surface. In order to set the size, we need to pass a <code class="docutils literal notranslate"><span class="pre">resolution</span></code>. This value is usually between 1 and 21. Larger values mean smaller squares and consequently a finer tessellation. For example, with a <code class="docutils literal notranslate"><span class="pre">resolution=13</span></code>, we have:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ffm_sqr_13</span><span class="o">=</span><span class="n">ffm</span><span class="o">.</span><span class="n">squares</span><span class="p">(</span><span class="mi">13</span><span class="p">)</span>
+<span class="n">ffm_sqr_13</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">lw</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">))</span><span class="o">.</span><span class="n">set_axis_off</span><span class="p">();</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_01_Getting_Started_13_0.png" src="../_images/example_notebooks_01_Getting_Started_13_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ffm_sqr_13</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>geometry</th>
+      <th>quadkey</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>POLYGON ((8.48145 50.09239, 8.48145 50.12058, ...</td>
+      <td>1202033020220</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>POLYGON ((8.48145 50.06419, 8.48145 50.09239, ...</td>
+      <td>1202033020222</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>POLYGON ((8.52539 50.12058, 8.52539 50.14875, ...</td>
+      <td>1202033020203</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>POLYGON ((8.52539 50.09239, 8.52539 50.12058, ...</td>
+      <td>1202033020221</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>POLYGON ((8.52539 50.06419, 8.52539 50.09239, ...</td>
+      <td>1202033020223</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>The square grid with a <code class="docutils literal notranslate"><span class="pre">resolution=15</span></code> look like this:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ffm_sqr_15</span><span class="o">=</span><span class="n">ffm</span><span class="o">.</span><span class="n">squares</span><span class="p">(</span><span class="mi">15</span><span class="p">)</span>
+<span class="n">ffm_sqr_15</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">lw</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">))</span><span class="o">.</span><span class="n">set_axis_off</span><span class="p">();</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_01_Getting_Started_16_0.png" src="../_images/example_notebooks_01_Getting_Started_16_0.png" />
+</div>
+</div>
+<p>As it can be seen the number of square are relatively higher when resolution is higher. We can check the number of squares for each resolution:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Resolution=13  ==&gt;  Number of squares:  &#39;</span><span class="p">,</span> <span class="n">ffm_sqr_13</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Resolution=15  ==&gt;  Number of squares:  &#39;</span><span class="p">,</span> <span class="n">ffm_sqr_15</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Resolution=13  ==&gt;  Number of squares:   45
+Resolution=15  ==&gt;  Number of squares:   488
+</pre></div></div>
+</div>
+</div>
+<div class="section" id="hexagons">
+<h2>hexagons<a class="headerlink" href="#hexagons" title="Permalink to this headline"></a></h2>
+<p>The next method is hexagons. Similar to squares, this method creates (almost) equal shapes to cover the area. A slight difference is that the algorithm finds the optimal number of hexagons, and not all the surface is covered. Therefore, there may be some areas on the borders which are left behind.</p>
+<p>Similarly, we need to pass a resolution to set the hexagon sizes. The larger numbers mean smaller hexagons. A suitable value is usually between 5 and 15. Here is the hexagon tessellation with <code class="docutils literal notranslate"><span class="pre">resolution=7</span></code>:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ffm_hex_7</span><span class="o">=</span><span class="n">ffm</span><span class="o">.</span><span class="n">hexagons</span><span class="p">(</span><span class="mi">7</span><span class="p">)</span>
+<span class="n">ffm_hex_7</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">lw</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">))</span><span class="o">.</span><span class="n">set_axis_off</span><span class="p">();</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_01_Getting_Started_20_0.png" src="../_images/example_notebooks_01_Getting_Started_20_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ffm_hex_7</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>hex_id</th>
+      <th>geometry</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>871faeaaeffffff</td>
+      <td>POLYGON ((8.59585 50.10425, 8.59746 50.09256, ...</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>871faeaa3ffffff</td>
+      <td>POLYGON ((8.56260 50.10080, 8.56422 50.08911, ...</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>871faeaadffffff</td>
+      <td>POLYGON ((8.64334 50.12694, 8.64494 50.11525, ...</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>871faea13ffffff</td>
+      <td>POLYGON ((8.62429 50.14275, 8.62590 50.13107, ...</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>871faea02ffffff</td>
+      <td>POLYGON ((8.65276 50.18123, 8.65437 50.16955, ...</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>At the next resolution, in this case, <code class="docutils literal notranslate"><span class="pre">resolution=8</span></code>, each hexagon is divided into 7 sub-hexagons. This means the total number of hexagons is (almost) 7 times more when resolution increments one unit. Following plot shows the hexagons of Frankfurt with <code class="docutils literal notranslate"><span class="pre">resolution=8</span></code>:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ffm_hex_8</span><span class="o">=</span><span class="n">ffm</span><span class="o">.</span><span class="n">hexagons</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span>
+<span class="n">ffm_hex_8</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">lw</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">))</span><span class="o">.</span><span class="n">set_axis_off</span><span class="p">();</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_01_Getting_Started_23_0.png" src="../_images/example_notebooks_01_Getting_Started_23_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Resolution=7  ==&gt;  Number of hexagons:  &#39;</span><span class="p">,</span> <span class="n">ffm_hex_7</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Resolution=8  ==&gt;  Number of hexagons:  &#39;</span><span class="p">,</span> <span class="n">ffm_hex_8</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Resolution=7  ==&gt;  Number of hexagons:   53
+Resolution=8  ==&gt;  Number of hexagons:   366
+</pre></div></div>
+</div>
+</div>
+<div class="section" id="Adaptive-squares">
+<h2>Adaptive squares<a class="headerlink" href="#Adaptive-squares" title="Permalink to this headline"></a></h2>
+<p>Adaptive squares are an extension of regular squares. This method starts with relatively large squares and uses the spatial data, i.e., Points of Interests (POI), to divide the high-density squares into 4 subsquares. The division of squares is done until a specific threshold for POI count per square is reached.</p>
+<p>The spatial data are retrieved from OpenStreetMap (OSM). We can use which POI categories we want to use. The selected POI categories should be passed as a list. These categories are the OSM primary categories, which represent physical objects on the map. More information can be found at this <a class="reference external" href="https://wiki.openstreetmap.org/wiki/Map_features">link</a>.</p>
+<p>You can see the top-level categories by:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">Tessellation</span><span class="o">.</span><span class="n">osm_primary_features</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[&#39;aerialway&#39;, &#39;aeroway&#39;, &#39;amenity&#39;, &#39;barrier&#39;, &#39;boundary&#39;, &#39;building&#39;, &#39;craft&#39;, &#39;emergency&#39;, &#39;geological&#39;, &#39;healthcare&#39;, &#39;highway&#39;, &#39;historic&#39;, &#39;landuse&#39;, &#39;leisure&#39;, &#39;man_made&#39;, &#39;military&#39;, &#39;natural&#39;, &#39;office&#39;, &#39;place&#39;, &#39;power&#39;, &#39;public_transport&#39;, &#39;railway&#39;, &#39;route&#39;, &#39;shop&#39;, &#39;sport&#39;, &#39;telecom&#39;, &#39;tourism&#39;, &#39;water&#39;, &#39;waterway&#39;]
+</pre></div></div>
+</div>
+<p>So we build the adaptive squares for</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Adaptive Squares using only amenity data</span>
+<span class="n">ffm_asq</span> <span class="o">=</span> <span class="n">ffm</span><span class="o">.</span><span class="n">adaptive_squares</span><span class="p">(</span><span class="n">start_resolution</span><span class="o">=</span><span class="mi">13</span><span class="p">,</span>
+                                <span class="n">poi_categories</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;amenity&quot;</span><span class="p">],</span>
+                                <span class="n">threshold</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                <span class="n">timeout</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span>
+                                <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Getting data from OSM...
+Creating POI DataFrame...
+Cleaning POI DataFrame...
+Threshold=198  ==&gt; set as the median POI-count per square at the initial level
+Threshold exceeded! Squares are subdivided into resolution 14
+Threshold exceeded! Squares are subdivided into resolution 15
+Threshold exceeded! Squares are subdivided into resolution 16
+Threshold exceeded! Squares are subdivided into resolution 17
+</pre></div></div>
+</div>
+<p>We visualize the adaptive squares:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ffm_asq</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">lw</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">))</span><span class="o">.</span><span class="n">set_axis_off</span><span class="p">();</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_01_Getting_Started_30_0.png" src="../_images/example_notebooks_01_Getting_Started_30_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ffm_asq</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>quadkey</th>
+      <th>count</th>
+      <th>geometry</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>1202033020033</td>
+      <td>83</td>
+      <td>POLYGON ((8.61328 50.17690, 8.61328 50.20503, ...</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>1202033020120</td>
+      <td>32</td>
+      <td>POLYGON ((8.65723 50.20503, 8.65723 50.23315, ...</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>1202033020121</td>
+      <td>39</td>
+      <td>POLYGON ((8.70117 50.20503, 8.70117 50.23315, ...</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>12020330201220</td>
+      <td>5</td>
+      <td>POLYGON ((8.63525 50.19097, 8.63525 50.20503, ...</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>12020330201221</td>
+      <td>49</td>
+      <td>POLYGON ((8.65723 50.19097, 8.65723 50.20503, ...</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+</div>
+<div class="section" id="Voronoi-Diagrams">
+<h2>Voronoi-Diagrams<a class="headerlink" href="#Voronoi-Diagrams" title="Permalink to this headline"></a></h2>
+<p>Voronoi-Diagram is a method for tessellation that uses irregular shapes to cover the area. In this method, we have a given set of points, called generators. For each generator, there is a polygon that contains the area that is closer to this generator than other generators.</p>
+<p>In this context, the generators are the POI, coming from OSM as explained for adaptive squares. Usually, the number of POI is larger than the required number of polygons. So, we can use a clustering method to cluster POI in the first step and then use the cluster centroids as the generator points.</p>
+<p>In the example below, we use <code class="docutils literal notranslate"><span class="pre">shop</span></code> and <code class="docutils literal notranslate"><span class="pre">public_transport</span></code> as POI. We use the <code class="docutils literal notranslate"><span class="pre">k-means</span></code> clustering algorithm to cluster the POI and build the generators. The number of polygons is set to 100.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ffm_voronoi</span><span class="o">=</span> <span class="n">ffm</span><span class="o">.</span><span class="n">voronoi</span><span class="p">(</span><span class="n">cluster_algo</span><span class="o">=</span><span class="s1">&#39;k-means&#39;</span><span class="p">,</span>
+                        <span class="n">poi_categories</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;shop&#39;</span><span class="p">,</span><span class="s1">&#39;public_transport&#39;</span><span class="p">],</span>
+                        <span class="n">timeout</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span>
+                        <span class="n">n_polygons</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+                        <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Getting data from OSM...
+Creating POI DataFrame...
+Cleaning POI DataFrame...
+K-Means Clustering...
+Creating Voronoi polygons...
+</pre></div></div>
+</div>
+<p>We can now plot and visualize the voronoi polygons:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ffm_voronoi</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">lw</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">))</span><span class="o">.</span><span class="n">set_axis_off</span><span class="p">();</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_01_Getting_Started_35_0.png" src="../_images/example_notebooks_01_Getting_Started_35_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ffm_voronoi</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>geometry</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>POLYGON ((8.59543 50.08904, 8.58224 50.09516, ...</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>POLYGON ((8.72848 50.13084, 8.71238 50.14025, ...</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>POLYGON ((8.65669 50.13082, 8.64616 50.15157, ...</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>POLYGON ((8.65870 50.10552, 8.66003 50.11245, ...</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>POLYGON ((8.51751 50.09623, 8.50234 50.08454, ...</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Number of polygons ==&gt; &#39;</span> <span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">ffm_voronoi</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Number of polygons ==&gt;  100
+</pre></div></div>
+</div>
+</div>
+<div class="section" id="City-blocks">
+<h2>City blocks<a class="headerlink" href="#City-blocks" title="Permalink to this headline"></a></h2>
+<p>The last tessellation method is city blocks. We define city blocks as the smallest area surrounded by street segments. This method gets the road network data from OSM and generates polygons based on the roads. We use hierarchical clustering to merge a group of contiguous polygons. This guarantees that tiny polygons like road islands are not identified as single polygons. The number of desired polygons can be passed. This would be an approximation. The final number of city blocks could slightly
+vary.</p>
+<p>For example, the following is the example of city blocks for Frankfurt:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ffm_cb</span> <span class="o">=</span> <span class="n">ffm</span><span class="o">.</span><span class="n">city_blocks</span><span class="p">(</span><span class="n">n_polygons</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span>
+                          <span class="n">detail_deg</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                          <span class="n">split_roads</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                          <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Selected highway type(s) are [&#39;highway&#39;~&#39;motorway|trunk|primary|secondary|tertiary|residential|unclassified|motorway_link|trunk_link|primary_link|secondary_link|living_street|pedestrian|track|bus_guideway|footway|path|service|cycleway&#39;]
+Collecting road network data...
+Splitting the linestring, such that each linestring has exactly 2 points.
+Collected data has 272749 street segments.
+Creating initial city blocks using the road network data...
+Merging small city blocks...
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ffm_cb</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">lw</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">))</span><span class="o">.</span><span class="n">set_axis_off</span><span class="p">();</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/example_notebooks_01_Getting_Started_40_0.png" src="../_images/example_notebooks_01_Getting_Started_40_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ffm_cb</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>geometry</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>POLYGON ((8.68232 50.10887, 8.68220 50.10886, ...</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>POLYGON ((8.67485 50.11179, 8.67490 50.11181, ...</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>POLYGON ((8.68545 50.10926, 8.68522 50.10925, ...</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>POLYGON ((8.69298 50.11307, 8.69298 50.11309, ...</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>POLYGON ((8.69076 50.10175, 8.69068 50.10173, ...</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Number of polygons ==&gt; &#39;</span> <span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">ffm_cb</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Number of polygons ==&gt;  760
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../Examples.html" class="btn btn-neutral float-left" title="Examples" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="02_Tessllating_Different_Cities.html" class="btn btn-neutral float-right" title="Tessllating Different Cities" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, tesspy developers.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

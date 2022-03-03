@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tesspy.tessellation &mdash; tesspy 0.0.1 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> tesspy
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tesspy.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../functions.html">All Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Contribution.html">Contribution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Acknowledgements.html">Acknowledgements</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">tesspy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      <li>tesspy.tessellation</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for tesspy.tessellation</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">sklearn.cluster</span> <span class="kn">import</span> <span class="n">KMeans</span>
+<span class="kn">import</span> <span class="nn">hdbscan</span>
+<span class="kn">from</span> <span class="nn">scipy.spatial</span> <span class="kn">import</span> <span class="n">Voronoi</span>
+<span class="kn">from</span> <span class="nn">tessellation_functions</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">poi_data</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+
+<span class="c1"># todo: return gdf with POI count</span>
+
+<div class="viewcode-block" id="get_city_polygon"><a class="viewcode-back" href="../../tesspy.html#tesspy.tessellation.get_city_polygon">[docs]</a><span class="k">def</span> <span class="nf">get_city_polygon</span><span class="p">(</span><span class="n">city</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Gets the polygon of a city or an area</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    city : str</span>
+<span class="sd">        city must be a name of a city, or an address of a region</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    --------</span>
+<span class="sd">    df_city : GeoDataFrame</span>
+<span class="sd">        GeoDataFrame containing the polygon of the city</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s1">&#39;ignore&#39;</span><span class="p">)</span>
+        <span class="n">df_city</span> <span class="o">=</span> <span class="n">ox</span><span class="o">.</span><span class="n">geocode_to_gdf</span><span class="p">(</span><span class="n">city</span><span class="p">)</span>
+    <span class="n">df_city</span> <span class="o">=</span> <span class="n">df_city</span><span class="p">[[</span><span class="s2">&quot;osm_id&quot;</span><span class="p">,</span> <span class="s2">&quot;geometry&quot;</span><span class="p">]]</span>
+    <span class="n">df_city</span> <span class="o">=</span> <span class="n">df_city</span><span class="o">.</span><span class="n">rename</span><span class="p">({</span><span class="s2">&quot;osm_id&quot;</span><span class="p">:</span> <span class="s2">&quot;osmid&quot;</span><span class="p">})</span>
+    <span class="k">return</span> <span class="n">df_city</span></div>
+
+
+<span class="k">def</span> <span class="nf">_check_input_geodataframe</span><span class="p">(</span><span class="n">gdf</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    checks if the input gdf is in a correct format</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    gdf : GeoDataFrame</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    --------</span>
+<span class="sd">    gdf : GeoDataFrame</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">gdf</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;GeoDataFrame must have only one geometry element&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">gdf</span><span class="p">,</span> <span class="s2">&quot;geometry&quot;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Geometry column missing in GeoDataFrame&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">gdf</span><span class="p">[</span><span class="s1">&#39;geometry&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="n">Polygon</span><span class="p">,</span> <span class="n">MultiPolygon</span><span class="p">]:</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Geometry must be of type shapely polygon or multipolygon&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">gdf</span><span class="o">.</span><span class="n">crs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;GeoDataFrame must have a CRS&quot;</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">gdf</span><span class="o">.</span><span class="n">crs</span> <span class="o">!=</span> <span class="s1">&#39;epsg:4326&#39;</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">gdf</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">epsg</span><span class="o">=</span><span class="mi">4326</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">gdf</span>
+
+
+<div class="viewcode-block" id="Tessellation"><a class="viewcode-back" href="../../tesspy.html#tesspy.tessellation.Tessellation">[docs]</a><span class="k">class</span> <span class="nc">Tessellation</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Creates a Tessellation object using a GeoDataFrame or a city name,</span>
+<span class="sd">    which allows for different tessellation methods</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    area : GeoDataFrame or str</span>
+<span class="sd">        GeoDataFrame must have a single shaply Polygon or MultiPolygon</span>
+<span class="sd">        in geometry column and its CRS must be defined.</span>
+<span class="sd">        str must be a name of a city, or an address of a region</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; ffm= Tessellation(&#39;Frankfurt am Main&#39;)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">area</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">area</span><span class="p">)</span> <span class="o">==</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">area_gdf</span> <span class="o">=</span> <span class="n">_check_input_geodataframe</span><span class="p">(</span><span class="n">area</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">area</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">area_gdf</span> <span class="o">=</span> <span class="n">get_city_polygon</span><span class="p">(</span><span class="n">area</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;area must be in format: GeoDataFrame or string&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">poi_dataframe</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">available_poi_categories</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">road_network</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">queried_highway_types</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span> <span class="nf">_get_missing_poi_categories</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">poi_list</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Checks if the poi categories are already available in the object poi_dataframe</span>
+<span class="sd">        Creates a list of missing categories, which should be downloaded from OSM</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        poi_list : list</span>
+<span class="sd">            A list of passed POI categories</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        missing_poi_categories : list</span>
+<span class="sd">            A list containing the POI categories which should be downloaded</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">missing_poi_categories</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">poi_category</span> <span class="ow">in</span> <span class="n">poi_list</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">poi_dataframe</span><span class="p">,</span> <span class="n">poi_category</span><span class="p">):</span>
+                <span class="n">missing_poi_categories</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">poi_category</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">missing_poi_categories</span>
+
+<div class="viewcode-block" id="Tessellation.squares"><a class="viewcode-back" href="../../tesspy.html#tesspy.tessellation.Tessellation.squares">[docs]</a>    <span class="k">def</span> <span class="nf">squares</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resolution</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generate square grid laying over the area</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        resolution : int</span>
+<span class="sd">            Specifies the size of squares</span>
+<span class="sd">            A positive number between todo: complete</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        df_qk_squares : pandas.DataFrame</span>
+<span class="sd">            Dataframe containing squares</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">df_qk_squares</span> <span class="o">=</span> <span class="n">get_squares_polyfill</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">area_gdf</span><span class="p">,</span> <span class="n">resolution</span><span class="p">)</span>
+        <span class="n">df_qk_squares</span> <span class="o">=</span> <span class="n">df_qk_squares</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;osm_id&#39;</span><span class="p">,</span> <span class="s1">&#39;children_id&#39;</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="n">df_qk_squares</span></div>
+
+<div class="viewcode-block" id="Tessellation.hexagons"><a class="viewcode-back" href="../../tesspy.html#tesspy.tessellation.Tessellation.hexagons">[docs]</a>    <span class="k">def</span> <span class="nf">hexagons</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resolution</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generate hexagon grid laying over the area</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        resolution : int</span>
+<span class="sd">            Specifies the size of hexagons</span>
+<span class="sd">            A positive number between todo: complete</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        df_h3_hexagons : pandas.DataFrame</span>
+<span class="sd">            Dataframe containing hexagons</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">df_h3_hexagons</span> <span class="o">=</span> <span class="n">get_h3_hexagons</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">area_gdf</span><span class="p">,</span> <span class="n">resolution</span><span class="p">)</span>
+        <span class="n">df_h3_hexagons</span> <span class="o">=</span> <span class="n">df_h3_hexagons</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;index&#39;</span><span class="p">:</span> <span class="s1">&#39;hex_id&#39;</span><span class="p">})</span>
+
+        <span class="k">return</span> <span class="n">df_h3_hexagons</span></div>
+
+<div class="viewcode-block" id="Tessellation.adaptive_squares"><a class="viewcode-back" href="../../tesspy.html#tesspy.tessellation.Tessellation.adaptive_squares">[docs]</a>    <span class="k">def</span> <span class="nf">adaptive_squares</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                         <span class="n">start_resolution</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                         <span class="n">poi_categories</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;amenity&quot;</span><span class="p">,</span> <span class="s1">&#39;building&#39;</span><span class="p">],</span>
+                         <span class="n">threshold</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                         <span class="n">timeout</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span>
+                         <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generate adaptive squares based on the input POI data.</span>
+<span class="sd">        Squares are created at the start resolution. Each square is broken</span>
+<span class="sd">        into four smaller squares while the number of its POI exceeds the</span>
+<span class="sd">        threshold.</span>
+<span class="sd">        POI categories should be a list of OSM primary map features.</span>
+<span class="sd">        A complete list can be found on the OSM website:</span>
+<span class="sd">        https://wiki.openstreetmap.org/wiki/Map_features</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        start_resolution : int</span>
+<span class="sd">            Specifies the size of initial squares</span>
+<span class="sd">        poi_categories : A list of OSM primary map features or &#39;all&#39;</span>
+<span class="sd">                         default=[&quot;amenity&quot;, &#39;building&#39;]</span>
+<span class="sd">            &#39;all&#39; means all the available POI categories</span>
+<span class="sd">            Possible values in the list: [&#39;aerialway&#39;, &#39;aeroway&#39;,</span>
+<span class="sd">            &#39;amenity&#39;, &#39;barrier&#39;, &#39;boundary&#39;, &#39;building&#39;, &#39;craft&#39;,</span>
+<span class="sd">            &#39;emergency&#39;, &#39;geological&#39;, &#39;healthcare&#39;, &#39;highway&#39;,</span>
+<span class="sd">            &#39;historic&#39;, &#39;landuse&#39;, &#39;leisure&#39;, &#39;man_made&#39;, &#39;military&#39;,</span>
+<span class="sd">            &#39;natural&#39;, &#39;office&#39;, &#39;place&#39;, &#39;power&#39;, &#39;public_transport&#39;,</span>
+<span class="sd">            &#39;railway&#39;, &#39;route&#39;, &#39;shop&#39;, &#39;sport&#39;, &#39;telecom&#39;, &#39;tourism&#39;,</span>
+<span class="sd">            &#39;water&#39;, &#39;waterway&#39;]</span>
+<span class="sd">        threshold : int, default=None</span>
+<span class="sd">            Threshold for the number of POI in a single square. If square</span>
+<span class="sd">            has more, it is divided into four squares. If None passed, the</span>
+<span class="sd">            median number of POI per square in the initial level is used</span>
+<span class="sd">            as threshold.</span>
+<span class="sd">        timeout : int, default=60</span>
+<span class="sd">            The TCP connection timeout for the request</span>
+<span class="sd">        verbose : bool, default=False</span>
+<span class="sd">            If True, print information while computing</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        df_adaptive_squares : pandas.DataFrame</span>
+<span class="sd">            Dataframe containing adaptive squares</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">poi_categories</span> <span class="o">==</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
+            <span class="n">poi_categories</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">osm_primary_features</span><span class="p">()</span>
+
+        <span class="c1"># check if the categories are already available in poi_data</span>
+        <span class="c1"># find the ones which are not available and should be downloaded from OSM</span>
+        <span class="n">missing_poi_categories</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_missing_poi_categories</span><span class="p">(</span><span class="n">poi_categories</span><span class="p">)</span>
+
+        <span class="c1"># if there is any category that should be downloaded --&gt;</span>
+        <span class="c1"># create the query and run it</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">missing_poi_categories</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">poi_data_obj</span> <span class="o">=</span> <span class="n">POIdata</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">area_gdf</span><span class="p">,</span> <span class="n">missing_poi_categories</span><span class="p">,</span> <span class="n">timeout</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+            <span class="n">poi_data_new</span> <span class="o">=</span> <span class="n">poi_data_obj</span><span class="o">.</span><span class="n">get_poi_data</span><span class="p">()</span>
+            <span class="c1"># concat the data with the available poi_data dataframe of the Tessellation object</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">poi_dataframe</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">poi_dataframe</span><span class="p">,</span> <span class="n">poi_data_new</span><span class="p">])</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">poi_dataframe</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">poi_dataframe</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># data, based on which, tessellation should be done</span>
+        <span class="n">tess_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">poi_dataframe</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">poi_dataframe</span><span class="p">[</span><span class="n">poi_categories</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">points_geom</span> <span class="o">=</span> <span class="n">tess_data</span><span class="p">[[</span><span class="s1">&#39;center_longitude&#39;</span><span class="p">,</span> <span class="s1">&#39;center_latitude&#39;</span><span class="p">]]</span> \
+            <span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="n">Point</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="s1">&#39;center_longitude&#39;</span><span class="p">],</span> <span class="n">p</span><span class="p">[</span><span class="s1">&#39;center_latitude&#39;</span><span class="p">]),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">tess_data</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">geometry</span><span class="o">=</span><span class="n">points_geom</span><span class="p">,</span>
+                                     <span class="n">data</span><span class="o">=</span><span class="n">tess_data</span><span class="p">[</span><span class="n">poi_categories</span><span class="p">],</span>
+                                     <span class="n">crs</span><span class="o">=</span><span class="s1">&#39;EPSG:4326&#39;</span><span class="p">)</span>
+        <span class="n">poi_data_aqk</span> <span class="o">=</span> <span class="n">tess_data</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;points_geom&quot;</span><span class="p">:</span> <span class="s2">&quot;geometry&quot;</span><span class="p">})</span>
+
+        <span class="n">df_aqk</span> <span class="o">=</span> <span class="n">get_squares_polyfill</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">area_gdf</span><span class="p">,</span> <span class="n">start_resolution</span><span class="p">)</span>
+        <span class="n">aqk_count_df</span> <span class="o">=</span> <span class="n">count_poi</span><span class="p">(</span><span class="n">df_aqk</span><span class="p">,</span> <span class="n">poi_data_aqk</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">threshold</span><span class="p">:</span>
+            <span class="n">threshold</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">aqk_count_df</span><span class="p">[</span><span class="s2">&quot;count&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Threshold=</span><span class="si">{</span><span class="n">threshold</span><span class="si">}</span><span class="s2">  ==&gt; set as the median POI-count per square at the initial level&quot;</span><span class="p">)</span>
+
+        <span class="n">i</span> <span class="o">=</span> <span class="n">start_resolution</span>
+        <span class="k">while</span> <span class="nb">max</span><span class="p">(</span><span class="n">aqk_count_df</span><span class="p">[</span><span class="s2">&quot;count&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">threshold</span><span class="p">:</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Threshold exceeded! Squares are subdivided into resolution </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="n">df_tmp</span> <span class="o">=</span> <span class="n">get_adaptive_squares</span><span class="p">(</span><span class="n">aqk_count_df</span><span class="p">,</span> <span class="n">threshold</span><span class="p">)</span>
+            <span class="n">df_tmp</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;count&quot;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">df_tmp2</span> <span class="o">=</span> <span class="n">count_poi</span><span class="p">(</span><span class="n">df_tmp</span><span class="p">,</span> <span class="n">poi_data_aqk</span><span class="p">)</span>
+            <span class="n">aqk_count_df</span> <span class="o">=</span> <span class="n">df_tmp2</span>
+
+        <span class="n">final_aqk</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">sjoin</span><span class="p">(</span><span class="n">aqk_count_df</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">area_gdf</span><span class="p">)</span>
+        <span class="n">final_aqk</span> <span class="o">=</span> <span class="n">final_aqk</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;osm_id&#39;</span><span class="p">,</span> <span class="s1">&#39;children_id&#39;</span><span class="p">,</span> <span class="s1">&#39;index_right&#39;</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="n">final_aqk</span></div>
+
+<div class="viewcode-block" id="Tessellation.voronoi"><a class="viewcode-back" href="../../tesspy.html#tesspy.tessellation.Tessellation.voronoi">[docs]</a>    <span class="k">def</span> <span class="nf">voronoi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                <span class="n">cluster_algo</span><span class="o">=</span><span class="s2">&quot;k-means&quot;</span><span class="p">,</span>
+                <span class="n">poi_categories</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;amenity&quot;</span><span class="p">,</span> <span class="s1">&#39;building&#39;</span><span class="p">],</span>
+                <span class="n">timeout</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span>
+                <span class="n">n_polygons</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+                <span class="n">min_cluster_size</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span>
+                <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generate Voronoi polygons based on the input POI data.</span>
+<span class="sd">        POI categories should be a list of OSM primary map features.</span>
+<span class="sd">        A complete list can be found on the OSM website:</span>
+<span class="sd">        https://wiki.openstreetmap.org/wiki/Map_features</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        cluster_algo : {&#39;k-means&#39;, &#39;hdbscan&#39;, None}, default=&#39;k-means&#39;</span>
+<span class="sd">            Algorithm for clustering the POI data before creating</span>
+<span class="sd">            Voronoi generators. If None passed, POI data are</span>
+<span class="sd">            directly used as generators.</span>
+<span class="sd">        poi_categories : A list of OSM primary map features or &#39;all&#39;</span>
+<span class="sd">                         default=[&quot;amenity&quot;, &#39;building&#39;]</span>
+<span class="sd">            &#39;all&#39; means all the available POI categories</span>
+<span class="sd">            Possible values in the list: [&#39;aerialway&#39;, &#39;aeroway&#39;,</span>
+<span class="sd">            &#39;amenity&#39;, &#39;barrier&#39;, &#39;boundary&#39;, &#39;building&#39;, &#39;craft&#39;,</span>
+<span class="sd">            &#39;emergency&#39;, &#39;geological&#39;, &#39;healthcare&#39;, &#39;highway&#39;,</span>
+<span class="sd">            &#39;historic&#39;, &#39;landuse&#39;, &#39;leisure&#39;, &#39;man_made&#39;, &#39;military&#39;,</span>
+<span class="sd">            &#39;natural&#39;, &#39;office&#39;, &#39;place&#39;, &#39;power&#39;, &#39;public_transport&#39;,</span>
+<span class="sd">            &#39;railway&#39;, &#39;route&#39;, &#39;shop&#39;, &#39;sport&#39;, &#39;telecom&#39;, &#39;tourism&#39;,</span>
+<span class="sd">            &#39;water&#39;, &#39;waterway&#39;]</span>
+<span class="sd">        timeout : int, default=60</span>
+<span class="sd">            The TCP connection timeout for the request</span>
+<span class="sd">        n_polygons : int, default=100</span>
+<span class="sd">            Only when cluster_algo=&quot;k-means&quot;, approximate number of</span>
+<span class="sd">            polygons to be created. Positive number and less than</span>
+<span class="sd">            the initial POI numbers</span>
+<span class="sd">        min_cluster_size : int, default=15</span>
+<span class="sd">            Only when cluster_algo=&quot;hdbscan&quot;, minimum cluster size</span>
+<span class="sd">            Positive number</span>
+<span class="sd">        verbose : bool, default=False</span>
+<span class="sd">            If True, print information while computing</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        df_voronoi : pandas.DataFrame</span>
+<span class="sd">            Dataframe containing Voronoi polygons</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">poi_categories</span> <span class="o">==</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
+            <span class="n">poi_categories</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">osm_primary_features</span><span class="p">()</span>
+
+        <span class="c1"># check if the categories are already available in poi_data</span>
+        <span class="c1"># find the ones which are not available and should be downloaded from OSM</span>
+        <span class="n">missing_poi_categories</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_missing_poi_categories</span><span class="p">(</span><span class="n">poi_categories</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">area_gdf</span><span class="p">)</span> <span class="o">==</span> <span class="n">MultiPolygon</span><span class="p">:</span>
+            <span class="n">queried_area</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">area_gdf</span><span class="o">.</span><span class="n">convex_hull</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">queried_area</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">area_gdf</span>
+
+        <span class="c1"># if there is any category that should be downloaded --&gt;</span>
+        <span class="c1"># create the query and run it</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">missing_poi_categories</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">poi_data_obj</span> <span class="o">=</span> <span class="n">POIdata</span><span class="p">(</span><span class="n">queried_area</span><span class="p">,</span> <span class="n">missing_poi_categories</span><span class="p">,</span> <span class="n">timeout</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+            <span class="n">poi_data_new</span> <span class="o">=</span> <span class="n">poi_data_obj</span><span class="o">.</span><span class="n">get_poi_data</span><span class="p">()</span>
+            <span class="c1"># concat the data with the available poi_data dataframe of the Tessellation object</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">poi_dataframe</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">poi_dataframe</span><span class="p">,</span> <span class="n">poi_data_new</span><span class="p">])</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">poi_dataframe</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">poi_dataframe</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># data, based on which, tessellation should be done</span>
+        <span class="n">tess_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">poi_dataframe</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">poi_dataframe</span><span class="p">[</span><span class="n">poi_categories</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">data_locs</span> <span class="o">=</span> <span class="n">tess_data</span><span class="p">[[</span><span class="s1">&#39;center_longitude&#39;</span><span class="p">,</span> <span class="s1">&#39;center_latitude&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">values</span>
+
+        <span class="c1"># create generators for Voronoi diagram</span>
+        <span class="k">if</span> <span class="n">cluster_algo</span> <span class="o">==</span> <span class="s2">&quot;k-means&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;K-Means Clustering...&#39;</span><span class="p">)</span>
+            <span class="n">clustering</span> <span class="o">=</span> <span class="n">KMeans</span><span class="p">(</span><span class="n">n_clusters</span><span class="o">=</span><span class="n">n_polygons</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">data_locs</span><span class="p">)</span>
+            <span class="n">generators</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">data_locs</span><span class="p">[</span><span class="n">clustering</span><span class="o">.</span><span class="n">labels_</span> <span class="o">==</span> <span class="n">label</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_polygons</span><span class="p">)]</span>
+
+        <span class="k">elif</span> <span class="n">cluster_algo</span> <span class="o">==</span> <span class="s2">&quot;hdbscan&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;HDBSCAN Clustering... This can take a while...&#39;</span><span class="p">)</span>
+            <span class="n">clustering</span> <span class="o">=</span> <span class="n">hdbscan</span><span class="o">.</span><span class="n">HDBSCAN</span><span class="p">(</span><span class="n">min_cluster_size</span><span class="o">=</span><span class="n">min_cluster_size</span><span class="p">,</span> <span class="n">prediction_data</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">data_locs</span><span class="p">)</span>
+            <span class="n">generators</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">data_locs</span><span class="p">[</span><span class="n">clustering</span><span class="o">.</span><span class="n">labels_</span> <span class="o">==</span> <span class="n">label</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span>
+                          <span class="nb">range</span><span class="p">(</span><span class="n">clustering</span><span class="o">.</span><span class="n">labels_</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
+
+        <span class="k">elif</span> <span class="n">cluster_algo</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tess_data</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">5000</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Too many generators for Voronoi diagram. Please select a clustering algorithm&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">generators</span> <span class="o">=</span> <span class="n">data_locs</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Please use a clustering algorithm: k-means, hdbscan or None&quot;</span><span class="p">)</span>
+
+        <span class="c1"># create Voronoi polygons</span>
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Creating Voronoi polygons...&#39;</span><span class="p">)</span>
+        <span class="n">voronoi_dia</span> <span class="o">=</span> <span class="n">Voronoi</span><span class="p">(</span><span class="n">generators</span><span class="p">)</span>
+        <span class="n">voronoi_poly</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">geometry</span><span class="o">=</span><span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">voronoi_polygons</span><span class="p">(</span><span class="n">voronoi_dia</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">)],</span> <span class="n">crs</span><span class="o">=</span><span class="s2">&quot;EPSG:4326&quot;</span><span class="p">)</span>
+        <span class="n">voronoi_poly</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">sjoin</span><span class="p">(</span><span class="n">voronoi_poly</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">area_gdf</span><span class="p">)</span>
+        <span class="n">vor_polygons</span> <span class="o">=</span> <span class="n">voronoi_poly</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">area_gdf</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">df_voronoi</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">geometry</span><span class="o">=</span><span class="n">vor_polygons</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">df_voronoi</span></div>
+
+<div class="viewcode-block" id="Tessellation.city_blocks"><a class="viewcode-back" href="../../tesspy.html#tesspy.tessellation.Tessellation.city_blocks">[docs]</a>    <span class="k">def</span> <span class="nf">city_blocks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                    <span class="n">n_polygons</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">detail_deg</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">split_roads</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                    <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span>
+                    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create city bocks (tiles) using road data from the area.</span>
+<span class="sd">        To collect road data, specify the highway types by</span>
+<span class="sd">        modifying detail_deg</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        n_polygons: int, default = None</span>
+<span class="sd">            targeted number of city blocks, this is an approximation</span>
+<span class="sd">            the final number of polygons can vary slightly</span>
+<span class="sd">        detail_deg: int, default = None</span>
+<span class="sd">            define the number of the top (osm) highway types to use for creating city blocks</span>
+<span class="sd">        split_roads: bool, default = True</span>
+<span class="sd">            if True, LineStrings are split up such that each LineString contains exactly 2 Points</span>
+<span class="sd">            This usually make the polygonizing more robust but slower.</span>
+<span class="sd">        verbose : bool, default = False</span>
+<span class="sd">            If True, print information while computing</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        final_city_blocks : geopandas.GeoDataFrame</span>
+<span class="sd">            GeoDataFrame with city block tiles</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># check if the road data is already available</span>
+        <span class="k">if</span> <span class="n">detail_deg</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">highwaytypes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">osm_highway_types</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">detail_deg</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">int</span> <span class="ow">and</span> <span class="n">detail_deg</span> <span class="o">&lt;=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">osm_highway_types</span><span class="p">()):</span>
+            <span class="n">highwaytypes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">osm_highway_types</span><span class="p">()[:</span><span class="n">detail_deg</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Please insert a valid detail degree: None or int&quot;</span><span class="p">)</span>
+
+        <span class="c1"># for OSM query, we need a polygon. If multipolygon is passed, we generate the convex hull</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">area_gdf</span><span class="p">)</span> <span class="o">==</span> <span class="n">MultiPolygon</span><span class="p">:</span>
+            <span class="n">queried_area</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">area_gdf</span><span class="o">.</span><span class="n">convex_hull</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">queried_area</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">area_gdf</span>
+
+        <span class="c1"># if the road network is not available</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">queried_highway_types</span> <span class="o">!=</span> <span class="n">highwaytypes</span><span class="p">:</span>
+            <span class="c1"># collect road network data</span>
+            <span class="n">road_data_collect_object</span> <span class="o">=</span> <span class="n">RoadData</span><span class="p">(</span><span class="n">queried_area</span><span class="p">,</span> <span class="n">detail_deg</span><span class="p">,</span> <span class="n">split_roads</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+            <span class="n">road_data</span> <span class="o">=</span> <span class="n">road_data_collect_object</span><span class="o">.</span><span class="n">get_road_network</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">road_network</span> <span class="o">=</span> <span class="n">road_data</span>
+            <span class="c1"># keep track of downloaded road network to prevent similar OSM request</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">queried_highway_types</span> <span class="o">=</span> <span class="n">highwaytypes</span>
+        <span class="c1"># if road network available, don&#39;t download it again.</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">road_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">road_network</span>
+
+        <span class="c1"># todo: causing problems (kernel dies): should this stay?</span>
+        <span class="c1"># split roads if True</span>
+        <span class="k">if</span> <span class="n">split_roads</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Splitting the linestring, such that each linestring has exactly 2 points.&quot;</span><span class="p">)</span>
+            <span class="n">road_data</span> <span class="o">=</span> <span class="n">split_linestring</span><span class="p">(</span><span class="n">road_data</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Creating initial city blocks using the road network data...&quot;</span><span class="p">)</span>
+
+        <span class="c1"># creating blocks</span>
+        <span class="n">blocks</span> <span class="o">=</span> <span class="n">create_blocks</span><span class="p">(</span><span class="n">road_data</span><span class="p">)</span>
+
+        <span class="c1"># keep polygons inside studied area</span>
+        <span class="n">polygons_in_area</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">sjoin</span><span class="p">(</span><span class="n">blocks</span><span class="p">,</span> <span class="n">queried_area</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s1">&#39;inner&#39;</span><span class="p">)</span>
+        <span class="n">polygons_in_area</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;index_right&quot;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># create polygons by the border</span>
+        <span class="n">rest_polygons</span> <span class="o">=</span> <span class="n">get_rest_polygon</span><span class="p">(</span><span class="n">polygons_in_area</span><span class="p">,</span> <span class="n">queried_area</span><span class="p">)</span>
+
+        <span class="c1"># add rest polygons to all polygons</span>
+        <span class="n">city_blocks</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">polygons_in_area</span><span class="p">,</span> <span class="n">rest_polygons</span><span class="p">])</span>
+
+        <span class="c1"># merging small polygons using hierarchical clustering</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">n_polygons</span><span class="p">:</span>
+            <span class="n">city_blocks</span> <span class="o">=</span> <span class="n">city_blocks</span><span class="p">[[</span><span class="s1">&#39;geometry&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">city_blocks</span>
+        <span class="k">if</span> <span class="n">n_polygons</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">city_blocks</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Cannot extract more city blocks than initial city blocks!&#39;</span>
+                             <span class="sa">f</span><span class="s1">&#39;Initial city blocks are </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">city_blocks</span><span class="p">)</span><span class="si">}</span><span class="s1">, desired city blocks are </span><span class="si">{</span><span class="n">n_polygons</span><span class="si">}</span><span class="s1">&#39;</span>
+                             <span class="sa">f</span><span class="s1">&#39;Choose a value less than </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">city_blocks</span><span class="p">)</span><span class="si">}</span><span class="s1">.&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Merging small city blocks...&quot;</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s1">&#39;ignore&#39;</span><span class="p">)</span>
+            <span class="n">city_blocks</span><span class="p">[</span><span class="s2">&quot;centroid&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">city_blocks</span><span class="o">.</span><span class="n">centroid</span>
+
+        <span class="n">coordinates</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">([</span><span class="n">city_blocks</span><span class="p">[</span><span class="s2">&quot;centroid&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">city_blocks</span><span class="p">[</span><span class="s2">&quot;centroid&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">y</span><span class="p">])</span>
+        <span class="c1"># the algorithm needs O(n²) memory and O(n³) runtime</span>
+        <span class="c1"># =&gt; doesn&#39;t work with large data ==&gt; not enough RAM ==&gt; kernel dies</span>
+        <span class="c1"># think about changing the clustering algorithm</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">AgglomerativeClustering</span><span class="p">(</span><span class="n">n_clusters</span><span class="o">=</span><span class="n">n_polygons</span><span class="p">,</span> <span class="n">affinity</span><span class="o">=</span><span class="s1">&#39;euclidean&#39;</span><span class="p">)</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span>
+
+        <span class="n">city_blocks</span><span class="p">[</span><span class="s2">&quot;Cluster&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">labels_</span>
+
+        <span class="n">merged_polys</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">city_blocks</span><span class="p">[</span><span class="s2">&quot;Cluster&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">():</span>
+            <span class="n">tmp</span> <span class="o">=</span> <span class="n">city_blocks</span><span class="p">[</span><span class="n">city_blocks</span><span class="p">[</span><span class="s2">&quot;Cluster&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">idx</span><span class="p">]</span>
+            <span class="n">polygons</span> <span class="o">=</span> <span class="n">tmp</span><span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+            <span class="n">merged_polygon</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoSeries</span><span class="p">(</span><span class="n">unary_union</span><span class="p">(</span><span class="n">polygons</span><span class="p">))</span>
+            <span class="n">merged_polys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">merged_polygon</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="n">new_merged_polys</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;geometry&#39;</span><span class="p">:</span> <span class="n">merged_polys</span><span class="p">}</span>
+        <span class="n">merged_polys_df</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">new_merged_polys</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="s2">&quot;EPSG:4326&quot;</span><span class="p">)</span>
+        <span class="n">keep_df</span> <span class="o">=</span> <span class="n">merged_polys_df</span><span class="p">[</span><span class="n">merged_polys_df</span><span class="o">.</span><span class="n">geom_type</span> <span class="o">==</span> <span class="s2">&quot;Polygon&quot;</span><span class="p">]</span>
+        <span class="n">to_explode</span> <span class="o">=</span> <span class="n">merged_polys_df</span><span class="p">[</span><span class="n">merged_polys_df</span><span class="o">.</span><span class="n">geom_type</span> <span class="o">==</span> <span class="s2">&quot;MultiPolygon&quot;</span><span class="p">]</span>
+        <span class="n">explode_df</span> <span class="o">=</span> <span class="n">explode</span><span class="p">(</span><span class="n">to_explode</span><span class="p">)</span>
+        <span class="n">explode_df</span> <span class="o">=</span> <span class="n">explode_df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+        <span class="n">explode_df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;level_0&quot;</span><span class="p">,</span> <span class="s2">&quot;level_1&quot;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">final_city_blocks</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">keep_df</span><span class="p">,</span> <span class="n">explode_df</span><span class="p">])</span>
+        <span class="n">final_city_blocks</span> <span class="o">=</span> <span class="n">final_city_blocks</span><span class="p">[[</span><span class="s1">&#39;geometry&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">final_city_blocks</span></div>
+
+<div class="viewcode-block" id="Tessellation.get_polygon"><a class="viewcode-back" href="../../tesspy.html#tesspy.tessellation.Tessellation.get_polygon">[docs]</a>    <span class="k">def</span> <span class="nf">get_polygon</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        returns the area polygon in GeoDataFrame format</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">area_gdf</span></div>
+
+<div class="viewcode-block" id="Tessellation.get_poi_data"><a class="viewcode-back" href="../../tesspy.html#tesspy.tessellation.Tessellation.get_poi_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_poi_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        returns the POI data in GeoDataFrame format</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">poi_dataframe</span></div>
+
+<div class="viewcode-block" id="Tessellation.get_road_network"><a class="viewcode-back" href="../../tesspy.html#tesspy.tessellation.Tessellation.get_road_network">[docs]</a>    <span class="k">def</span> <span class="nf">get_road_network</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns</span>
+<span class="sd">        --------</span>
+<span class="sd">        road_network : geopandas.GeoDataFrame</span>
+<span class="sd">            the road network data in GeoDataFrame format</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">road_network</span></div>
+
+<div class="viewcode-block" id="Tessellation.osm_primary_features"><a class="viewcode-back" href="../../tesspy.html#tesspy.tessellation.Tessellation.osm_primary_features">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">osm_primary_features</span><span class="p">():</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        list of primary OSM features</span>
+<span class="sd">        available at https://wiki.openstreetmap.org/wiki/Map_features</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        --------</span>
+<span class="sd">        list</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">POIdata</span><span class="o">.</span><span class="n">osm_primary_features</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Tessellation.osm_highway_types"><a class="viewcode-back" href="../../tesspy.html#tesspy.tessellation.Tessellation.osm_highway_types">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">osm_highway_types</span><span class="p">():</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        list of all highway types</span>
+<span class="sd">        returns list of highway types</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">RoadData</span><span class="o">.</span><span class="n">osm_highway_types</span><span class="p">()</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, tesspy developers.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

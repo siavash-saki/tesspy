@@ -1,151 +1,211 @@
-
 <!DOCTYPE html>
-
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
-
-    <title>Welcome to tesspy’s documentation! &#8212; tesspy 0.0.1 documentation</title>
-    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-    <script src="_static/jquery.js"></script>
-    <script src="_static/underscore.js"></script>
-    <script src="_static/doctools.js"></script>
-    <script src="_static/language_data.js"></script>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Welcome to tesspy’s documentation! &mdash; tesspy 0.0.1 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="tesspy package" href="tesspy.html" />
-   
-  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
-  
-  
-  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+    <link rel="next" title="Examples" href="Examples.html" /> 
+</head>
 
-  </head><body>
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="#" class="icon icon-home"> tesspy
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tesspy.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="functions.html">All Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Contribution.html">Contribution</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Acknowledgements.html">Acknowledgements</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">tesspy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="#" class="icon icon-home"></a> &raquo;</li>
+      <li>Welcome to tesspy’s documentation!</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
   
+<style>
+/* CSS overrides for sphinx_rtd_theme */
 
-    <div class="document">
-      <div class="documentwrapper">
-        <div class="bodywrapper">
-          
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
 
-          <div class="body" role="main">
-            
-  <section id="welcome-to-tesspy-s-documentation">
-<h1>Welcome to tesspy’s documentation!<a class="headerlink" href="#welcome-to-tesspy-s-documentation" title="Permalink to this headline">¶</a></h1>
-<section id="introduction">
-<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
-<p>tesspy is a python library for geographical tessellation. By discretizing urban areas,
-it builds local geographical units that allow further quantitative analysis. In addition
-to regular tessellation methods, such as square grid and hexagon grid, it builds irregular
-tessellations, such as voronoi diagrams and city blocks, based on OpenStreetMap geospatial data.</p>
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="welcome-to-tesspy-s-documentation">
+<h1>Welcome to tesspy’s documentation!<a class="headerlink" href="#welcome-to-tesspy-s-documentation" title="Permalink to this headline"></a></h1>
+<img alt="tesspy" class="align-left" src="_images/logo.jpg" />
+<div class="section" id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">tesspy</span></code> is a python library for geographical tessellation.</p>
+<p>The process of discretization of space into subspaces without overlaps and gaps is called tessellation. Tessellation is essential in understanding geographical space and provides a framework for analyzing geospatial data. Different tessellation methods are implemented in <cite>tesspy</cite>. They can be divided into two groups. The first group is regular tessellation methods: square grid and hexagon grid. The second group is irregular tessellation methods based on geospatial data. These methods are adaptive squares, Voronoi diagrams, and city blocks. The geospatial data used for tessellation is retrieved from the OpenStreetMap database.</p>
 <p>The package is currently maintained by <a class="reference external" href="http://github.com/siavash-saki">&#64;siavash-saki</a> and <a class="reference external" href="http://github.com/JoHamann">&#64;JoHamann</a>.</p>
 <p><a class="reference external" href="https://github.com/siavash-saki/tesspy">https://github.com/siavash-saki/tesspy</a></p>
-</section>
-<section id="install">
-<h2>Install<a class="headerlink" href="#install" title="Permalink to this headline">¶</a></h2>
-<p>asadasdasd</p>
-<p>You can install <code class="docutils literal notranslate"><span class="pre">tesspy</span></code> from PyPI using pip:</p>
+</div>
+<div class="section" id="install">
+<h2>Install<a class="headerlink" href="#install" title="Permalink to this headline"></a></h2>
+<p>You can install <code class="docutils literal notranslate"><span class="pre">tesspy</span></code> from PyPI using pip (<strong>Not Recommended</strong>):</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">tesspy</span>
 </pre></div>
 </div>
-</section>
-<section id="documentation-contents">
-<h2>Documentation contents<a class="headerlink" href="#documentation-contents" title="Permalink to this headline">¶</a></h2>
+<p>and from conda (<strong>Recommended</strong>):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">install</span> <span class="n">tesspy</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="creating-a-new-environment-for-tesspy">
+<h2>Creating a new environment for tesspy<a class="headerlink" href="#creating-a-new-environment-for-tesspy" title="Permalink to this headline"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">tesspy</span></code> depends on <code class="docutils literal notranslate"><span class="pre">geopandas</span></code>, which could make the installation sometimes tricky because of the conflicts with the current packages. Therefore, we recommend creating a new clean environment and installing the dependencies from the conda-forge channel.</p>
+<p>Create a new environment:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">create</span> <span class="o">-</span><span class="n">n</span> <span class="n">tesspy_env</span> <span class="o">-</span><span class="n">c</span> <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
+</pre></div>
+</div>
+<p>Activate this environment:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">activate</span> <span class="n">tesspy_env</span>
+</pre></div>
+</div>
+<p>Install tesspy from conda-forge channel:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">install</span> <span class="o">-</span><span class="n">c</span> <span class="n">conda</span><span class="o">-</span><span class="n">forge</span> <span class="n">tesspy</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Permalink to this headline"></a></h2>
+<p>The city of “Frankfurt am Main” in Germany is used to showcase different tessellation methods. This is how a tessellation object is built, and different methods are called. For the tessellation methods based on Points of Interests (adaptive squares, Voronoi polygons, and City Blocks), we use <code class="docutils literal notranslate"><span class="pre">amenity</span></code> data from the OpenStreetMap.:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">tesspy</span> <span class="kn">import</span> <span class="n">Tessellation</span>
+<span class="n">ffm</span><span class="o">=</span> <span class="n">Tessellation</span><span class="p">(</span><span class="s1">&#39;Frankfurt am Main&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="section" id="squares">
+<h3>Squares<a class="headerlink" href="#squares" title="Permalink to this headline"></a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ffm_sqruares</span> <span class="o">=</span> <span class="n">ffm</span><span class="o">.</span><span class="n">squares</span><span class="p">(</span><span class="n">resolution</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="squares" src="_images/Squares.png" />
+</div>
+<div class="section" id="hexagons">
+<h3>Hexagons<a class="headerlink" href="#hexagons" title="Permalink to this headline"></a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ffm_sqruares</span> <span class="o">=</span> <span class="n">ffm</span><span class="o">.</span><span class="n">squares</span><span class="p">(</span><span class="n">resolution</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="_images/Hexagons.png" src="_images/Hexagons.png" />
+</div>
+<div class="section" id="adaptive-squares">
+<h3>Adaptive Squares<a class="headerlink" href="#adaptive-squares" title="Permalink to this headline"></a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ffm_asq</span> <span class="o">=</span> <span class="n">ffm</span><span class="o">.</span><span class="n">adaptive_squares</span><span class="p">(</span><span class="n">start_resolution</span><span class="o">=</span><span class="mi">14</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">poi_categories</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;amenity&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+<img alt="_images/Adaptive_Squares.png" src="_images/Adaptive_Squares.png" />
+</div>
+<div class="section" id="voronoi-polygons">
+<h3>Voronoi Polygons<a class="headerlink" href="#voronoi-polygons" title="Permalink to this headline"></a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ffm_sqruares</span> <span class="o">=</span> <span class="n">ffm</span><span class="o">.</span><span class="n">squares</span><span class="p">(</span><span class="n">resolution</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="_images/Voronoi.png" src="_images/Voronoi.png" />
+</div>
+<div class="section" id="city-blocks">
+<h3>City Blocks<a class="headerlink" href="#city-blocks" title="Permalink to this headline"></a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ffm_sqruares</span> <span class="o">=</span> <span class="n">ffm</span><span class="o">.</span><span class="n">squares</span><span class="p">(</span><span class="n">resolution</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="_images/CB.png" src="_images/CB.png" />
 <div class="toctree-wrapper compound">
-<p><span class="caption-text">Contents:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="tesspy.html">tesspy package</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="tesspy.html#module-tesspy.poi_data">tesspy.poi_data</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tesspy.html#module-tesspy.tessellation">tesspy.tessellation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tesspy.html#module-tesspy.tessellation_functions">tessellation_functions</a></li>
-</ul>
-</li>
-</ul>
 </div>
-</section>
-<section id="all-functions">
-<h2>All functions<a class="headerlink" href="#all-functions" title="Permalink to this headline">¶</a></h2>
-<ul class="simple">
-<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
-</ul>
-</section>
-<section id="module-index">
-<h2>Module index<a class="headerlink" href="#module-index" title="Permalink to this headline">¶</a></h2>
-<ul class="simple">
-<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
-</ul>
-</section>
-</section>
+</div>
+</div>
+</div>
 
 
+           </div>
           </div>
-          
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="Examples.html" class="btn btn-neutral float-right" title="Examples" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, tesspy developers.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper">
-<h1 class="logo"><a href="#">tesspy</a></h1>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
 
-
-
-
-
-
-
-
-<h3>Navigation</h3>
-<p><span class="caption-text">Contents:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="tesspy.html">tesspy package</a></li>
-</ul>
-
-<div class="relations">
-<h3>Related Topics</h3>
-<ul>
-  <li><a href="#">Documentation overview</a><ul>
-      <li>Next: <a href="tesspy.html" title="next chapter">tesspy package</a></li>
-  </ul></li>
-</ul>
-</div>
-<div id="searchbox" style="display: none" role="search">
-  <h3 id="searchlabel">Quick search</h3>
-    <div class="searchformwrapper">
-    <form class="search" action="search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
-      <input type="submit" value="Go" />
-    </form>
-    </div>
-</div>
-<script>$('#searchbox').show(0);</script>
-
-
-
-
-
-
-
-
-        </div>
-      </div>
-      <div class="clearer"></div>
-    </div>
-    <div class="footer">
-      &copy;2022, tesspy developers.
-      
-      |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.2.1</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
-      
-      |
-      <a href="_sources/index.rst.txt"
-          rel="nofollow">Page source</a>
-    </div>
-
-    
-
-    
-  </body>
+</body>
 </html>
