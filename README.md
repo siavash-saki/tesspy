@@ -1,10 +1,10 @@
 # tesspy
 
-<img align="right" src="docs/readme_pics/logo.jpg">
+<img align="left" src="docs/readme_pics/logo.jpg">
 
 `tesspy` is a python library for urban areas tessellation. 
 
-The process of discretization of space into subspaces without overlaps and gaps is called tessellation. Tessellation is essential in understanding geographical space and provides a framework for analyzing geospatial data. Different tessellation methods are implemented in `tesspy`. The first group are regular tessellation methods: Square grid and hexagon grid. Second group are irregular tessellation methods based on gespatial data. These methods are: adaptive squares, Voronoi diagrams and city blocks. The geospatial data used for tessellation is retrieved from the OpenStreetMap database.
+The process of discretization of space into subspaces without overlaps and gaps is called tessellation. Tessellation is essential in understanding geographical space and provides a framework for analyzing geospatial data. Different tessellation methods are implemented in `tesspy`. They can be divided into two groups. The first group is regular tessellation methods: square grid and hexagon grid. The second group is irregular tessellation methods based on geospatial data. These methods are adaptive squares, Voronoi diagrams, and city blocks. The geospatial data used for tessellation is retrieved from the OpenStreetMap database.
 
 
 ## Installation
@@ -46,7 +46,7 @@ The official documentation is hosted on **[ReadTheDocs](https://tesspy.readthedo
 
 
 ## Examples
-The city of "Frankfurt am Main" in Germany is used to showcase different tessellation methods. This is how a tessellation objest is built and diffrent methods are called. For the tessellation methods which are based on Points of Interests (adaptive squares, Voronoi polygons, and City Blocks), we use `amenty` data from the OpenStreetMap.
+The city of "Frankfurt am Main" in Germany is used to showcase different tessellation methods. This is how a tessellation object is built, and different methods are called. For the tessellation methods based on Points of Interests (adaptive squares, Voronoi polygons, and City Blocks), we use `amenity` data from the OpenStreetMap.
 ```python
 from tesspy import Tessellation
 ffm= Tessellation('Frankfurt am Main')
@@ -87,8 +87,8 @@ ffm_city_blocks = ffm.city_blocks(n_polygons=500)
 
 ## Contributing to tesspy
 All kind of contributions are welcome: 
-* Improvment of code with new features, bug fixes, and  bug reports
-* Improvment of documentation
+* Improvement of code with new features, bug fixes, and  bug reports
+* Improvement of documentation
 * Additional tests
 
 If you want to contribute to code:
@@ -100,7 +100,7 @@ If you want to contribute to code:
 6. Update documentation
 7. Pull Request
 
-If you have any idea or question, feel free to open an issue.
+If you have any ideas or questions, feel free to open an issue.
 
 
 ## Acknowledgements
