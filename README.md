@@ -54,12 +54,7 @@ ffm= Tessellation('Frankfurt am Main')
 ```python
 ffm_sqruares = ffm.squares(resolution=15)
 ```
-<p align="left">
-  <img src="docs/readme_pics/Squares.png">
-</p>
-
-![Squares_tessellation](https://github.com/siavash-saki/tesspy/blob/7a6f6bc8bab709b14c64827ae875d0dc8abcd332/docs/readme_pics/Squares.png)
-
+![Squares_tessellation](docs/readme_pics/Squares.png)
 
 ### Hexagons
 ```python
