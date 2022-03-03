@@ -88,6 +88,7 @@ class Tessellation:
         self.poi_dataframe = pd.DataFrame()
         self.available_poi_categories = []
         self.road_network = pd.DataFrame()
+        self.queried_highway_types = []
 
     def _get_missing_poi_categories(self, poi_list):
         """
@@ -372,7 +373,8 @@ class Tessellation:
         detail_deg: int, default = None
             define the number of the top (osm) highway types to use for creating city blocks
         split_roads: bool, default = True
-            if True, LineStrings should be split up such that each LineString contains exactly 2 Points
+            if True, LineStrings are split up such that each LineString contains exactly 2 Points
+            This usually make the polygonizing more robust but slower.
         verbose : bool, default = False
             If True, print information while computing
 
@@ -381,51 +383,59 @@ class Tessellation:
         final_city_blocks : geopandas.GeoDataFrame
             GeoDataFrame with city block tiles
         """
+
+        # check if the road data is already available
+        if detail_deg is None:
+            highwaytypes = self.osm_highway_types()
+        elif type(detail_deg) is int and detail_deg <= len(self.osm_highway_types()):
+            highwaytypes = self.osm_highway_types()[:detail_deg]
+        else:
+            raise ValueError("Please insert a valid detail degree: None or int")
+
+        # for OSM query, we need a polygon. If multipolygon is passed, we generate the convex hull
         if type(self.area_gdf) == MultiPolygon:
             queried_area = self.area_gdf.convex_hull
         else:
             queried_area = self.area_gdf
 
-        road_data = RoadData(queried_area, detail_deg, split_roads, verbose).get_road_network()
+        # if the road network is not available
+        if self.queried_highway_types != highwaytypes:
+            # collect road network data
+            road_data_collect_object = RoadData(queried_area, detail_deg, split_roads, verbose)
+            road_data = road_data_collect_object.get_road_network()
+            self.road_network = road_data
+            # keep track of downloaded road network to prevent similar OSM request
+            self.queried_highway_types = highwaytypes
+        # if road network available, don't download it again.
+        else:
+            road_data = self.road_network
+
+        # split roads if True
+        if split_roads:
+            if verbose:
+                print("Splitting the linestring, such that each linestring has exactly 2 points.")
+            road_data = split_linestring(road_data)
+
         if verbose:
-            # print(f"Road data is collected. Overall {len(road_data)} streets are included.")
             print("Creating initial city blocks using the road network data...")
 
+        # creating blocks
         blocks = create_blocks(road_data)
 
+        # keep polygons inside studied area
         polygons_in_area = gpd.sjoin(blocks, queried_area, how='inner')
         polygons_in_area.drop(columns=["index_right"], inplace=True)
-        # if verbose:
-        #     print(f"Filtered out {len(blocks) - len(polygons_in_area)} polygons, that where not in the area.")
 
+        # create polygons by the border
         rest_polygons = get_rest_polygon(polygons_in_area, queried_area)
 
+        # add rest polygons to all polygons
         city_blocks = pd.concat([polygons_in_area, rest_polygons])
 
+        # merging small polygons using hierarchical clustering
         if not n_polygons:
             city_blocks = city_blocks[['geometry']].reset_index(drop=True)
             return city_blocks
-
-        # city_blocks_hc = city_blocks.to_crs("EPSG:5243")
-        # city_blocks_hc["centroid"] = city_blocks_hc.centroid
-        #
-        # coordinates = np.column_stack([city_blocks_hc["centroid"].x, city_blocks_hc["centroid"].y])
-        #
-        #
-        # if verbose:
-        #     print("Threshold for hierarchical clustering is computed.")
-        # th = get_hierarchical_clustering_parameter(coordinates, n_polygons)
-        #
-        # if th:
-        #     if verbose:
-        #         print(f"Distance threshold for clustering is {th}.")
-        #
-        #     model = AgglomerativeClustering(n_clusters=None, distance_threshold=th, affinity='euclidean')
-        #     model.fit(coordinates)
-        # else:
-        #     if verbose:
-        #         print(f"No threshold could match the inputs, so the nb of LGUs ({n_polygons}) is used.")
-
         if n_polygons > len(city_blocks):
             raise ValueError(f'Cannot extract more city blocks than initial city blocks!'
                              f'Initial city blocks are {len(city_blocks)}, desired city blocks are {n_polygons}'
@@ -442,7 +452,6 @@ class Tessellation:
         model.fit(coordinates)
 
         city_blocks["Cluster"] = model.labels_
-        # city_blocks_hc["Cluster"] = model.labels_
 
         merged_polys = []
         for idx in city_blocks["Cluster"].unique():
@@ -477,7 +486,6 @@ class Tessellation:
         return self.poi_dataframe
 
     def get_road_network(self):
-        # todo: get road data
         """
         Returns
         --------

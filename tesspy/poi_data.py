@@ -319,23 +319,15 @@ class RoadData:
         :return: GeoDataFrame containing road network
         """
         cf = self.create_custom_filter()
-
         if self.verbose:
             print("Collecting road network data...")
-        G = ox.graph_from_polygon(self.area.boundary.convex_hull.values[0], custom_filter=cf)
-        G_projected = ox.project_graph(G, to_crs='epsg:4326')
-        G_undirected = G_projected.to_undirected()
-        G_edges_as_gdf = ox.graph_to_gdfs(G_undirected, nodes=False, edges=True)
+        graph = ox.graph_from_polygon(self.area.boundary.convex_hull.values[0], custom_filter=cf)
 
-        if self.split_roads:
-            if self.verbose:
-                print("Splitting the linestring, such that each linestring has exactly 2 points.")
-            road_network = split_linestring(G_edges_as_gdf)
-
-        else:
-            road_network = G_edges_as_gdf
+        graph_projected = ox.project_graph(graph, to_crs='epsg:4326')
+        graph_undirected = graph_projected.to_undirected()
+        graph_edges_as_gdf = ox.graph_to_gdfs(graph_undirected, nodes=False, edges=True)
 
         if self.verbose:
-            print(f"Collected data has {len(road_network)} street segments.")
+            print(f"Collected data has {len(graph_edges_as_gdf)} street segments.")
 
-        return road_network
+        return graph_edges_as_gdf
