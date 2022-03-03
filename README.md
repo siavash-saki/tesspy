@@ -64,8 +64,8 @@ ffm_sqruares = ffm.squares(resolution=15)
 ffm_hex_8 = ffm.hexagons(resolution=8)
 ```
  <br>
-<img align="right" width="300" height="300" src="docs/readme_pics/Hexagons.png">
- </br>
+<img align="left" width="300" height="300" src="docs/readme_pics/Hexagons.png">
+ <br>
 
 
 ### Adaptive Squares
