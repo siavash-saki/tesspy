@@ -42,7 +42,7 @@ conda install -c conda-forge tesspy
 
 
 ## Documentation
-The official documentation is hosted on **[ReadTheDocs](https://tesspy.readthedocs.io)**
+The official documentation is hosted on **[ReadTheDocs](https://tesspy.readthedocs.io)**.
 
 
 ## Examples
