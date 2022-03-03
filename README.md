@@ -18,8 +18,6 @@ and from conda (**Recommended**):
 conda install -c conda-forge tesspy
 ```
 
-
-
 ## Creating a new environment for tesspy
 
 `tesspy` depends on `geopandas`, which could make the installation sometimes tricky because of the conflicts with the current packages. Therefore, we recommend creating a new clean environment and installing the dependencies from the conda-forge channel.
@@ -39,6 +37,11 @@ Install tesspy from conda-forge channel:
 ```shell
 conda install -c conda-forge tesspy
 ```
+
+
+## Dependencies
+
+`tesspy`'s dependencies are: `geopandas`,`h3-py`,`osmnx`,`hdbscan`, and`mercantile`.
 
 
 ## Documentation
