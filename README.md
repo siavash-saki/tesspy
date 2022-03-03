@@ -1,9 +1,9 @@
 # tesspy
 
 <img align="right" src="docs/readme_pics/logo.jpg">
-tesspy is a python library for urban areas tessellation. 
+`tesspy` is a python library for urban areas tessellation. 
 
-The process of discretization of space into subspaces without overlaps and gaps is called tessellation. Tessellation is essential in understanding geographical space and provides a framework for analyzing geospatial data. Different tessellation methods are implemented in tesspy. The first group are regular tessellation methods: Square grid and hexagon grid. Second group are irregular tessellation methods based on gespatial data. These methods are: adaptive squares, Voronoi diagrams and city blocks. The geospatial data used for tessellation is retrieved from the OpenStreetMap database.
+The process of discretization of space into subspaces without overlaps and gaps is called tessellation. Tessellation is essential in understanding geographical space and provides a framework for analyzing geospatial data. Different tessellation methods are implemented in `tesspy`. The first group are regular tessellation methods: Square grid and hexagon grid. Second group are irregular tessellation methods based on gespatial data. These methods are: adaptive squares, Voronoi diagrams and city blocks. The geospatial data used for tessellation is retrieved from the OpenStreetMap database.
 
 
 ## Installation
