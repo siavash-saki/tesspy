@@ -13,7 +13,7 @@ You can install ``tesspy`` from PyPI using pip (**Not Recommended**):
 pip install tesspy
 ```
 
-and from conda:
+and from conda (**Recommended**):
 ```
 conda install -c conda-forge tesspy
 ```
