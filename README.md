@@ -63,16 +63,13 @@ ffm_sqruares = ffm.squares(resolution=15)
 ```python
 ffm_hex_8 = ffm.hexagons(resolution=8)
 ```
-
-<img align="left" width="400" height="400" src="docs/readme_pics/Hexagons.png">
- </p>
+![hexagon_tessellation](docs/readme_pics/Hexagons.png)
 
 
 ### Adaptive Squares
 ```python
 ffm_asq = ffm.adaptive_squares(start_resolution=14, threshold=100, poi_categories=['amenity'])
 ```
-![hexagon_tessellation](docs/readme_pics/Hexagons.png)
 
 ![adaptive_squares_tessellation](docs/readme_pics/Adaptive_Squares.png)
 
