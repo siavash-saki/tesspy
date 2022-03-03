@@ -18,6 +18,9 @@ and from conda (**Recommended**):
 conda install -c conda-forge tesspy
 ```
 
+## Dependencies
+
+`tesspy`'s dependencies are: `geopandas`,`h3-py`,`osmnx`,`hdbscan`, and`mercantile`.
 
 
 ## Creating a new environment for tesspy
