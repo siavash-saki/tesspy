@@ -58,6 +58,9 @@ ffm_sqruares = ffm.squares(resolution=15)
   <img src="docs/readme_pics/Squares.png">
 </p>
 
+![Squares_tessellation](docs/readme_pics/https://github.com/siavash-saki/tesspy/blob/7a6f6bc8bab709b14c64827ae875d0dc8abcd332/docs/readme_pics/Squares.png.png)
+
+
 ### Hexagons
 ```python
 ffm_hex_8 = ffm.hexagons(resolution=8)
