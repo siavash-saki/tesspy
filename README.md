@@ -5,7 +5,7 @@
 A package for urban and suburban area tessellations. 
 
 ## Installation
-You can install ``tesspy`` from PyPI using pip:
+You can install ``tesspy`` from PyPI using pip (**Not Recommended**):
 ```
 pip install tesspy
 ```
@@ -41,29 +41,46 @@ conda install -c conda-forge tesspy
 ## Documentation
 The official documentation is hosted on **[ReadTheDocs](https://tesspy.readthedocs.io)**
 
+
 ## Examples
-Example for a germany city: Frankfurt am Main, an US-city: Key West and the capital of Nairobi. In all examples the local projection was used such that any kind of distortion is minimized. The following picutres shows the boundary polygons. 
-![This is an image](Examples/pics/Boundary_polygons.png)
+The city of "Frankfurt am Main" in Germany is used to showcase different tessellation methods. This is how a tessellation objest is built and diffrent methods are called. For the tessellation methods which are based on Points of Interests (adaptive squares, Voronoi polygons, and City Blocks), we use `amenty` data from the OpenStreetMap.
+```python
+from tesspy import Tessellation
+ffm= Tessellation('Frankfurt am Main')
+```
+
 
 ### Squares 
-For square based tessellations different resolution were used the get similar looking results. 
-![This is an image](Examples/pics/Squares.png)
+```python
+ffm_sqruares = ffm.squares(resolution=15)
+```
+![square_tessellation](docs/readme_pics/Squares.png)
+
 
 ### Hexagons
-For hexagona based tessellations different resolution were used the get similar looking results. 
-![This is an image](Examples/pics/Hexagons.png)
+```python
+ffm_hex_8 = ffm.hexagons(resolution=8)
+```
+![hexagon_tessellation](docs/readme_pics/Hexagons.png)
+
 
 ### Adaptive Squares
-For the adaptive square based tessellations different start resolutions were used. As POI the feature "amenity" was used.
-![This is an image](Examples/pics/Adaptive_Squares.png)
+```python
+ffm_asq = ffm.adaptive_squares(start_resolution=14, threshold=100, poi_categories=['amenity'])
+```
+![hexagon_tessellation](docs/readme_pics/Adaptive_Squares.png)
 
 ### Voronoi Polygons
-The Voronoi-Diagram based tessellations used the "building" feature to cluster those data and create the generators.
-![This is an image](Examples/pics/Voronoi.png)
+```python
+ffm_voronoi = ffm.voronoi(poi_categories=['amenity'], n_polygons=500)
+```
+![Voronoi_tessellation](docs/readme_pics/Voronoi.png)
 
 ### City Blocks
-For City Blocks all highway-types were used
-![This is an image](Examples/pics/CB.png)
+```python
+ffm_city_blocks = ffm.city_blocks(n_polygons=500)
+```
+![city_blocks_tessellation](docs/readme_pics/CB.png)
 
 ## Contributing to tesspy
 Contribution is welcome!
