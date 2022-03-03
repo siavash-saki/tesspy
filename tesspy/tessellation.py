@@ -410,6 +410,7 @@ class Tessellation:
         else:
             road_data = self.road_network
 
+        # todo: causing problems (kernel dies): should this stay?
         # split roads if True
         if split_roads:
             if verbose:
@@ -447,7 +448,11 @@ class Tessellation:
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
             city_blocks["centroid"] = city_blocks.centroid
+
         coordinates = np.column_stack([city_blocks["centroid"].x, city_blocks["centroid"].y])
+        # the algorithm needs O(n²) memory and O(n³) runtime
+        # => doesn't work with large data ==> not enough RAM ==> kernel dies
+        # think about changing the clustering algorithm
         model = AgglomerativeClustering(n_clusters=n_polygons, affinity='euclidean')
         model.fit(coordinates)
 
@@ -462,7 +467,6 @@ class Tessellation:
 
         new_merged_polys = {'geometry': merged_polys}
         merged_polys_df = gpd.GeoDataFrame(new_merged_polys, crs="EPSG:4326")
-
         keep_df = merged_polys_df[merged_polys_df.geom_type == "Polygon"]
         to_explode = merged_polys_df[merged_polys_df.geom_type == "MultiPolygon"]
         explode_df = explode(to_explode)
