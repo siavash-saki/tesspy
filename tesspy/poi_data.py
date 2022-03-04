@@ -6,7 +6,6 @@ import osmnx as ox
 import requests
 import json
 from shapely.geometry import Point
-from tessellation_functions import split_linestring
 
 
 def geom_ceil(coordinate, precision=4):
