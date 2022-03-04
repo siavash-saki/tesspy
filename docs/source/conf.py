@@ -29,6 +29,7 @@ autodoc_mock_imports = [
     "osmnx"
 ]
 
+master_doc = 'index'
 
 # -- Project information -----------------------------------------------------
 
