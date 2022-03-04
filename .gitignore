@@ -12,3 +12,5 @@ tesspy/.ipynb_checkpoints
 /docs/readme_pics/.ipynb_checkpoints/
 /docs/readme_pics/cache/
 /docs/.ipynb_checkpoints/
+/dist/
+/build/
