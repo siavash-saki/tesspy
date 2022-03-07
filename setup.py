@@ -12,7 +12,7 @@ INSTALL_REQUIRES = ['geopandas >= 0.10.0',
 
 setuptools.setup(
     name="tesspy",
-    version="0.0.2",
+    version="0.0.3",
     author="tesspy Developers",
     author_email="jonas.hamann@fb3.fra-uas.de",
     description="Tessellation of Urban Areas",
