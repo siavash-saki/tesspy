@@ -1,6 +1,6 @@
 import setuptools
 
-with open("README.md", "r", encoding="utf8") as fh:
+with open("README.md", "r", encoding="utf8", errors="ignore") as fh:
     LONG_DESCRIPTION = fh.read()
 
 # Packages that tesspy uses explicitly:
