@@ -14,7 +14,7 @@ authors:
     orcid: 0000-0002-3681-911X
     affiliation: "1, 2"
   - name: Tobias Hagen
-    orcid: 0000-0000-0000-0000
+    orcid: 0000-0003-3717-7929
     affiliation: "1, 2"
 affiliations:
  - name: Frankfurt University of Applied Sciences, Frankfurt am Main, Germany
