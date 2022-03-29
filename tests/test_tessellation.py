@@ -90,7 +90,8 @@ def test_new_shapely():
     city = Tessellation("Key West")
     city_qk = city.squares(15)
     city_hex = city.hexagons(8)
-    city_vp = city.voronoi(cluster_algo="k-means",poi_categories=["amenity"], timeout=60, n_polygons=500, verbose=False)
+    city_vp = city.voronoi(cluster_algo="k-means", poi_categories=["amenity"], timeout=60, n_polygons=500,
+                           verbose=False)
     city_aqk = city.adaptive_squares(14, poi_categories=["building"])
     print(f"{len(city_qk)} Squares; {len(city_hex)} Hexagons; {len(city_vp)} Voronoi; {len(city_aqk)} Adaptive Squares")
 
@@ -107,3 +108,53 @@ def test_index_methods():
     print(f"Voronoi using Kmeans has geom_type:{df_vp_kmeans.geom_type.unique()}")
     print(f"Voronoi using hdbscan has geom_type:{df_vp_hdbscan.geom_type.unique()}")
     print(f"City blocks gdf has geom_type:{df_cb.geom_type.unique()}")
+
+
+def test_count_lgu_function_short_version():
+    city = Tessellation("Paris")
+    poi_categories2 = ["amenity", "building"]
+
+    df_squares = city.squares(resolution=14)
+    df_squares = count_poi_per_tile(city, df_squares, method="squares", poi_categories=poi_categories2)
+
+    print(f'Squares GeoDataFrame has columns: {df_squares.columns}')
+
+    assert hasattr(df_squares, "count_amenity")
+
+
+def test_count_lgu_function():
+    city = Tessellation("Paris")
+    poi_categories1 = ["amenity"]
+    poi_categories2 = ["amenity", "building"]
+
+    df_squares = city.squares(resolution=14)
+    df_squares = count_poi_per_tile(city, df_squares, method="squares", poi_categories=poi_categories1)
+    sleep(120)
+
+    df_hexs = city.hexagons(resolution=9)
+    df_hexs = count_poi_per_tile(city, df_hexs, method="hexagons", poi_categories=poi_categories1)
+    sleep(120)
+
+    df_aqk = city.adaptive_squares(start_resolution=14, poi_categories=['amenity'])
+    df_aqk = count_poi_per_tile(city, df_aqk, method="adaptive_squares", poi_categories=poi_categories2)
+    sleep(120)
+
+    df_vp = city.voronoi(poi_categories=['building'])
+    df_vp = count_poi_per_tile(city, df_vp, method="voronoi", poi_categories=poi_categories2)
+    sleep(120)
+
+    df_cb = city.city_blocks()
+    df_cb = count_poi_per_tile(city, df_cb, method="city_blocks", poi_categories=poi_categories1)
+    sleep(120)
+
+    print(f'Squares GeoDataFrame has columns: {df_squares.columns}')
+    print(f'Hexagons GeoDataFrame has columns: {df_hexs.columns}')
+    print(f'Adaptive Squares GeoDataFrame has columns: {df_aqk.columns}')
+    print(f'Voronoi Polygons GeoDataFrame has columns: {df_vp.columns}')
+    print(f'City blocks GeoDataFrame has columns: {df_cb.columns}')
+
+    assert hasattr(df_squares, "count_amenity")
+    assert hasattr(df_hexs, "count_amenity")
+    assert hasattr(df_aqk, "count_amenity")
+    assert hasattr(df_vp, "count_amenity")
+    assert hasattr(df_cb, "count_amenity")

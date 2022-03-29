@@ -1,6 +1,8 @@
 from sklearn.cluster import KMeans
 import hdbscan
 from scipy.spatial import Voronoi
+
+import tesspy
 from tessellation_functions import *
 from poi_data import *
 import numpy as np
@@ -90,6 +92,55 @@ def _check_valid_geometry_gdf(gdf):
                 return gdf
 
 
+def count_poi_per_tile(city,
+                       gdf,
+                       method,
+                       poi_categories=['amenity', 'building'],
+                       timeout=120):
+    if method == 'squares':
+        join_idx = 'quadkey'
+
+    elif method == 'hexagons':
+        join_idx = 'hex_id'
+
+    elif method == 'adaptive_squares':
+        join_idx = 'quadkey'
+
+    elif method == 'voronoi':
+        join_idx = 'voronoi_id'
+
+    elif method == 'city_blocks':
+        join_idx = 'cityblock_id'
+
+    else:
+        raise ValueError("Please insert a valid method. Valid methods are: 'squares', 'hexagons', 'adaptive_squares', "
+                         "'voronoi', 'city_blocks'")
+
+    df_poi = POIdata(city.get_polygon(),
+                     poi_categories=poi_categories,
+                     timeout=timeout,
+                     verbose=False).get_poi_data()
+
+    points_geom = df_poi[['center_longitude', 'center_latitude']] \
+        .apply(lambda p: Point(p['center_longitude'], p['center_latitude']), axis=1)
+
+    tess_data = gpd.GeoDataFrame(geometry=points_geom,
+                                 data=df_poi[poi_categories],
+                                 crs='EPSG:4326')
+    for poi_categories in tess_data.columns.difference(["geometry"]):
+        tmp_gdf = tess_data[tess_data[poi_categories]]
+        poi_per_lgu = gpd.sjoin(gdf, tmp_gdf, how="left", predicate="contains")
+        column_name = 'count_' + str(poi_categories)
+        poi_per_lgu[column_name] = 1
+        tmp_a = poi_per_lgu.groupby(by=join_idx).count()[column_name].reset_index().sort_values(by=join_idx,
+                                                                                                ascending=True)
+        tmp_b = gdf.sort_values(by=join_idx, ascending=True)
+        final_df = pd.merge(tmp_b, tmp_a[[join_idx, column_name]], on=join_idx, how="left")
+        gdf = gpd.GeoDataFrame(final_df, geometry="geometry")
+
+    return gdf
+
+
 class Tessellation:
     """
     Creates a Tessellation object using a GeoDataFrame or a city name,
@@ -151,7 +202,7 @@ class Tessellation:
         ----------
         resolution : int
             Specifies the size of squares
-            A positive number between todo: complete
+            A positive number between
 
         Returns
         -------
@@ -171,7 +222,7 @@ class Tessellation:
         ----------
         resolution : int
             Specifies the size of hexagons
-            A positive number between todo: complete
+            A positive number between
 
         Returns
         -------
