@@ -93,3 +93,17 @@ def test_new_shapely():
     city_vp = city.voronoi(cluster_algo="k-means",poi_categories=["amenity"], timeout=60, n_polygons=500, verbose=False)
     city_aqk = city.adaptive_squares(14, poi_categories=["building"])
     print(f"{len(city_qk)} Squares; {len(city_hex)} Hexagons; {len(city_vp)} Voronoi; {len(city_aqk)} Adaptive Squares")
+
+
+def test_index_methods():
+    city = Tessellation("Paris")
+    df_vp_hdbscan = city.voronoi(poi_categories=["amenity"], cluster_algo='hdbscan')
+    df_vp_kmeans = city.voronoi(poi_categories=["amenity"])
+    df_cb = city.city_blocks()
+    print(f"Voronoi using Kmeans has columns:{df_vp_kmeans.columns}")
+    print(f"Voronoi using hdbscan has columns:{df_vp_hdbscan.columns}")
+    print(f"City blocks gdf has columns:{df_cb.columns}")
+
+    print(f"Voronoi using Kmeans has geom_type:{df_vp_kmeans.geom_type.unique()}")
+    print(f"Voronoi using hdbscan has geom_type:{df_vp_hdbscan.geom_type.unique()}")
+    print(f"City blocks gdf has geom_type:{df_cb.geom_type.unique()}")

@@ -59,6 +59,37 @@ def _check_input_geodataframe(gdf):
                     return gdf
 
 
+def _check_valid_geometry_gdf(gdf):
+    """
+    Checks if the geometry type of the gdf is correct. We want only shapely.Polygon geom_types.
+    If there are MultiPolygons in the input gdf, it will be exploded into Polygons
+
+    Parameters
+    ----------
+    gdf : GeoDataFrame
+
+    Returns
+    --------
+    gdf : GeoDataFrame
+    """
+
+    if len(gdf) < 1:
+        raise ValueError("GeoDataFrame must have only one geometry element")
+    else:
+        if not hasattr(gdf, "geometry"):
+            raise TypeError("Geometry column missing in GeoDataFrame")
+        else:
+            print("MultiPolygon found. Splitting it up...")
+            if 'MultiPolygon' in gdf.geom_type.unique():
+                gdf = explode(gdf)
+                gdf = gdf.reset_index()
+                gdf.drop(columns=["level_0", "level_1"], inplace=True)
+
+                return gdf
+            else:
+                return gdf
+
+
 class Tessellation:
     """
     Creates a Tessellation object using a GeoDataFrame or a city name,
@@ -352,6 +383,12 @@ class Tessellation:
         vor_polygons = voronoi_poly.intersection(self.area_gdf.geometry.iloc[0])
         df_voronoi = gpd.GeoDataFrame(geometry=vor_polygons)
 
+        df_voronoi = _check_valid_geometry_gdf(df_voronoi)
+
+        df_voronoi.reset_index(inplace=True)
+        df_voronoi.rename(columns={"index": "voronoi_id"}, inplace=True)
+        df_voronoi['voronoi_id'] = 'voronoiID' + df_voronoi['voronoi_id'].astype(str)
+
         return df_voronoi
 
     def city_blocks(self,
@@ -436,7 +473,15 @@ class Tessellation:
         # merging small polygons using hierarchical clustering
         if not n_polygons:
             city_blocks = city_blocks[['geometry']].reset_index(drop=True)
+
+            city_blocks = _check_valid_geometry_gdf(city_blocks)
+
+            city_blocks.reset_index(inplace=True)
+            city_blocks.rename(columns={"index": "cityblock_id"}, inplace=True)
+            city_blocks['cityblock_id'] = 'cityblockID' + city_blocks['cityblock_id'].astype(str)
+
             return city_blocks
+
         if n_polygons > len(city_blocks):
             raise ValueError(f'Cannot extract more city blocks than initial city blocks!'
                              f'Initial city blocks are {len(city_blocks)}, desired city blocks are {n_polygons}'
@@ -474,6 +519,12 @@ class Tessellation:
         explode_df.drop(columns=["level_0", "level_1"], inplace=True)
         final_city_blocks = pd.concat([keep_df, explode_df])
         final_city_blocks = final_city_blocks[['geometry']].reset_index(drop=True)
+
+        final_city_blocks = _check_valid_geometry_gdf(final_city_blocks)
+
+        final_city_blocks.reset_index(inplace=True)
+        final_city_blocks.rename(columns={"index": "cityblock_id"}, inplace=True)
+        final_city_blocks['cityblock_id'] = 'cityblockID' + final_city_blocks['cityblock_id'].astype(str)
 
         return final_city_blocks
 
