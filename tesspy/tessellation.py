@@ -1,3 +1,4 @@
+import numpy
 from sklearn.cluster import KMeans
 import hdbscan
 from scipy.spatial import Voronoi
@@ -97,6 +98,25 @@ def count_poi_per_tile(city,
                        method,
                        poi_categories=['amenity', 'building'],
                        timeout=120):
+    if type(city) == str:
+        city = Tessellation(city)
+    elif type(city) == Tessellation:
+        city = city
+    else:
+        raise ValueError('Please insert a valid city-type. Valid types are: tesspy.Tessellation Obejct or String')
+
+    if len(gdf) < 1:
+        raise ValueError('Please insert a valid Tessellation-GeoDataFrame. A valid Tessellation-GeoDataFrame should '
+                         'include at least one tile.')
+    if type(poi_categories) == str:
+        poi_categories = [poi_categories]
+    elif type(poi_categories) == list or type(poi_categories) == numpy.array():
+        poi_categories = poi_categories
+    else:
+        raise ValueError('Please insert valid poi_categories. Valid types are: string values based on '
+                         'osm_primary_features of list/numpy.array with osm_primary_features.')
+
+
     if method == 'squares':
         join_idx = 'quadkey'
 

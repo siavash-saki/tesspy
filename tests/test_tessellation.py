@@ -122,6 +122,101 @@ def test_count_lgu_function_short_version():
     assert hasattr(df_squares, "count_amenity")
 
 
+def test_count_lgu_function_different_city_inputs():
+    city = Tessellation("Paris")
+    city_2 = "Paris"
+    poi_categories2 = ["amenity", "building"]
+
+    df_squares = city.squares(resolution=14)
+    df_squares = count_poi_per_tile(city, df_squares, method="squares", poi_categories=poi_categories2)
+    sleep(60)
+    df_squares2 = city.squares(resolution=14)
+    df_squares2 = count_poi_per_tile(city_2, df_squares2, method="squares", poi_categories=poi_categories2)
+
+    print(f'Squares GeoDataFrame has columns: {df_squares.columns}')
+    print(f'Squares2 GeoDataFrame has columns: {df_squares2.columns}')
+
+    assert hasattr(df_squares, "count_amenity")
+    assert hasattr(df_squares, "count_building")
+
+    assert hasattr(df_squares2, "count_amenity")
+    assert hasattr(df_squares2, "count_building")
+
+
+def test_count_lgu_function_invalid_inputs_city():
+    city = Tessellation("Paris")
+    city_2 = "Paris"
+    poi_categories2 = ["amenity", "building"]
+
+    df_squares = city.squares(resolution=14)
+    try:
+        df_squares = count_poi_per_tile(city.get_polygon(), df_squares, method="squares",
+                                        poi_categories=poi_categories2)
+        assert hasattr(df_squares, "count_amenity")
+    except:
+        print("-->It worked. Invalid input was recognized")
+
+
+def test_count_lgu_function_invalid_inputs_gdf():
+    city = Tessellation("Paris")
+    poi_categories2 = ["amenity", "building"]
+
+    try:
+        df_squares = count_poi_per_tile(city, gpd.GeoDataFrame(), method="squares",
+                                        poi_categories=poi_categories2)
+        assert hasattr(df_squares, "count_amenity")
+    except:
+        print("-->It worked. Invalid input was recognized")
+
+
+def test_count_lgu_function_invalid_inputs_method():
+    city = Tessellation("Paris")
+    city_2 = "Paris"
+    poi_categories2 = ["amenity", "building"]
+
+    df_squares = city.squares(resolution=14)
+    try:
+        df_squares = count_poi_per_tile(city, df_squares, poi_categories=poi_categories2)
+        assert hasattr(df_squares, "count_amenity")
+    except:
+        print("-->It worked. Invalid input was recognized")
+
+
+def test_count_lgu_function_invalid_inputs_poi():
+    city = Tessellation("Paris")
+    city_2 = "Paris"
+    poi_categories2 = ["amenity", "building"]
+
+    df_squares = city.squares(resolution=14)
+    try:
+        df_squares = count_poi_per_tile(city, df_squares, poi_categories=10)
+        assert hasattr(df_squares, "count_amenity")
+    except:
+        print("-->It worked. Invalid input was recognized")
+
+
+def test_count_lgu_function_different_poi():
+    city = Tessellation("Paris")
+    poi_categories1 = "amenity"
+    poi_categories2 = ["amenity"]
+    poi_categories3 = ["amenity", "building"]
+
+    df_squares1 = city.squares(resolution=14)
+    df_squares2 = city.squares(resolution=14)
+    df_squares3 = city.squares(resolution=14)
+
+    df_squares1 = count_poi_per_tile(city, df_squares1, method="squares", poi_categories=poi_categories1)
+    sleep(120)
+    df_squares2 = count_poi_per_tile(city, df_squares2, method="squares", poi_categories=poi_categories2)
+    sleep(120)
+    df_squares3 = count_poi_per_tile(city, df_squares3, method="squares", poi_categories=poi_categories3)
+
+    # assert df_squares1.columns == df_squares2.columns
+    print(df_squares1.columns)
+    print(df_squares2.columns)
+    assert 'count_building' in df_squares3.columns
+
+
 def test_count_lgu_function():
     city = Tessellation("Paris")
     poi_categories1 = ["amenity"]
