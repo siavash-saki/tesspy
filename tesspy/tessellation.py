@@ -98,6 +98,25 @@ def count_poi_per_tile(city,
                        method,
                        poi_categories=['amenity', 'building'],
                        timeout=120):
+    """
+    Counts different POI-categories per tile. For each POI-categories an additional column is added to the Tessellation
+    GeoDataFrame (gdf). After counting each POI-category the final Tessellation GeoDataFrame with the additional count-
+    columns is returned.
+
+    Parameters
+    ----------
+    city: Tessellation object or string of the underlying city
+    gdf : GeoDataFrame of the Tessellation for the underlying city
+    method: method used to tessellate the city polygon. It's used to create the index, the POI and Tessellation-datasets
+        will be joined on
+    poi_categories: POI which will be count per tile. These POI may differ from the POI used to create the tessellation
+    timeout: time to wait for OSM to return POI data
+
+    Returns
+    --------
+    gdf : GeoDataFrame - Tessellation GeoDataFrame with additional columns (count_poi-columns are added)
+    """
+
     if type(city) == str:
         city = Tessellation(city)
     elif type(city) == Tessellation:
@@ -115,7 +134,6 @@ def count_poi_per_tile(city,
     else:
         raise ValueError('Please insert valid poi_categories. Valid types are: string values based on '
                          'osm_primary_features of list/numpy.array with osm_primary_features.')
-
 
     if method == 'squares':
         join_idx = 'quadkey'
