@@ -175,7 +175,6 @@ class POIdata:
         lst_ways = []
 
         generator = resp['elements']
-
         for item in generator:
 
             for cat in self.poi_categories:
@@ -196,12 +195,37 @@ class POIdata:
         nodes_df = pd.DataFrame(lst_nodes)
         ways_df = pd.DataFrame(lst_ways)
 
-        nodes_df['geometry'] = nodes_df[['lon', 'lat']].apply(lambda p: [{'lat': p['lat'], 'lon': p['lon']}], axis=1)
-        nodes_df = nodes_df.rename(columns={'lat': 'center_latitude', 'lon': 'center_longitude'})
-        nodes_df = nodes_df.drop(columns=['id'])
-        ways_df = ways_df.drop(columns=['id', 'bounds', 'nodes'])
+        if len(nodes_df) > 0 and len(ways_df) > 0:
+            if self.verbose:
+                print("Joining nodes and ways")
 
-        poi_df = pd.concat([ways_df, nodes_df]).fillna(False)
+            nodes_df['geometry'] = nodes_df[['lon', 'lat']].apply(lambda p: [{'lat': p['lat'], 'lon': p['lon']}],
+                                                                  axis=1)
+            nodes_df = nodes_df.rename(columns={'lat': 'center_latitude', 'lon': 'center_longitude'})
+            nodes_df = nodes_df.drop(columns=['id'])
+            ways_df = ways_df.drop(columns=['id', 'bounds', 'nodes'])
+
+            poi_df = pd.concat([ways_df, nodes_df]).fillna(False)
+
+        elif len(nodes_df) == 0 and len(ways_df) > 0:
+            if self.verbose:
+                print("No nodes found. Return ways only.")
+
+            ways_df = ways_df.drop(columns=['id', 'bounds', 'nodes'])
+            poi_df = ways_df.fillna(False)
+
+        elif len(nodes_df) > 0 and len(ways_df) == 0:
+            if self.verbose:
+                print("No ways found returning nodes only")
+
+            nodes_df['geometry'] = nodes_df[['lon', 'lat']].apply(lambda p: [{'lat': p['lat'], 'lon': p['lon']}],
+                                                                  axis=1)
+            nodes_df = nodes_df.rename(columns={'lat': 'center_latitude', 'lon': 'center_longitude'})
+            nodes_df = nodes_df.drop(columns=['id'])
+            poi_df = nodes_df.fillna(False)
+        else:
+            raise ValueError("No POI data for the inserted poi-category/categories and area.")
+
 
         # add POI categories with no data to poi_df
         for poi_category in self.poi_categories:
@@ -221,6 +245,9 @@ class POIdata:
         area_buffered_gdf = gpd.GeoDataFrame(geometry=self.area_buffered, crs='epsg:4326')
         idx_to_keep = gpd.sjoin(poi_geo_df, area_buffered_gdf, predicate='within').index
         poi_df = poi_df.loc[idx_to_keep]
+
+        if len(poi_df) == 0:
+            raise ValueError("No poi data found that is within the area.")
 
         return poi_df
 

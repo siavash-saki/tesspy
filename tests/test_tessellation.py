@@ -253,3 +253,13 @@ def test_count_lgu_function():
     assert hasattr(df_aqk, "count_amenity")
     assert hasattr(df_vp, "count_amenity")
     assert hasattr(df_cb, "count_amenity")
+
+
+def test_poi_collection():
+    city = Tessellation("Frankfurt")
+    poi_data_1 = POIdata(city.get_polygon(),
+                         poi_categories=["aerialway"],
+                         timeout=60,
+                         verbose=True).get_poi_data()
+    print(poi_data_1.head())
+
