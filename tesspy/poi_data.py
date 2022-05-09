@@ -153,6 +153,8 @@ class POIdata:
             print('Getting data from OSM...')
 
         # sending the request
+        # todo: polygon instead bbox??
+        # resp = requests.get("https://overpass-api.de/api/interpreter", data=query_string)
         resp = requests.get(url=request_header + query_string)
         if resp.status_code == 429:
             raise RuntimeError("429 Too Many Requests:\n"
