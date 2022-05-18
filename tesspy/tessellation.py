@@ -9,6 +9,7 @@ from sklearn.cluster import KMeans
 from scipy.spatial import Voronoi
 import hdbscan
 
+import tesspy
 from tessellation_functions import *
 from poi_data import *
 
@@ -127,6 +128,8 @@ def count_poi_per_tile(city,
         city = Tessellation(city)
     elif type(city) == Tessellation:
         city = city
+    elif type(city) == tesspy.tessellation.Tessellation:
+        city = city
     else:
         raise ValueError('Please insert a valid city-type. Valid types are: tesspy.Tessellation Obejct or String')
 
@@ -135,7 +138,7 @@ def count_poi_per_tile(city,
                          'include at least one tile.')
     if type(poi_categories) == str:
         poi_categories = [poi_categories]
-    elif type(poi_categories) == list or type(poi_categories) == numpy.array():
+    elif type(poi_categories) == list or type(poi_categories) == np.array():
         poi_categories = poi_categories
     else:
         raise ValueError('Please insert valid poi_categories. Valid types are: string values based on '
