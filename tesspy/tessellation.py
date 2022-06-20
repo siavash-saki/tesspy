@@ -126,6 +126,7 @@ def count_poi_per_tile(city,
 
     if type(city) == str:
         city = Tessellation(city)
+    # Only str input for now
     # elif type(city) == Tessellation:
     #    city = city
     # elif type(city) == tesspy.tessellation.Tessellation:
