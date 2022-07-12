@@ -5,14 +5,14 @@ with open("README.md", "r", encoding="utf8", errors="ignore") as fh:
 
 # Packages that tesspy uses explicitly:
 INSTALL_REQUIRES = ['geopandas >= 0.10.0',
-                    'h3',  # h3-py
+                    'h3',  # conda h3-py
                     'osmnx',
                     'hdbscan',
                     'mercantile']
 
 setuptools.setup(
     name="tesspy",
-    version="0.0.3",
+    version="0.1.0",
     author="tesspy Developers",
     author_email="jonas.hamann@fb3.fra-uas.de",
     description="Tessellation of Urban Areas",

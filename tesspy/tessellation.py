@@ -1,9 +1,17 @@
+import os
+import numpy as np
+import pandas as pd
+import geopandas as gpd
+
+import warnings
+
 from sklearn.cluster import KMeans
-import hdbscan
 from scipy.spatial import Voronoi
+import hdbscan
+
+import tesspy
 from tessellation_functions import *
 from poi_data import *
-import numpy as np
 
 
 # todo: return gdf with POI count
@@ -59,6 +67,142 @@ def _check_input_geodataframe(gdf):
                     return gdf
 
 
+def _check_valid_geometry_gdf(gdf):
+    """
+    Checks if the geometry type of the gdf is correct. We want only shapely.Polygon geom_types.
+    If there are MultiPolygons in the input gdf, it will be exploded into Polygons
+
+    Parameters
+    ----------
+    gdf : GeoDataFrame
+
+    Returns
+    --------
+    gdf : GeoDataFrame
+    """
+
+    if len(gdf) < 1:
+        raise ValueError("GeoDataFrame must have only one geometry element")
+    else:
+        if not hasattr(gdf, "geometry"):
+            raise TypeError("Geometry column missing in GeoDataFrame")
+        else:
+            print("MultiPolygon found. Splitting it up...")
+            if 'MultiPolygon' in gdf.geom_type.unique():
+                gdf = explode(gdf)
+                gdf = gdf.reset_index()
+                gdf.drop(columns=["level_0",
+                                  "level_1"],
+                         inplace=True)
+
+                return gdf
+            else:
+                return gdf
+
+
+def count_poi_per_tile(city,
+                       gdf,
+                       method,
+                       poi_categories=['amenity', 'building'],
+                       timeout=120):
+    """
+    Counts different POI-categories per tile. For each POI-categories an additional column is added to the Tessellation
+    GeoDataFrame (gdf). After counting each POI-category the final Tessellation GeoDataFrame with the additional count-
+    columns is returned.
+
+    Parameters
+    ----------
+    city: Tessellation object or string of the underlying city
+    gdf : GeoDataFrame of the Tessellation for the underlying city
+    method: method used to tessellate the city polygon. It's used to create the index, the POI and Tessellation-datasets
+        will be joined on
+    poi_categories: POI which will be count per tile. These POI may differ from the POI used to create the tessellation
+    timeout: time to wait for OSM to return POI data
+
+    Returns
+    --------
+    gdf : GeoDataFrame - Tessellation GeoDataFrame with additional columns (count_poi-columns are added)
+    """
+
+    if type(city) == str:
+        city = Tessellation(city)
+    # Only str input for now
+    # elif type(city) == Tessellation:
+    #    city = city
+    # elif type(city) == tesspy.tessellation.Tessellation:
+    #    city = city
+    else:
+        raise ValueError('Please insert a valid city-type. Valid types are: tesspy.Tessellation Obejct or String')
+
+    if len(gdf) < 1:
+        raise ValueError('Please insert a valid Tessellation-GeoDataFrame. A valid Tessellation-GeoDataFrame should '
+                         'include at least one tile.')
+    if type(poi_categories) == str:
+        poi_categories = [poi_categories]
+    elif type(poi_categories) == list or type(poi_categories) == np.array():
+        poi_categories = poi_categories
+    else:
+        raise ValueError('Please insert valid poi_categories. Valid types are: string values based on '
+                         'osm_primary_features of list/numpy.array with osm_primary_features.')
+
+    if method == 'squares':
+        join_idx = 'quadkey'
+
+    elif method == 'hexagons':
+        join_idx = 'hex_id'
+
+    elif method == 'adaptive_squares':
+        join_idx = 'quadkey'
+
+    elif method == 'voronoi':
+        join_idx = 'voronoi_id'
+
+    elif method == 'city_blocks':
+        join_idx = 'cityblock_id'
+
+    else:
+        raise ValueError("Please insert a valid method. Valid methods are: 'squares',"
+                         " 'hexagons', 'adaptive_squares', "
+                         "'voronoi', 'city_blocks'")
+
+    df_poi = POIdata(city.get_polygon(),
+                     poi_categories=poi_categories,
+                     timeout=timeout,
+                     verbose=False).get_poi_data()
+
+    points_geom = df_poi[['center_longitude', 'center_latitude']]\
+                         .apply(lambda p: Point(p['center_longitude'],
+                                                p['center_latitude']),
+                                axis=1)
+
+    tess_data = gpd.GeoDataFrame(geometry=points_geom,
+                                 data=df_poi[poi_categories],
+                                 crs='EPSG:4326')
+
+    for poi_categories in tess_data.columns.difference(["geometry"]):
+        tmp_gdf = tess_data[tess_data[poi_categories]]
+        poi_per_lgu = gpd.sjoin(gdf,
+                                tmp_gdf,
+                                how="left",
+                                predicate="contains")
+        column_name = 'count_' + str(poi_categories)
+        poi_per_lgu[column_name] = 1
+        tmp_a = poi_per_lgu.groupby(by=join_idx)\
+                           .count()[column_name]\
+                           .reset_index()\
+                           .sort_values(by=join_idx,ascending=True)
+        tmp_b = gdf.sort_values(by=join_idx,
+                                ascending=True)
+        final_df = pd.merge(tmp_b,
+                            tmp_a[[join_idx, column_name]],
+                            on=join_idx,
+                            how="left")
+        gdf = gpd.GeoDataFrame(final_df,
+                               geometry="geometry")
+
+    return gdf
+
+
 class Tessellation:
     """
     Creates a Tessellation object using a GeoDataFrame or a city name,
@@ -90,7 +234,8 @@ class Tessellation:
         self.road_network = pd.DataFrame()
         self.queried_highway_types = []
 
-    def _get_missing_poi_categories(self, poi_list):
+    def _get_missing_poi_categories(self,
+                                    poi_list):
         """
         Checks if the poi categories are already available in the object poi_dataframe
         Creates a list of missing categories, which should be downloaded from OSM
@@ -108,11 +253,13 @@ class Tessellation:
 
         missing_poi_categories = []
         for poi_category in poi_list:
-            if not hasattr(self.poi_dataframe, poi_category):
+            if not hasattr(self.poi_dataframe,
+                           poi_category):
                 missing_poi_categories.append(poi_category)
         return missing_poi_categories
 
-    def squares(self, resolution: int):
+    def squares(self,
+                resolution: int):
         """
         Generate square grid laying over the area
 
@@ -120,19 +267,22 @@ class Tessellation:
         ----------
         resolution : int
             Specifies the size of squares
-            A positive number between todo: complete
+            A positive number between
 
         Returns
         -------
         df_qk_squares : pandas.DataFrame
             Dataframe containing squares
         """
-        df_qk_squares = get_squares_polyfill(self.area_gdf, resolution)
-        df_qk_squares = df_qk_squares.drop(columns=['osm_id', 'children_id'])
+        df_qk_squares = get_squares_polyfill(self.area_gdf,
+                                             resolution)
+        df_qk_squares = df_qk_squares.drop(columns=['osm_id',
+                                                    'children_id'])
 
         return df_qk_squares
 
-    def hexagons(self, resolution: int):
+    def hexagons(self,
+                 resolution: int):
         """
         Generate hexagon grid laying over the area
 
@@ -140,7 +290,7 @@ class Tessellation:
         ----------
         resolution : int
             Specifies the size of hexagons
-            A positive number between todo: complete
+            A positive number between
 
         Returns
         -------
@@ -148,8 +298,10 @@ class Tessellation:
             Dataframe containing hexagons
         """
 
-        df_h3_hexagons = get_h3_hexagons(self.area_gdf, resolution)
-        df_h3_hexagons = df_h3_hexagons.reset_index().rename(columns={'index': 'hex_id'})
+        df_h3_hexagons = get_h3_hexagons(self.area_gdf,
+                                         resolution)
+        df_h3_hexagons = df_h3_hexagons.reset_index()\
+                                       .rename(columns={'index': 'hex_id'})
 
         return df_h3_hexagons
 
@@ -209,7 +361,10 @@ class Tessellation:
         # if there is any category that should be downloaded -->
         # create the query and run it
         if len(missing_poi_categories) > 0:
-            poi_data_obj = POIdata(self.area_gdf, missing_poi_categories, timeout, verbose)
+            poi_data_obj = POIdata(self.area_gdf,
+                                   missing_poi_categories,
+                                   timeout,
+                                   verbose)
             poi_data_new = poi_data_obj.get_poi_data()
             # concat the data with the available poi_data dataframe of the Tessellation object
             self.poi_dataframe = pd.concat([self.poi_dataframe, poi_data_new]).fillna(False)
@@ -217,14 +372,16 @@ class Tessellation:
 
         # data, based on which, tessellation should be done
         tess_data = self.poi_dataframe[self.poi_dataframe[poi_categories].sum(axis=1) > 0]
-        points_geom = tess_data[['center_longitude', 'center_latitude']] \
-            .apply(lambda p: Point(p['center_longitude'], p['center_latitude']), axis=1)
+        points_geom = tess_data[['center_longitude', 'center_latitude']]\
+                                    .apply(lambda p: Point(p['center_longitude'],
+                                                           p['center_latitude']),
+                                           axis=1)
         tess_data = gpd.GeoDataFrame(geometry=points_geom,
                                      data=tess_data[poi_categories],
                                      crs='EPSG:4326')
         poi_data_aqk = tess_data.rename(columns={"points_geom": "geometry"})
-
-        df_aqk = get_squares_polyfill(self.area_gdf, start_resolution)
+        df_aqk = get_squares_polyfill(self.area_gdf,
+                                      start_resolution)
         aqk_count_df = count_poi(df_aqk, poi_data_aqk)
 
         if not threshold:
@@ -238,13 +395,19 @@ class Tessellation:
             if verbose:
                 print(f"Threshold exceeded! Squares are subdivided into resolution {i}")
 
-            df_tmp = get_adaptive_squares(aqk_count_df, threshold)
-            df_tmp.drop(columns=["count"], inplace=True)
-            df_tmp2 = count_poi(df_tmp, poi_data_aqk)
+            df_tmp = get_adaptive_squares(aqk_count_df,
+                                          threshold)
+            df_tmp.drop(columns=["count"],
+                        inplace=True)
+            df_tmp2 = count_poi(df_tmp,
+                                poi_data_aqk)
             aqk_count_df = df_tmp2
 
-        final_aqk = gpd.sjoin(aqk_count_df, self.area_gdf)
-        final_aqk = final_aqk.drop(columns=['osm_id', 'children_id', 'index_right'])
+        final_aqk = gpd.sjoin(aqk_count_df,
+                              self.area_gdf)
+        final_aqk = final_aqk.drop(columns=['osm_id',
+                                            'children_id',
+                                            'index_right'])
 
         return final_aqk
 
@@ -310,15 +473,20 @@ class Tessellation:
         # if there is any category that should be downloaded -->
         # create the query and run it
         if len(missing_poi_categories) > 0:
-            poi_data_obj = POIdata(queried_area, missing_poi_categories, timeout, verbose)
+            poi_data_obj = POIdata(queried_area,
+                                   missing_poi_categories,
+                                   timeout,
+                                   verbose)
             poi_data_new = poi_data_obj.get_poi_data()
             # concat the data with the available poi_data dataframe of the Tessellation object
-            self.poi_dataframe = pd.concat([self.poi_dataframe, poi_data_new]).fillna(False)
+            self.poi_dataframe = pd.concat([self.poi_dataframe,
+                                            poi_data_new]).fillna(False)
             self.poi_dataframe = self.poi_dataframe.reset_index(drop=True)
 
         # data, based on which, tessellation should be done
         tess_data = self.poi_dataframe[self.poi_dataframe[poi_categories].sum(axis=1) > 0]
-        data_locs = tess_data[['center_longitude', 'center_latitude']].values
+        data_locs = tess_data[['center_longitude',
+                               'center_latitude']].values
 
         # create generators for Voronoi diagram
         if cluster_algo == "k-means":
@@ -330,7 +498,8 @@ class Tessellation:
         elif cluster_algo == "hdbscan":
             if verbose:
                 print('HDBSCAN Clustering... This can take a while...')
-            clustering = hdbscan.HDBSCAN(min_cluster_size=min_cluster_size, prediction_data=True).fit(data_locs)
+            clustering = hdbscan.HDBSCAN(min_cluster_size=min_cluster_size,
+                                         prediction_data=True).fit(data_locs)
             generators = [np.mean(data_locs[clustering.labels_ == label], axis=0) for label in
                           range(clustering.labels_.max() + 1)]
 
@@ -347,10 +516,19 @@ class Tessellation:
         if verbose:
             print('Creating Voronoi polygons...')
         voronoi_dia = Voronoi(generators)
-        voronoi_poly = gpd.GeoDataFrame(geometry=[p for p in voronoi_polygons(voronoi_dia, 0.1)], crs="EPSG:4326")
-        voronoi_poly = gpd.sjoin(voronoi_poly, self.area_gdf)
+        voronoi_poly = gpd.GeoDataFrame(geometry=[p for p in voronoi_polygons(voronoi_dia, 0.1)],
+                                        crs="EPSG:4326")
+        voronoi_poly = gpd.sjoin(voronoi_poly,
+                                 self.area_gdf)
         vor_polygons = voronoi_poly.intersection(self.area_gdf.geometry.iloc[0])
         df_voronoi = gpd.GeoDataFrame(geometry=vor_polygons)
+
+        df_voronoi = _check_valid_geometry_gdf(df_voronoi)
+
+        df_voronoi.reset_index(inplace=True)
+        df_voronoi.rename(columns={"index": "voronoi_id"},
+                          inplace=True)
+        df_voronoi['voronoi_id'] = 'voronoiID' + df_voronoi['voronoi_id'].astype(str)
 
         return df_voronoi
 
@@ -401,7 +579,10 @@ class Tessellation:
         # if the road network is not available
         if self.queried_highway_types != highwaytypes:
             # collect road network data
-            road_data_collect_object = RoadData(queried_area, detail_deg, split_roads, verbose)
+            road_data_collect_object = RoadData(queried_area,
+                                                detail_deg,
+                                                split_roads,
+                                                verbose)
             road_data = road_data_collect_object.get_road_network()
             self.road_network = road_data
             # keep track of downloaded road network to prevent similar OSM request
@@ -424,19 +605,33 @@ class Tessellation:
         blocks = create_blocks(road_data)
 
         # keep polygons inside studied area
-        polygons_in_area = gpd.sjoin(blocks, queried_area, how='inner')
-        polygons_in_area.drop(columns=["index_right"], inplace=True)
+        polygons_in_area = gpd.sjoin(blocks,
+                                     queried_area,
+                                     how='inner')
+        polygons_in_area.drop(columns=["index_right"],
+                              inplace=True)
 
         # create polygons by the border
-        rest_polygons = get_rest_polygon(polygons_in_area, queried_area)
+        rest_polygons = get_rest_polygon(polygons_in_area,
+                                         queried_area)
 
         # add rest polygons to all polygons
-        city_blocks = pd.concat([polygons_in_area, rest_polygons])
+        city_blocks = pd.concat([polygons_in_area,
+                                 rest_polygons])
 
         # merging small polygons using hierarchical clustering
         if not n_polygons:
             city_blocks = city_blocks[['geometry']].reset_index(drop=True)
+
+            city_blocks = _check_valid_geometry_gdf(city_blocks)
+
+            city_blocks.reset_index(inplace=True)
+            city_blocks.rename(columns={"index": "cityblock_id"},
+                               inplace=True)
+            city_blocks['cityblock_id'] = 'cityblockID' + city_blocks['cityblock_id'].astype(str)
+
             return city_blocks
+
         if n_polygons > len(city_blocks):
             raise ValueError(f'Cannot extract more city blocks than initial city blocks!'
                              f'Initial city blocks are {len(city_blocks)}, desired city blocks are {n_polygons}'
@@ -449,11 +644,13 @@ class Tessellation:
             warnings.simplefilter('ignore')
             city_blocks["centroid"] = city_blocks.centroid
 
-        coordinates = np.column_stack([city_blocks["centroid"].x, city_blocks["centroid"].y])
+        coordinates = np.column_stack([city_blocks["centroid"].x,
+                                       city_blocks["centroid"].y])
         # the algorithm needs O(n²) memory and O(n³) runtime
         # => doesn't work with large data ==> not enough RAM ==> kernel dies
         # think about changing the clustering algorithm
-        model = AgglomerativeClustering(n_clusters=n_polygons, affinity='euclidean')
+        model = AgglomerativeClustering(n_clusters=n_polygons,
+                                        affinity='euclidean')
         model.fit(coordinates)
 
         city_blocks["Cluster"] = model.labels_
@@ -474,6 +671,12 @@ class Tessellation:
         explode_df.drop(columns=["level_0", "level_1"], inplace=True)
         final_city_blocks = pd.concat([keep_df, explode_df])
         final_city_blocks = final_city_blocks[['geometry']].reset_index(drop=True)
+
+        final_city_blocks = _check_valid_geometry_gdf(final_city_blocks)
+
+        final_city_blocks.reset_index(inplace=True)
+        final_city_blocks.rename(columns={"index": "cityblock_id"}, inplace=True)
+        final_city_blocks['cityblock_id'] = 'cityblockID' + final_city_blocks['cityblock_id'].astype(str)
 
         return final_city_blocks
 
@@ -508,7 +711,37 @@ class Tessellation:
         --------
         list
         """
-        return POIdata.osm_primary_features()
+        osm_primary_features_lst = ['aerialway',
+                                    'aeroway',
+                                    'amenity',
+                                    'barrier',
+                                    'boundary',
+                                    'building',
+                                    'craft',
+                                    'emergency',
+                                    'geological',
+                                    'healthcare',
+                                    'highway',
+                                    'historic',
+                                    'landuse',
+                                    'leisure',
+                                    'man_made',
+                                    'military',
+                                    'natural',
+                                    'office',
+                                    'place',
+                                    'power',
+                                    'public_transport',
+                                    'railway',
+                                    'route',
+                                    'shop',
+                                    'sport',
+                                    'telecom',
+                                    'tourism',
+                                    'water',
+                                    'waterway']
+
+        return osm_primary_features_lst
 
     @staticmethod
     def osm_highway_types():
@@ -516,4 +749,24 @@ class Tessellation:
         list of all highway types
         returns list of highway types
         """
-        return RoadData.osm_highway_types()
+        osm_highways_lst = ['motorway',
+                            'trunk',
+                            'primary',
+                            'secondary',
+                            'tertiary',
+                            'residential',
+                            'unclassified',
+                            'motorway_link',
+                            'trunk_link',
+                            'primary_link',
+                            'secondary_link',
+                            'living_street',
+                            'pedestrian',
+                            'track',
+                            'bus_guideway',
+                            'footway',
+                            'path',
+                            'service',
+                            'cycleway']
+
+        return osm_highways_lst

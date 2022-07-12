@@ -1,6 +1,8 @@
+import os
 import numpy as np
 import pandas as pd
 import geopandas as gpd
+
 import warnings
 import osmnx as ox
 import requests
@@ -9,11 +11,15 @@ from shapely.geometry import Point
 
 
 def geom_ceil(coordinate, precision=4):
-    return np.true_divide(np.ceil(coordinate * 10 ** precision), 10 ** precision)
+    coordinate_ceil = np.true_divide(np.ceil(coordinate * 10 ** precision),
+                                     10 ** precision)
+    return coordinate_ceil
 
 
 def geom_floor(coordinate, precision=4):
-    return np.true_divide(np.floor(coordinate * 10 ** precision), 10 ** precision)
+    coordinate_floor = np.true_divide(np.floor(coordinate * 10 ** precision),
+                                      10 ** precision)
+    return coordinate_floor
 
 
 class POIdata:
@@ -35,7 +41,11 @@ class POIdata:
         If True, print information while computing
     """
 
-    def __init__(self, area, poi_categories, timeout, verbose):
+    def __init__(self,
+                 area,
+                 poi_categories,
+                 timeout,
+                 verbose):
         self.area_buffered = None
         self.area = area
         self.poi_categories = poi_categories
@@ -95,9 +105,14 @@ class POIdata:
         # make the query area a bit larger
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
-            self.area_buffered = self.area.buffer(0.008).simplify(0.005)
+            self.area_buffered = self.area.buffer(0.008)\
+                                     .simplify(0.005)
 
-        xy = np.array(self.area_buffered.iloc[0].exterior.coords)
+        exter_cooridinates = self.area_buffered\
+                                 .iloc[0]\
+                                 .exterior.coords
+
+        xy = np.array(exter_cooridinates)
 
         # make polygon string for OSM overpass query
         # Using the polygon, fewer data are retrieved, and it's faster but request is long can can lead to 414
@@ -116,7 +131,8 @@ class POIdata:
         # todo: is this necessary?
         for poi_category in self.poi_categories:
             if poi_category not in self.osm_primary_features():
-                raise ValueError(f'{poi_category} is not a valid POI primary category. See a list of OSM primary '
+                raise ValueError(f'{poi_category} is not a valid POI primary category. '
+                                 f'See a list of OSM primary '
                                  f'features with Tessellation.osm_primary_features()')
 
         # create query string for overpass
@@ -163,7 +179,8 @@ class POIdata:
                                "Please wait a couple of minutes and then try again.")
         elif resp.status_code == 504:
             raise RuntimeError("504 Gateway Timeout:\n"
-                               "the server has already so much load that the request cannot be executed."
+                               "the server has already so much load that"
+                               " the request cannot be executed."
                                "Please try again later")
         elif resp.status_code != 200:
             raise RuntimeError("Bad Request!")
@@ -177,7 +194,6 @@ class POIdata:
         lst_ways = []
 
         generator = resp['elements']
-
         for item in generator:
 
             for cat in self.poi_categories:
@@ -198,12 +214,47 @@ class POIdata:
         nodes_df = pd.DataFrame(lst_nodes)
         ways_df = pd.DataFrame(lst_ways)
 
-        nodes_df['geometry'] = nodes_df[['lon', 'lat']].apply(lambda p: [{'lat': p['lat'], 'lon': p['lon']}], axis=1)
-        nodes_df = nodes_df.rename(columns={'lat': 'center_latitude', 'lon': 'center_longitude'})
-        nodes_df = nodes_df.drop(columns=['id'])
-        ways_df = ways_df.drop(columns=['id', 'bounds', 'nodes'])
+        if len(nodes_df) > 0 and len(ways_df) > 0:
+            if self.verbose:
+                print("Joining nodes and ways")
 
-        poi_df = pd.concat([ways_df, nodes_df]).fillna(False)
+            nodes_df['geometry'] = nodes_df[['lon', 'lat']].apply(lambda p: [{'lat': p['lat'],
+                                                                              'lon': p['lon']}],
+                                                                  axis=1)
+            nodes_df = nodes_df.rename(columns={'lat': 'center_latitude',
+                                                'lon': 'center_longitude'})
+            nodes_df = nodes_df.drop(columns=['id'])
+            ways_df = ways_df.drop(columns=['id',
+                                            'bounds',
+                                            'nodes'])
+
+            poi_df = pd.concat([ways_df, nodes_df]).fillna(False)
+
+        elif len(nodes_df) == 0 and len(ways_df) > 0:
+            if self.verbose:
+                print("No nodes found. Return ways only.")
+
+            ways_df = ways_df.drop(columns=['id',
+                                            'bounds',
+                                            'nodes'])
+            poi_df = ways_df.fillna(False)
+
+        elif len(nodes_df) > 0 and len(ways_df) == 0:
+            if self.verbose:
+                print("No ways found returning nodes only")
+
+            nodes_df['geometry'] = nodes_df[['lon', 'lat']]\
+                                        .apply(lambda p: [{'lat': p['lat'],
+                                                           'lon': p['lon']}],
+                                               axis=1)
+
+            nodes_df = nodes_df.rename(columns={'lat': 'center_latitude',
+                                                'lon': 'center_longitude'})
+            nodes_df = nodes_df.drop(columns=['id'])
+            poi_df = nodes_df.fillna(False)
+        else:
+            raise ValueError("No POI data for the inserted poi-category/categories and area.")
+
 
         # add POI categories with no data to poi_df
         for poi_category in self.poi_categories:
@@ -211,18 +262,28 @@ class POIdata:
                 poi_df[poi_category] = False
 
         # prettify poi_df by sorting columns
-        first_cols = ['type', 'geometry', 'tags', 'center_latitude', 'center_longitude']
+        first_cols = ['type',
+                      'geometry',
+                      'tags',
+                      'center_latitude',
+                      'center_longitude']
+
         second_cols = sorted(poi_df.columns.drop(first_cols))
         poi_df = poi_df[first_cols + second_cols]
         poi_df = poi_df.reset_index(drop=True)
 
         # Keep only the POI within the area
-        poi_geo_df = gpd.GeoDataFrame(
-            geometry=[Point(coords) for coords in poi_df[['center_longitude', 'center_latitude']].values],
-            crs='EPSG:4326')
+        geometry_column = [Point(coords) for coords in poi_df[['center_longitude', 'center_latitude']].values]
+        poi_geo_df = gpd.GeoDataFrame(geometry = geometry_column,
+                                        crs='EPSG:4326')
         area_buffered_gdf = gpd.GeoDataFrame(geometry=self.area_buffered, crs='epsg:4326')
-        idx_to_keep = gpd.sjoin(poi_geo_df, area_buffered_gdf, predicate='within').index
+        idx_to_keep = gpd.sjoin(poi_geo_df,
+                                area_buffered_gdf,
+                                predicate='within').index
         poi_df = poi_df.loc[idx_to_keep]
+
+        if len(poi_df) == 0:
+            raise ValueError("No poi data found that is within the area.")
 
         return poi_df
 
@@ -247,7 +308,12 @@ class RoadData:
             If True, print information while computing
     """
 
-    def __init__(self, area, detail_deg=None, split_roads=True, verbose=False):
+    def __init__(self,
+                 area,
+                 detail_deg=None,
+                 split_roads=True,
+                 verbose=False):
+
         self.detail_deg = detail_deg
         self.area = area
         self.verbose = verbose
@@ -322,11 +388,14 @@ class RoadData:
         cf = self.create_custom_filter()
         if self.verbose:
             print("Collecting road network data...")
-        graph = ox.graph_from_polygon(self.area.boundary.convex_hull.values[0], custom_filter=cf)
-
-        graph_projected = ox.project_graph(graph, to_crs='epsg:4326')
+        graph = ox.graph_from_polygon(self.area.boundary.convex_hull.values[0],
+                                      custom_filter=cf)
+        graph_projected = ox.project_graph(graph,
+                                           to_crs='epsg:4326')
         graph_undirected = graph_projected.to_undirected()
-        graph_edges_as_gdf = ox.graph_to_gdfs(graph_undirected, nodes=False, edges=True)
+        graph_edges_as_gdf = ox.graph_to_gdfs(graph_undirected,
+                                              nodes=False,
+                                              edges=True)
 
         if self.verbose:
             print(f"Collected data has {len(graph_edges_as_gdf)} street segments.")

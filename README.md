@@ -1,7 +1,7 @@
 # tesspy
 [![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 [![Documentation Status](https://readthedocs.org/projects/tesspy/badge/?version=latest)](https://tesspy.readthedocs.io/en/latest/?badge=latest)
-![version](https://img.shields.io/badge/version-0.0.3-blue)
+![version](https://img.shields.io/badge/version-0.1.0-blue)
 [![Conda Version](https://img.shields.io/conda/vn/conda-forge/tesspy.svg)](https://anaconda.org/conda-forge/tesspy)
 
 <img align="left" src="docs/readme_pics/logo.jpg">
