@@ -37,7 +37,7 @@ Being extensive and flexible, `TessPy` allows the user to customize the tessella
 
 ![Irregular Tessellation methods Voronoi diagrams using k-means (left) and hdbscan (center), and city blocks (right).label{fig1}]( fig1_irregular_tess.png)
 
-# Statement of need
+# Statement of Need
 
 The first challenge in most of spatial analyses is defining a (statistical) unit to proceed with quantitative analysis (or, in other words discretizing the studied region). `TessPy` addresses the process of creating the units for spatial analysis. It uses tessellation to build the tiles, which are then defined as units. `TessPy` is extensive and flexible at creating these units since various tessellation methods are implemented and all the tessellation methods are customizable. Therefore, it allows for endless variations in generating these units. 
 
@@ -45,7 +45,7 @@ As @white2008 argue, topology affects the outcome of geospatial models. Therefor
 
 Regarding the available dataset and the characteristics of the studied variable, the user can test different topologies (different tessellation methods or different units) and finally achieve what, in that particular case, leads to the most efficient quantitative analysis. Besides tessellation, `TessPy` provides further functionalities. For example, users can combine spatial discretization with additional data, in this case POI data are assigned to each tile [@hagen2022]. Overall, `TessPy` provides the framework for geospatial analyses. By using the retrieved POI data and the created tiles, it allows further analyses. 
 
-# Example usage 
+# Example Usage 
 
 Assume we have a dataset of real estate prices in Berlin. It contains locations and the corresponding prices. Visualizing this dataset results in autoref{fig2} (left), which does not indicate any insight into the real estate prices in Berlin. To start any quantitative analysis, we need first to define the units. We can do this by tessellating Berlin using `TessPy`, as shown in autoref{fig2} (right). In this case, we create a square grid. This is the prerequisite for any statistical analysis.
 
@@ -59,8 +59,14 @@ All the above analyses can be demonstrated using another tessellation method, su
 
 Using `TessPy`, the number of different POI categories in each unit can be calculated. For example, a dataset with the number of restaurants in each tile can be created, and by merging this information, we can investigate if there is a correlation between the number of restaurants and real estate prices. Using `TessPy`, all the POI data can be retrieved to even build a model to explain or predict an outcome variable (such as the price).
 
-# Related software packages
+# Related Software Packages
 
 @fleischmann2019 published `momepy`, a package for urban morphology, with the main purpose of quantitative analysis of urban forms. Using `momepy`, the user can generate a building-based morphological tessellation using Voronoi diagrams. This can be used, for example, to calculate which ratio of each tessellation cell is covered by a related building. However, this is only a special case of tessellation (Voronoi diagrams and buildings as generators). Moreover, created tiles may not cover the whole defined area since it tessellates the buffered building center points. `momepy` is not developed for geographical tessellation and none of the tessellation approaches of `TessPy` for geographical areas is mentioned by or implemented in `momepy`. 
 
 `tessagon` [@tessagon_software] is a python package for the tessellation of 3D surfaces using triangles, hexagons, and more. However, this package can only tessellate 3D surfaces (to use in 3D printers) and not geographical (or urban) areas.
+
+# Acknowledgements
+
+`TessPy` is the result of the research project [ClusterMobil](https://www.frankfurt-university.de/de/hochschule/fachbereich-1-architektur-bauingenieurwesen-geomatik/forschungsinstitut-ffin/fachgruppen-des-ffin/fg-neue-mobilitat/relut/forschungsprojekte-relut/clustermobil/) conducted by the [Research Lab for Urban Transport](https://www.frankfurt-university.de/en/about-us/faculty-1-architecture-civil-engineering-geomatics/research-institute-ffin/specialist-groups-of-the-ffin/specialist-group-new-mobility/relut/). This research project is funded by the state of Hesse and [HOLM](https://frankfurt-holm.de/) funding under the *Innovations in Logistics and Mobility* measure of the Hessian Ministry of Economics, Energy, Transport and Housing. [HA Project No.: 1017/21-19]
+
+# References
