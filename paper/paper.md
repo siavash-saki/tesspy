@@ -33,9 +33,9 @@ Discretization of urban areas is a crucial aspect in many spatial analyses. It h
 
 `TessPy` contains an implementation of different tessellation methods for geographical areas and is designed to be flexible and easy to use. It is built on top of `GeoPandas` [@kelsey_jordahl_2019]. Tiles are returned in a `GeoDataFrame` in `shapely` [@shapely_software] `Polygon` format. Regular methods implemented here are squares and hexagons. The implemented irregular tessellations are adaptive squares, Voronoi diagrams, and city blocks. The irregular methods are data-driven and the required data is retrieved from the OpenStreetMap (OSM) [@OpenStreetMap]. Points of Interest (POI) are downloaded using `overpass` API, the official OSM API, to access the OSM database. To get the road network data, `osmnx` [@boeing2017] is used. The input can be in different formats e.g., a `Polygon` (or a `Multipolygon`) with a defined coordinate reference system (CRS), or an address.  More methods and functions are explained in the API documentation. Several examples (e.g., clustering of urban areas) are demonstrated in `TessPy` documentation.
 
-Being extensive and flexible, `TessPy` allows the user to customize the tessellation methods. This is essential, especially when it comes to irregular methods. For example, different initial clustering algorithms can be used to define centroids in the Voronoi method. autoref{fig1} shows three examples for irregular tessellations for Frankfurt am Main.
+Being extensive and flexible, `TessPy` allows the user to customize the tessellation methods. This is essential, especially when it comes to irregular methods. For example, different initial clustering algorithms can be used to define centroids in the Voronoi method. \autoref{fig1} shows three examples for irregular tessellations for Frankfurt am Main.
 
-![Irregular Tessellation methods Voronoi diagrams using k-means (left) and hdbscan (center), and city blocks (right).label{fig1}]( fig1_irregular_tess.png)
+![Irregular Tessellation methods Voronoi diagrams using k-means (left) and hdbscan (center), and city blocks (right).\label{fig1}](fig1_irregular_tess.png)
 
 # Statement of Need
 
@@ -47,13 +47,13 @@ Regarding the available dataset and the characteristics of the studied variable,
 
 # Example Usage 
 
-Assume we have a dataset of real estate prices in Berlin. It contains locations and the corresponding prices. Visualizing this dataset results in autoref{fig2} (left), which does not indicate any insight into the real estate prices in Berlin. To start any quantitative analysis, we need first to define the units. We can do this by tessellating Berlin using `TessPy`, as shown in autoref{fig2} (right). In this case, we create a square grid. This is the prerequisite for any statistical analysis.
+Assume we have a dataset of real estate prices in Berlin. It contains locations and the corresponding prices. Visualizing this dataset results in \autoref{fig2} (left), which does not indicate any insight into the real estate prices in Berlin. To start any quantitative analysis, we need first to define the units. We can do this by tessellating Berlin using `TessPy`, as shown in autoref{fig2} (right). In this case, we create a square grid. This is the prerequisite for any statistical analysis.
 
-![Real estate locations visualized on the map (left), and Berlin tessellated in squares using TessPy (right)label{fig2}](fig2_locations.png)
+![Real estate locations visualized on the map (left), and Berlin tessellated in squares using TessPy (right).\label{fig2}](fig2_locations.png)
 
-Statistical analyses such as a heatmap of prices or a test for spatial autocorrelation can be conducted based on the created tiles, as demonstrated in Figure 3.
+Statistical analyses such as a heatmap of prices or a test for spatial autocorrelation can be conducted based on the created tiles, as demonstrated in \autoref{fig3}.
 
-![A heatmap of real estate prices in Berlin (left), and spatial lag of prices (right) on the basis of the generated tileslabel{fig3}](fig3_heatmaps.png)
+![A heatmap of real estate prices in Berlin (left), and spatial lag of prices (right) on the basis of the generated tiles.\label{fig3}](fig3_heatmaps.png)
 
 All the above analyses can be demonstrated using another tessellation method, such as Voronoi polygons, with just a few lines of code. This simplicity of `TessPy` offers the user the opportunity to easily find the most suitable method to build the quantitative units for further steps.
 
