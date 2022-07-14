@@ -47,7 +47,7 @@ Regarding the available dataset and the characteristics of the studied variable,
 
 # Example Usage 
 
-Assume we have a dataset of real estate prices in Berlin. It contains locations and the corresponding prices. Visualizing this dataset results in \autoref{fig2} (left), which does not indicate any insight into the real estate prices in Berlin. To start any quantitative analysis, we need first to define the units. We can do this by tessellating Berlin using `TessPy`, as shown in autoref{fig2} (right). In this case, we create a square grid. This is the prerequisite for any statistical analysis.
+Assume we have a dataset of real estate prices in Berlin. It contains locations and the corresponding prices. Visualizing this dataset results in \autoref{fig2} (left), which does not indicate any insight into the real estate prices in Berlin. To start any quantitative analysis, we need first to define the units. We can do this by tessellating Berlin using `TessPy`, as shown in \autoref{fig2} (right). In this case, we create a square grid. This is the prerequisite for any statistical analysis.
 
 ![Real estate locations visualized on the map (left), and Berlin tessellated in squares using TessPy (right).\label{fig2}](fig2_locations.png)
 
