@@ -22,14 +22,14 @@ def count_poi(df,
 
     Parameters
     ----------
-    df : GeoDataFrame
+    df : geopandas.GeoDataFrame
         GeoDataFrame containing the tiles (polygons)
-    points : GeoDataFrame
+    points : geopandas.GeoDataFrame
         GeoDataFrame containing the POI
 
     Returns
     --------
-    final_df : GeoDataFrame
+    final_df : geopandas.GeoDataFrame
         GeoDataFrame containing the tiles and the POI count
     """
     # TODO: Change such that this works for every tessellation method ->
@@ -70,14 +70,14 @@ def get_squares_polyfill(gdf,
 
     Parameters
     ----------
-    gdf : GeoDataFrame
+    gdf : geopandas.GeoDataFrame
         GeoDataFrame containing the tiles (polygons)
     zoom_level : int
         Resolution, which controls the square sizes
 
     Returns
     --------
-    gdf : GeoDataFrame
+    gdf : geopandas.GeoDataFrame
         GeoDataFrame containing the squares
     """
     geom_name = gdf.geometry.name
@@ -123,14 +123,14 @@ def get_h3_hexagons(gdf,
 
     Parameters
     ----------
-    gdf : GeoDataFrame
+    gdf : geopandas.GeoDataFrame
         GeoDataFrame containing the tiles (polygons)
     resolution : int
         Resolution, which controls the hexagon sizes
 
     Returns
     --------
-    gdf : GeoDataFrame
+    gdf : geopandas.GeoDataFrame
         GeoDataFrame containing the hexagons
     """
     if type(gdf.geometry.iloc[0]) == Polygon:
@@ -176,18 +176,18 @@ def get_h3_hexagons(gdf,
 def get_adaptive_squares(input_gdf,
                          threshold):
     """
-    Adaptive tessellation. Subdivides all squares of input tessellation where thresholdi is exceeded.
+    Adaptive tessellation. Subdivides all squares of input tessellation where threshold is exceeded.
 
     Parameters
     ----------
-    input_gdf : GeoDataFrame
+    input_gdf : geopandas.GeoDataFrame
         GeoDataFrame containing the tiles (polygons)
     threshold : int
         threshold, which controls the division of squares
 
     Returns
     --------
-    gdf : GeoDataFrame
+    gdf : geopandas.GeoDataFrame
         GeoDataFrame containing the squares
     """
 
@@ -239,7 +239,7 @@ def voronoi_polygons(sp_voronoi_obj,
     Returns
     --------
     gdf : shapely.Polygon
-        Voronoi polygon
+        Voronoi polygons
     """
     centroid = sp_voronoi_obj.points.mean(axis=0)
 
@@ -289,11 +289,13 @@ def split_linestring(df):
 
     Parameters
     ----------
-    df: DataFrame of shapely.LineStrings containing more than two points
+    df: pandas.DataFrame
+        dataframe of shapely.LineStrings containing more than two points
 
     Returns
     --------
-    dataset: DataFrame with shapely.linestring with two points each
+    dataset: pandas.DataFrame
+        dataframe with shapely.linestring with two points each
     """
     linestrings = []
     osmid = []
@@ -320,11 +322,13 @@ def explode(gdf):
 
     Parameters
     ----------
-    gdf: which can have multi-part geometries that will be exploded
+    gdf:  geopandas.GeoDataFrame
+        GeoDataFrame that can have multi-part geometries that will be exploded
 
     Returns
     --------
-    gdf_out: GeoDataFrame with single geometries
+    gdf_out: geopandas.GeoDataFrame
+        GeoDataFrame with single geometries
     """
     gs = gdf.explode(index_parts=True)
     gdf2 = gs.reset_index().rename(columns={0: "geometry"})
@@ -352,12 +356,15 @@ def get_hierarchical_clustering_parameter(coordinates,
 
     Parameters
     ----------
-    coordinates: numpy column stock of coordinates of Data
-    threshold: Number of Polygons that should not be exceeded
+    coordinates: numpy.ndarray
+        stock of coordinates of Data
+    threshold: int
+        positive number indicating the number of Polygons that should not be exceeded
 
     Returns
     --------
-    th: int, defines the distance_threshold for hierarchical clustering
+    th: int
+        defines the distance_threshold for hierarchical clustering
     """
     dist_threshold = [i * 100 for i in range(2, 13)]
     for th in dist_threshold:
@@ -375,16 +382,17 @@ def get_hierarchical_clustering_parameter(coordinates,
 
 def create_blocks(road_network):
     """
-    This function uses the shapely function polygonize to create
-    blocks by using road data.
+    This function uses polygonize to create blocks by using road data.
 
     Parameters
     ----------
-    road_network: GeoDataFrame from RoadData class containing street segments
+    road_network: geopandas.GeoDataFrame
+        GeoDataFrame (coming from RoadData class) containing street segments
 
     Returns
     --------
-    blocks: GeoDataFrame with polygons, that were created by using the road data
+    blocks: geopandas.GeoDataFrame
+        GeoDataFrame with polygons, that were created by using the road data
     """
     if hasattr(road_network, 'geometry'):
         block_faces = list(polygonize(road_network['geometry']))
@@ -399,20 +407,25 @@ def get_rest_polygon(blocks, area):
     #  groups with ocean and multiple polygons because now the convex
     #  hull is used. That results in ocean parts becoming city blocks
     """
-    This function creates the rest polygons that can occur by creating city blocks. Dead ends or vegetation at the
-    boundary of the area will not be defined as blocks because there are no road to define a block. Since the
-    tessellation should cover the whole area those "rest polygons" will be  created by subtracting all blocks from the
-    area to fill these gaps. The rest_polygons are most likely a Multi-Polygon which is exploded into many polygons.
+    This function creates the rest polygons that can occur by creating
+    city blocks. Dead ends or vegetation at the boundary of the area will
+    not be defined as blocks because there are no road to define a block.
+    Since the tessellation should cover the whole area those "rest polygons"
+    will be created by subtracting all blocks from the area to fill these gaps.
+    The rest_polygons are most likely a Multi-Polygon which is exploded into many polygons.
     Using this, the city blocks method tessellates the whole area without gaps.
 
     Parameters
     ----------
-    blocks: GeoDataFrame with all blocks
-    area: GeoDataFrame with boundary polygon
+    blocks: geopandas.GeoDataFrame
+        GeoDataFrame containing city blocks
+    area: geopandas.GeoDataFrame
+        boundary polygon
 
     Returns
     --------
-    rest_polygons: GeoDataFrame of the rest polygons
+    rest_polygons: geopandas.GeoDataFrame
+        GeoDataFrame containing rest polygons
     """
 
     if hasattr(blocks, "geometry") and hasattr(area, "geometry"):

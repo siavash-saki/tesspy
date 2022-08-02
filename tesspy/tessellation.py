@@ -27,7 +27,7 @@ def get_city_polygon(city: str):
 
     Returns
     --------
-    df_city : GeoDataFrame
+    df_city : geopandas.GeoDataFrame
         GeoDataFrame containing the polygon of the city
     """
     with warnings.catch_warnings():
@@ -40,15 +40,18 @@ def get_city_polygon(city: str):
 
 def _check_input_geodataframe(gdf):
     """
-    checks if the input gdf is in a correct format
+    checks if the input gdf is in a correct format. Otherwise, an error is raised to
+    demonstrate what the problem is.
 
     Parameters
     ----------
-    gdf : GeoDataFrame
+    gdf : geopandas.GeoDataFrame
+        input GeoDataFrame
 
     Returns
     --------
-    gdf : GeoDataFrame
+    gdf : geopandas.GeoDataFrame
+        same GeoDataFrame as input
     """
     if len(gdf) != 1:
         raise ValueError("GeoDataFrame must have only one geometry element")
@@ -74,11 +77,11 @@ def _check_valid_geometry_gdf(gdf):
 
     Parameters
     ----------
-    gdf : GeoDataFrame
+    gdf : geopandas.GeoDataFrame
 
     Returns
     --------
-    gdf : GeoDataFrame
+    gdf : geopandas.GeoDataFrame
     """
 
     if len(gdf) < 1:
@@ -106,22 +109,39 @@ def count_poi_per_tile(city,
                        poi_categories=['amenity', 'building'],
                        timeout=120):
     """
-    Counts different POI-categories per tile. For each POI-categories an additional column is added to the Tessellation
-    GeoDataFrame (gdf). After counting each POI-category the final Tessellation GeoDataFrame with the additional count-
-    columns is returned.
+    Counts different POI-categories per tile. For each POI-categories an additional column
+    is added to the Tessellation GeoDataFrame (gdf). After counting each POI-category the
+    final Tessellation GeoDataFrame with the additional count-columns is returned.
 
     Parameters
     ----------
-    city: Tessellation object or string of the underlying city
-    gdf : GeoDataFrame of the Tessellation for the underlying city
-    method: method used to tessellate the city polygon. It's used to create the index, the POI and Tessellation-datasets
-        will be joined on
-    poi_categories: POI which will be count per tile. These POI may differ from the POI used to create the tessellation
-    timeout: time to wait for OSM to return POI data
+    city: str
+        Tessellation object or string of the underlying city
+    gdf : geopandas.GeoDataFrame
+        GeoDataFrame of the Tessellation for the underlying city
+    method: str
+        method used to tessellate the city polygon. It's used to create the index,
+        the POI and Tessellation-datasets will be joined on. Possible values are
+        ['squares', 'hexagons, 'adaptive_squares', voronoi', 'city_blocks']
+    poi_categories : list, default=["amenity", 'building']
+        POI which will be count per tile. These POI may differ from the POI used
+        to create the tessellation
+        This can be a list of OSM primary map features or 'all'
+            'all' means all the available POI categories
+            Possible values in the list: ['aerialway', 'aeroway',
+            'amenity', 'barrier', 'boundary', 'building', 'craft',
+            'emergency', 'geological', 'healthcare', 'highway',
+            'historic', 'landuse', 'leisure', 'man_made', 'military',
+            'natural', 'office', 'place', 'power', 'public_transport',
+            'railway', 'route', 'shop', 'sport', 'telecom', 'tourism',
+            'water', 'waterway']
+    timeout: int, default=120
+        positive number indicating the time to wait for OSM to return POI data
 
     Returns
     --------
-    gdf : GeoDataFrame - Tessellation GeoDataFrame with additional columns (count_poi-columns are added)
+    gdf : geopandas.GeoDataFrame
+        Tessellation GeoDataFrame with additional columns (count_poi-columns are added)
     """
 
     if type(city) == str:
@@ -210,7 +230,7 @@ class Tessellation:
 
     Parameters
     ----------
-    area : GeoDataFrame or str
+    area : geopandas.GeoDataFrame or str
         GeoDataFrame must have a single shaply Polygon or MultiPolygon
         in geometry column and its CRS must be defined.
         str must be a name of a city, or an address of a region
@@ -682,13 +702,19 @@ class Tessellation:
 
     def get_polygon(self):
         """
-        returns the area polygon in GeoDataFrame format
+        Returns
+        --------
+        area_gdf : geopandas.GeoDataFrame
+            the area polygon in GeoDataFrame format
         """
         return self.area_gdf
 
     def get_poi_data(self):
         """
-        returns the POI data in GeoDataFrame format
+        Returns
+        --------
+        area_gdf : geopandas.GeoDataFrame
+            the POI data in GeoDataFrame format
         """
         return self.poi_dataframe
 
@@ -709,7 +735,7 @@ class Tessellation:
 
         Returns
         --------
-        list
+        osm_primary_features_lst: list
         """
         osm_primary_features_lst = ['aerialway',
                                     'aeroway',
@@ -747,7 +773,11 @@ class Tessellation:
     def osm_highway_types():
         """
         list of all highway types
-        returns list of highway types
+
+        Returns
+        --------
+        osm_highways_lst: list
+            list of highway types
         """
         osm_highways_lst = ['motorway',
                             'trunk',
