@@ -105,7 +105,6 @@ def _check_valid_geometry_gdf(gdf):
 
 def count_poi_per_tile(city,
                        gdf,
-                       method,
                        poi_categories=['amenity', 'building'],
                        timeout=120):
     """
@@ -146,11 +145,7 @@ def count_poi_per_tile(city,
 
     if type(city) == str:
         city = Tessellation(city)
-    # Only str input for now
-    # elif type(city) == Tessellation:
-    #    city = city
-    # elif type(city) == tesspy.tessellation.Tessellation:
-    #    city = city
+
     else:
         raise ValueError('Please insert a valid city-type. Valid types are: tesspy.Tessellation Obejct or String')
 
@@ -165,62 +160,40 @@ def count_poi_per_tile(city,
         raise ValueError('Please insert valid poi_categories. Valid types are: string values based on '
                          'osm_primary_features of list/numpy.array with osm_primary_features.')
 
-    if method == 'squares':
-        join_idx = 'quadkey'
-
-    elif method == 'hexagons':
-        join_idx = 'hex_id'
-
-    elif method == 'adaptive_squares':
-        join_idx = 'quadkey'
-
-    elif method == 'voronoi':
-        join_idx = 'voronoi_id'
-
-    elif method == 'city_blocks':
-        join_idx = 'cityblock_id'
-
-    else:
-        raise ValueError("Please insert a valid method. Valid methods are: 'squares',"
-                         " 'hexagons', 'adaptive_squares', "
-                         "'voronoi', 'city_blocks'")
-
     df_poi = POIdata(city.get_polygon(),
                      poi_categories=poi_categories,
                      timeout=timeout,
                      verbose=False).get_poi_data()
 
-    points_geom = df_poi[['center_longitude', 'center_latitude']]\
-                         .apply(lambda p: Point(p['center_longitude'],
-                                                p['center_latitude']),
-                                axis=1)
+    points_geom = df_poi[['center_longitude', 'center_latitude']] \
+        .apply(lambda p: Point(p['center_longitude'],
+                               p['center_latitude']),
+               axis=1)
 
     tess_data = gpd.GeoDataFrame(geometry=points_geom,
                                  data=df_poi[poi_categories],
                                  crs='EPSG:4326')
 
-    for poi_categories in tess_data.columns.difference(["geometry"]):
-        tmp_gdf = tess_data[tess_data[poi_categories]]
-        poi_per_lgu = gpd.sjoin(gdf,
-                                tmp_gdf,
-                                how="left",
-                                predicate="contains")
-        column_name = 'count_' + str(poi_categories)
-        poi_per_lgu[column_name] = 1
-        tmp_a = poi_per_lgu.groupby(by=join_idx)\
-                           .count()[column_name]\
-                           .reset_index()\
-                           .sort_values(by=join_idx,ascending=True)
-        tmp_b = gdf.sort_values(by=join_idx,
-                                ascending=True)
-        final_df = pd.merge(tmp_b,
-                            tmp_a[[join_idx, column_name]],
-                            on=join_idx,
-                            how="left")
-        gdf = gpd.GeoDataFrame(final_df,
-                               geometry="geometry")
+    tess_data["value"] = tess_data.drop(columns=["geometry"]).idxmax(1).where(tess_data.any(1))
+    tess_data = tess_data[["value", "geometry"]]
 
-    return gdf
+    try:
+        idx = [s for s in gdf.columns if s.__contains__("id")][0]
+    except:
+        idx = [s for s in gdf.columns if s.__contains__("key")][0]
+
+    spatial_join = gpd.sjoin(gdf, tess_data)
+    pivot_table = pd.pivot_table(spatial_join,
+                                 index=idx,
+                                 columns='value',
+                                 aggfunc={'value': len})
+
+    pivot_table.columns = pivot_table.columns.droplevel()
+
+    merged_polygons = gdf.merge(pivot_table, how='left', on=idx)
+    merged_polygons.fillna(0, inplace=True)
+
+    return merged_polygons
 
 
 class Tessellation:
@@ -320,8 +293,8 @@ class Tessellation:
 
         df_h3_hexagons = get_h3_hexagons(self.area_gdf,
                                          resolution)
-        df_h3_hexagons = df_h3_hexagons.reset_index()\
-                                       .rename(columns={'index': 'hex_id'})
+        df_h3_hexagons = df_h3_hexagons.reset_index() \
+            .rename(columns={'index': 'hex_id'})
 
         return df_h3_hexagons
 
@@ -392,10 +365,10 @@ class Tessellation:
 
         # data, based on which, tessellation should be done
         tess_data = self.poi_dataframe[self.poi_dataframe[poi_categories].sum(axis=1) > 0]
-        points_geom = tess_data[['center_longitude', 'center_latitude']]\
-                                    .apply(lambda p: Point(p['center_longitude'],
-                                                           p['center_latitude']),
-                                           axis=1)
+        points_geom = tess_data[['center_longitude', 'center_latitude']] \
+            .apply(lambda p: Point(p['center_longitude'],
+                                   p['center_latitude']),
+                   axis=1)
         tess_data = gpd.GeoDataFrame(geometry=points_geom,
                                      data=tess_data[poi_categories],
                                      crs='EPSG:4326')

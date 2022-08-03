@@ -32,8 +32,6 @@ def count_poi(df,
     final_df : geopandas.GeoDataFrame
         GeoDataFrame containing the tiles and the POI count
     """
-    # TODO: Change such that this works for every tessellation method ->
-    #  groupby by sth like input index or even geometry
 
     pointsInPolygon = gpd.sjoin(df,
                                 points,
