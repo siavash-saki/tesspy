@@ -1,0 +1,14 @@
+name: test
+channels:
+  - conda-forge
+dependencies:
+  - python=3.8
+  - geopandas=0.10
+  - h3-py
+  - osmnx
+  - hdbscan
+  - mercantile
+  # testing
+  - pytest
+  - pytest-cov
+  - codecov

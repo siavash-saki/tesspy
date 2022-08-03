@@ -1,0 +1,49 @@
+# This workflow will install Python dependencies, run tests and lint with a variety of Python versions
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+
+name: Tests
+
+on:
+  push:
+    branches: [ "main", "tests-CI" ]
+  pull_request:
+    branches: [ "main", "tests-CI" ]
+
+jobs:
+
+  Test:
+    name: ${{ matrix.env }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -l {0}
+    strategy:
+      fail-fast: false
+      matrix:
+        env:
+          - tests/envs/38-env.yaml
+          - tests/envs/39-env.yaml
+          - tests/envs/310-env.yaml
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Conda
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          environment-file: ${{ matrix.env }}
+          miniforge-version: latest
+          miniforge-variant: Mambaforge
+          use-mamba: true
+
+      - name: Install tesspy
+        run: pip install .
+
+      - name: Check environment
+        run: |
+          conda info
+          conda list
+      - name: Test tesspy
+        run: |
+          pytest -v --color yes --cov-config .coveragerc --cov tesspy --cov-append --cov-report term-missing --cov-report xml tests
+
+      - uses: codecov/codecov-action@v2
