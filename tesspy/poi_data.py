@@ -29,7 +29,7 @@ class POIdata:
 
     Parameters
     ----------
-    area : GeoDataFrame or str
+    area : geopandas.GeoDataFrame or str
         GeoDataFrame must have a single shapely Polygon or MultiPolygon
         in geometry column and its CRS must be defined.
         str must be a name of a city, or an address of a region
@@ -295,7 +295,7 @@ class RoadData:
 
         Parameters
         ----------
-        area : GeoDataFrame or str
+        area : geopandas.GeoDataFrame or str
             GeoDataFrame must have a single shapely Polygon or MultiPolygon
             in geometry column and its CRS must be defined.
             str must be a name of a city, or an address of a region
@@ -354,7 +354,11 @@ class RoadData:
         """
         Creates custom filter that is used to collect road data with osmnx. The detail_deg is used to use only the top
         highway types.
-        :return: string with highway types that is used to collect data using osmnx
+
+        Returns
+        --------
+        custom_filter : list
+            string with highway types that is used to collect data using osmnx
         """
         # Creating custom filter for all highway types
         if self.detail_deg is None:
@@ -383,7 +387,11 @@ class RoadData:
         Collects the road network data based on the defined custom filter. The initial road data is based on graphs
         and transformed into a GeoDataFrame. Within the RoadData Class the user can divide to split the data such
         that each LineString (representing a street segment) contains only two points and not multiple points.
-        :return: GeoDataFrame containing road network
+
+        Returns
+        --------
+        graph_edges_as_gdf : geopandas.GeoDataFrane
+            GeoDataFrame containing road network
         """
         cf = self.create_custom_filter()
         if self.verbose:
