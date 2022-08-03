@@ -23,6 +23,7 @@ jobs:
         env:
           - tests/envs/38-env.yaml
           - tests/envs/39-env.yaml
+          - tests/envs/310-env.yaml
     steps:
       - uses: actions/checkout@v2
 
