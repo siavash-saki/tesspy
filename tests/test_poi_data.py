@@ -87,5 +87,5 @@ def test_get_road_network():
     road_data = RoadData(city, split_roads=False, verbose=True).get_road_network()
     assert len(split_road_data) > 0
     assert len(road_data) > 0
-    assert len(split_road_data) > len(road_data)
+    assert len(split_road_data) >= len(road_data)
 

@@ -24,7 +24,8 @@ def test_get_adaptive_squares():
         .apply(lambda p: Point(p['center_longitude'], p['center_latitude']), axis=1)
     tess_data = gpd.GeoDataFrame(geometry=points_geom,
                                  crs='EPSG:4326')
-    city_squares = city.squares(14)
+    # we need to use get_squares_polyfill. This method is used within aqk and provides information like children_id
+    city_squares = get_squares_polyfill(city.get_polygon(),14)
     count1 = count_poi(city_squares, tess_data)
 
     assert len(get_adaptive_squares(count1, 100)) > len(city_squares)
@@ -34,7 +35,5 @@ def test_get_adaptive_squares():
 def test_split_linestring():
     city = Tessellation("Lille")
     road_data = RoadData(city.get_polygon(), split_roads=False, verbose=True).get_road_network()
-    road_data2 = RoadData(city.get_polygon(), split_roads=True, verbose=False).get_road_network()
     split_road_data = split_linestring(road_data)
     assert len(split_road_data) > len(road_data)
-    assert len(split_road_data) == road_data2
