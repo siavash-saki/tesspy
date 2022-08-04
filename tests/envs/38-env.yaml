@@ -10,6 +10,5 @@ dependencies:
   - mercantile
   # testing
   - pytest
-  - fiona
   - pytest-cov
   - codecov
