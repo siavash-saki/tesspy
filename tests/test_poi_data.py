@@ -66,7 +66,13 @@ def test_get_poi_data_city_1():
     # City 1
     city1 = Tessellation("Innenstadt, Frankfurt am Main")
     poi_data = POIdata(city1.get_polygon(), poi_categories=["public_transport"], timeout=60, verbose=False)
-    ffm_data = poi_data.get_poi_data()
+
+    try:
+        ffm_data = poi_data.get_poi_data()
+    except RuntimeError:
+        sleep(5 * 60)
+        ffm_data = poi_data.get_poi_data()
+
     assert len(ffm_data) > 0
     assert hasattr(ffm_data, "geometry")
     assert hasattr(ffm_data, "public_transport")
@@ -80,13 +86,19 @@ def test_get_poi_data_city_2():
     # City 2
     city2 = Tessellation("Downtown San Diego")
     poi_data_2 = POIdata(city2.get_polygon(), poi_categories=["public_transport"], timeout=60, verbose=False)
-    ffm_data = poi_data_2.get_poi_data()
-    assert len(ffm_data) > 0
-    assert hasattr(ffm_data, "geometry")
-    assert hasattr(ffm_data, "public_transport")
-    assert hasattr(ffm_data, "center_latitude")
-    assert hasattr(ffm_data, "center_longitude")
-    assert hasattr(ffm_data, "tags")
+
+    try:
+        dsd_data = poi_data_2.get_poi_data()
+    except RuntimeError:
+        sleep(5 * 60)
+        dsd_data = poi_data_2.get_poi_data()
+
+    assert len(dsd_data) > 0
+    assert hasattr(dsd_data, "geometry")
+    assert hasattr(dsd_data, "public_transport")
+    assert hasattr(dsd_data, "center_latitude")
+    assert hasattr(dsd_data, "center_longitude")
+    assert hasattr(dsd_data, "tags")
 
 
 def test_osm_highway_types():
@@ -114,8 +126,10 @@ def test_create_custom_filter():
     assert "amenity" not in cf
     assert "public_transport" not in cf
 
+
 def test_get_road_network_data():
     city = Tessellation("SOHO, London").get_polygon()
+    sleep(30)
     road_data = RoadData(city).get_road_network()
     assert type(road_data) == gpd.GeoDataFrame
     assert len(road_data) > 100
@@ -123,10 +137,12 @@ def test_get_road_network_data():
     assert hasattr(road_data, "highway")
     assert hasattr(road_data, "osmid")
 
+
 def test_get_road_network_split():
-    sleep(10)
     city = Tessellation("Innenstadt, Frankfurt am Main").get_polygon()
+    sleep(30)
     split_road_data = RoadData(city, split_roads=True, verbose=True).get_road_network()
+    sleep(30)
     road_data = RoadData(city, split_roads=False, verbose=True).get_road_network()
     assert len(split_road_data) > 0
     assert len(road_data) > 0
