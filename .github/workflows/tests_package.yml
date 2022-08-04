@@ -12,18 +12,33 @@ on:
 jobs:
 
   Test:
-    name: ${{ matrix.env }}
-    runs-on: ubuntu-latest
+    name: On ${{ matrix.os }} with ${{ matrix.py }}
+    runs-on: ${{ matrix.os }}
     defaults:
       run:
         shell: bash -l {0}
     strategy:
       fail-fast: false
       matrix:
+        os: ubuntu-latest
         env:
           - tests/envs/38-env.yaml
           - tests/envs/39-env.yaml
           - tests/envs/310-env.yaml
+        py:
+          - py3.8
+          - py3.9
+          - py3.10
+        include:
+          - os: macos-latest
+            env: tests/envs/310-env.yaml
+            py: py3.10
+
+          - os: windows-latest
+            env: tests/envs/310-env.yaml
+            py: py3.10
+
+
     steps:
       - uses: actions/checkout@v2
 
