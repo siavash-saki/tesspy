@@ -6,7 +6,7 @@ hdbscan
 mercantile
 scikit-learn
 seaborn
-contextlily
+contextily
 esda
 libpysal
 statsmodels

@@ -12,7 +12,7 @@ dependencies:
   - scikit-learn
   # tutorials
   - seaborn
-  - contextlily
+  - contextily
   - esda
   - libpysal
   - statsmodels
