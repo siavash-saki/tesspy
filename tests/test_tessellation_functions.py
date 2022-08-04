@@ -11,7 +11,7 @@ def test_count_poi():
         .apply(lambda p: Point(p['center_longitude'], p['center_latitude']), axis=1)
     tess_data = gpd.GeoDataFrame(geometry=points_geom,
                                  crs='EPSG:4326')
-    city_squares = city.squares(14)
+    city_squares = get_squares_polyfill(city_polygon, 14)
     count1 = count_poi(city_squares, tess_data)
     assert hasattr(count1, "count")
     assert len(count1) > 0
