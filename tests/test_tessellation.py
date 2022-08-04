@@ -151,7 +151,7 @@ def test_count_lgu_function_short_version():
     poi_categories2 = ["leisure"]
 
     df_squares = city.squares(resolution=14)
-    sleep(30)
+    sleep(180)
     df_squares_with_counts = count_poi_per_tile("Nizza", df_squares, poi_categories=poi_categories2)
 
     assert type(df_squares_with_counts) == gpd.GeoDataFrame
@@ -215,9 +215,9 @@ def test_count_lgu_function_different_poi():
     poi_categories1 = "telecom"
     poi_categories3 = ["telecom", "public_transport"]
     df_squares = city.squares(resolution=14)
-    sleep(60)
+    sleep(180)
     df_squares1 = count_poi_per_tile("Mitte, Berlin", df_squares, poi_categories=poi_categories1)
-    sleep(60)
+    sleep(180)
     df_squares2 = count_poi_per_tile("Mitte, Berlin", df_squares, poi_categories=poi_categories3)
 
     assert hasattr(df_squares1, "telecom")
