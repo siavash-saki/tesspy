@@ -4,7 +4,7 @@ from tesspy.tessellation_functions import *
 import pandas as pd
 import geopandas as gpd
 
-tess_data = gpd.read_file('./leisure_poi_Mitte_Berlin.geojson')
+tess_data = gpd.read_file('tests/leisure_poi_Mitte_Berlin.geojson')
 city = Tessellation("Mitte, Berlin")
 city_polygon = city.get_polygon()
 
@@ -31,7 +31,7 @@ def test_get_adaptive_squares():
 
 
 def test_split_linestring():
-    road_data = pd.read_pickle('./road_data_Lille.pkl')
+    road_data = pd.read_pickle('tests/road_data_Lille.pkl')
     split_road_data = split_linestring(road_data)
 
     assert len(split_road_data) > len(road_data)
