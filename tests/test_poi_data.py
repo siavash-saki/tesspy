@@ -67,11 +67,13 @@ def test_get_poi_data_city_1():
     city1 = Tessellation("Innenstadt, Frankfurt am Main")
     poi_data = POIdata(city1.get_polygon(), poi_categories=["public_transport"], timeout=60, verbose=False)
 
-    try:
-        ffm_data = poi_data.get_poi_data()
-    except RuntimeError:
-        sleep(5 * 60)
-        ffm_data = poi_data.get_poi_data()
+    while True:
+        try:
+            ffm_data = poi_data.get_poi_data()
+            break
+        except RuntimeError:
+            sleep(5 * 60)
+            continue
 
     assert len(ffm_data) > 0
     assert hasattr(ffm_data, "geometry")
@@ -87,11 +89,13 @@ def test_get_poi_data_city_2():
     city2 = Tessellation("Downtown San Diego")
     poi_data_2 = POIdata(city2.get_polygon(), poi_categories=["public_transport"], timeout=60, verbose=False)
 
-    try:
-        dsd_data = poi_data_2.get_poi_data()
-    except RuntimeError:
-        sleep(5 * 60)
-        dsd_data = poi_data_2.get_poi_data()
+    while True:
+        try:
+            dsd_data = poi_data_2.get_poi_data()
+            break
+        except RuntimeError:
+            sleep(5 * 60)
+            continue
 
     assert len(dsd_data) > 0
     assert hasattr(dsd_data, "geometry")
@@ -129,7 +133,7 @@ def test_create_custom_filter():
 
 def test_get_road_network_data():
     city = Tessellation("SOHO, London").get_polygon()
-    sleep(30)
+    sleep(60)
     road_data = RoadData(city).get_road_network()
     assert type(road_data) == gpd.GeoDataFrame
     assert len(road_data) > 100
@@ -140,9 +144,9 @@ def test_get_road_network_data():
 
 def test_get_road_network_split():
     city = Tessellation("Innenstadt, Frankfurt am Main").get_polygon()
-    sleep(30)
+    sleep(60)
     split_road_data = RoadData(city, split_roads=True, verbose=True).get_road_network()
-    sleep(30)
+    sleep(60)
     road_data = RoadData(city, split_roads=False, verbose=True).get_road_network()
     assert len(split_road_data) > 0
     assert len(road_data) > 0

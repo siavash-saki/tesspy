@@ -98,11 +98,13 @@ def test_adaptive_squares():
     city = Tessellation("Mainz")
     city_sq = city.squares(14)
 
-    try:
-        city_asq = city.adaptive_squares(14, poi_categories=["leisure"], timeout=60, verbose=False)
-    except RuntimeError:
-        sleep(5 * 60)
-        city_asq = city.adaptive_squares(14, poi_categories=["leisure"], timeout=60, verbose=False)
+    while True:
+        try:
+            city_asq = city.adaptive_squares(14, poi_categories=["leisure"], timeout=60, verbose=False)
+            break
+        except RuntimeError:
+            sleep(5 * 60)
+            continue
 
     assert type(city_asq) == gpd.GeoDataFrame
     assert len(city_asq) > 0
@@ -116,19 +118,17 @@ def test_adaptive_squares():
 def test_voronoi():
     city = Tessellation("Mainz")
 
-    try:
-        city_km = city.voronoi(cluster_algo="k-means",
-                               poi_categories=["leisure"],
-                               timeout=60,
-                               n_polygons=20,
-                               verbose=False)
-    except RuntimeError:
-        sleep(5 * 60)
-        city_km = city.voronoi(cluster_algo="k-means",
-                               poi_categories=["leisure"],
-                               timeout=60,
-                               n_polygons=20,
-                               verbose=False)
+    while True:
+        try:
+            city_km = city.voronoi(cluster_algo="k-means",
+                                   poi_categories=["leisure"],
+                                   timeout=60,
+                                   n_polygons=20,
+                                   verbose=False)
+            break
+        except RuntimeError:
+            sleep(5 * 60)
+            continue
 
     city_h = city.voronoi(cluster_algo="hdbscan",
                           poi_categories=["leisure"],
@@ -164,11 +164,13 @@ def test_count_lgu_function_short_version():
     poi_categories2 = ["leisure"]
 
     df_squares = city.squares(resolution=14)
-    try:
-        df_squares_with_counts = count_poi_per_tile("Nizza", df_squares, poi_categories=poi_categories2)
-    except RuntimeError:
-        sleep(5 * 60)
-        df_squares_with_counts = count_poi_per_tile("Nizza", df_squares, poi_categories=poi_categories2)
+    while True:
+        try:
+            df_squares_with_counts = count_poi_per_tile("Nizza", df_squares, poi_categories=poi_categories2)
+            break
+        except RuntimeError:
+            sleep(5 * 60)
+            continue
 
     assert type(df_squares_with_counts) == gpd.GeoDataFrame
     assert len(df_squares_with_counts) > 0
@@ -233,16 +235,21 @@ def test_count_lgu_function_different_poi():
     df_squares = city.squares(resolution=14)
     sleep(180)
 
-    try:
-        df_squares1 = count_poi_per_tile("Mitte, Berlin", df_squares, poi_categories=poi_categories1)
-    except RuntimeError:
-        sleep(5 * 60)
-        df_squares1 = count_poi_per_tile("Mitte, Berlin", df_squares, poi_categories=poi_categories1)
-    try:
-        df_squares2 = count_poi_per_tile("Mitte, Berlin", df_squares, poi_categories=poi_categories3)
-    except RuntimeError:
-        sleep(5 * 60)
-        df_squares2 = count_poi_per_tile("Mitte, Berlin", df_squares, poi_categories=poi_categories3)
+    while True:
+        try:
+            df_squares1 = count_poi_per_tile("Mitte, Berlin", df_squares, poi_categories=poi_categories1)
+            break
+        except RuntimeError:
+            sleep(5 * 60)
+            continue
+
+    while True:
+        try:
+            df_squares2 = count_poi_per_tile("Mitte, Berlin", df_squares, poi_categories=poi_categories3)
+            break
+        except RuntimeError:
+            sleep(5 * 60)
+            continue
 
     assert hasattr(df_squares1, "telecom")
     assert hasattr(df_squares2, "telecom")
