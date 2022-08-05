@@ -46,7 +46,7 @@ conda install -c conda-forge tesspy
 
 ## Dependencies
 
-`tesspy`'s dependencies are: `geopandas`,`h3-py`,`osmnx`,`hdbscan`, and`mercantile`.
+`tesspy`'s dependencies are: `geopandas`, `scipy`, `h3-py`, `osmnx`, `hdbscan`, `mercantile`, and `scikit-learn`.
 
 
 ## Documentation
