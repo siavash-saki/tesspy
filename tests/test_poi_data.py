@@ -6,37 +6,41 @@ from time import sleep
 
 
 def test_osm_primary_features():
-    primary_categories = ['aerialway',
-                          'aeroway',
-                          'amenity',
-                          'barrier',
-                          'boundary',
-                          'building',
-                          'craft',
-                          'emergency',
-                          'geological',
-                          'healthcare',
-                          'highway',
-                          'historic',
-                          'landuse',
-                          'leisure',
-                          'man_made',
-                          'military',
-                          'natural',
-                          'office',
-                          'place',
-                          'power',
-                          'public_transport',
-                          'railway',
-                          'route',
-                          'shop',
-                          'sport',
-                          'telecom',
-                          'tourism',
-                          'water',
-                          'waterway']
+    primary_categories = [
+        "aerialway",
+        "aeroway",
+        "amenity",
+        "barrier",
+        "boundary",
+        "building",
+        "craft",
+        "emergency",
+        "geological",
+        "healthcare",
+        "highway",
+        "historic",
+        "landuse",
+        "leisure",
+        "man_made",
+        "military",
+        "natural",
+        "office",
+        "place",
+        "power",
+        "public_transport",
+        "railway",
+        "route",
+        "shop",
+        "sport",
+        "telecom",
+        "tourism",
+        "water",
+        "waterway",
+    ]
     city = Tessellation("Berlin")
-    poi_data = POIdata(city.get_polygon(), poi_categories=["landuse"], timeout=60, verbose=False)
+    poi_data = POIdata(
+        city.get_polygon(), poi_categories=["landuse"], timeout=60, verbose=False
+    )
     ls_osm_features = poi_data.osm_primary_features()
     assert type(ls_osm_features) == list
     assert len(ls_osm_features) > 0
@@ -46,10 +50,24 @@ def test_osm_primary_features():
 
 def test_create_overpass_query_string():
     city = Tessellation("Frankfurt am Main")
-    poi_data = POIdata(city.get_polygon(), poi_categories=["public_transport"], timeout=60, verbose=False)
-    poi_data2 = POIdata(city.get_polygon(), poi_categories=["public_transport", "tourism"], timeout=60, verbose=False)
-    poi_data3 = POIdata(city.get_polygon(), poi_categories=["public_transport", "shop", "waterway"], timeout=60,
-                        verbose=False)
+    poi_data = POIdata(
+        city.get_polygon(),
+        poi_categories=["public_transport"],
+        timeout=60,
+        verbose=False,
+    )
+    poi_data2 = POIdata(
+        city.get_polygon(),
+        poi_categories=["public_transport", "tourism"],
+        timeout=60,
+        verbose=False,
+    )
+    poi_data3 = POIdata(
+        city.get_polygon(),
+        poi_categories=["public_transport", "shop", "waterway"],
+        timeout=60,
+        verbose=False,
+    )
     query_str = poi_data.create_overpass_query_string()
     assert type(query_str) == str
     assert len(query_str) > 0
@@ -57,15 +75,22 @@ def test_create_overpass_query_string():
     assert "out:json" in query_str
     assert "node[public_transport]" in query_str
     assert "node[tourism]" not in query_str
-    assert "node[public_transport]" in poi_data2.create_overpass_query_string() \
-           and "node[tourism]" in poi_data2.create_overpass_query_string()
+    assert (
+        "node[public_transport]" in poi_data2.create_overpass_query_string()
+        and "node[tourism]" in poi_data2.create_overpass_query_string()
+    )
     assert "way[public_transport]" in poi_data3.create_overpass_query_string()
 
 
 def test_get_poi_data_city_1():
     # City 1
     city1 = Tessellation("Innenstadt, Frankfurt am Main")
-    poi_data = POIdata(city1.get_polygon(), poi_categories=["public_transport"], timeout=60, verbose=False)
+    poi_data = POIdata(
+        city1.get_polygon(),
+        poi_categories=["public_transport"],
+        timeout=60,
+        verbose=False,
+    )
 
     while True:
         try:
@@ -87,7 +112,12 @@ def test_get_poi_data_city_2():
     sleep(10)
     # City 2
     city2 = Tessellation("Downtown San Diego")
-    poi_data_2 = POIdata(city2.get_polygon(), poi_categories=["public_transport"], timeout=60, verbose=False)
+    poi_data_2 = POIdata(
+        city2.get_polygon(),
+        poi_categories=["public_transport"],
+        timeout=60,
+        verbose=False,
+    )
 
     while True:
         try:

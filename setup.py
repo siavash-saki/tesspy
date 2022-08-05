@@ -4,11 +4,13 @@ with open("README.md", "r", encoding="utf8", errors="ignore") as fh:
     LONG_DESCRIPTION = fh.read()
 
 # Packages that tesspy uses explicitly:
-INSTALL_REQUIRES = ['geopandas >= 0.10.0',
-                    'h3',  # conda h3-py
-                    'osmnx',
-                    'hdbscan',
-                    'mercantile']
+INSTALL_REQUIRES = [
+    "geopandas >= 0.10.0",
+    "h3",  # conda h3-py
+    "osmnx",
+    "hdbscan",
+    "mercantile",
+]
 
 setuptools.setup(
     name="tesspy",
@@ -27,6 +29,6 @@ setuptools.setup(
         "Operating System :: OS Independent",
         "Topic :: Scientific/Engineering :: GIS",
     ],
-    python_requires='>=3.7',
-    install_requires=INSTALL_REQUIRES
+    python_requires=">=3.7",
+    install_requires=INSTALL_REQUIRES,
 )
