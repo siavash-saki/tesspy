@@ -116,10 +116,6 @@ def count_poi_per_tile(city, gdf, poi_categories=["amenity", "building"], timeou
         Tessellation object or string of the underlying city
     gdf : geopandas.GeoDataFrame
         GeoDataFrame of the Tessellation for the underlying city
-    method: str
-        method used to tessellate the city polygon. It's used to create the index,
-        the POI and Tessellation-datasets will be joined on. Possible values are
-        ['squares', 'hexagons, 'adaptive_squares', voronoi', 'city_blocks']
     poi_categories : list, default=["amenity", 'building']
         POI which will be count per tile. These POI may differ from the POI used
         to create the tessellation
