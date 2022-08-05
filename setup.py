@@ -6,10 +6,12 @@ with open("README.md", "r", encoding="utf8", errors="ignore") as fh:
 # Packages that tesspy uses explicitly:
 INSTALL_REQUIRES = [
     "geopandas >= 0.10.0",
+    "scipy",
     "h3",  # conda h3-py
     "osmnx",
     "hdbscan",
     "mercantile",
+    "scikit-learn",
 ]
 
 setuptools.setup(
