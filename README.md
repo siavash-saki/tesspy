@@ -1,4 +1,5 @@
 # tesspy
+[![Tests](https://github.com/siavash-saki/tesspy/actions/workflows/tests_package.yml/badge.svg)](https://github.com/siavash-saki/tesspy/actions/workflows/tests_package.yml)
 [![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 [![Documentation Status](https://readthedocs.org/projects/tesspy/badge/?version=latest)](https://tesspy.readthedocs.io/en/latest/?badge=latest)
 ![version](https://img.shields.io/badge/version-0.1.0-blue)
