@@ -1,0 +1,12 @@
+geopandas=0.10
+scipy
+h3-py
+osmnx
+hdbscan
+mercantile
+scikit-learn
+seaborn
+contextily
+esda
+libpysal
+statsmodels

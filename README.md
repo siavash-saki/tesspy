@@ -1,4 +1,5 @@
 # tesspy
+[![Tests](https://github.com/siavash-saki/tesspy/actions/workflows/tests_package.yml/badge.svg)](https://github.com/siavash-saki/tesspy/actions/workflows/tests_package.yml)
 [![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 [![Documentation Status](https://readthedocs.org/projects/tesspy/badge/?version=latest)](https://tesspy.readthedocs.io/en/latest/?badge=latest)
 ![version](https://img.shields.io/badge/version-0.1.0-blue)
@@ -45,7 +46,7 @@ conda install -c conda-forge tesspy
 
 ## Dependencies
 
-`tesspy`'s dependencies are: `geopandas`,`h3-py`,`osmnx`,`hdbscan`, and`mercantile`.
+`tesspy`'s dependencies are: `geopandas`, `scipy`, `h3-py`, `osmnx`, `hdbscan`, `mercantile`, and `scikit-learn`.
 
 
 ## Documentation
@@ -98,14 +99,8 @@ All kind of contributions are welcome:
 * Improvement of documentation
 * Additional tests
 
-If you want to contribute to code:
-1. Fork the latest main branch
-2. Create a dev environment: install dependencies and install tesspy in [develop mode](https://python-packaging-tutorial.readthedocs.io/en/latest/setup_py.html#develop-mode)
-3. Write failing tests
-4. Write new code
-5. Run tests and make sure they pass
-6. Update documentation
-7. Pull Request
+Follow the instructions [here](https://tesspy.readthedocs.io/en/latest/Contribution.html)
+for submitting a PR.
 
 If you have any ideas or questions, feel free to open an issue.
 

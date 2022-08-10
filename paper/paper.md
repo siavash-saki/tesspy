@@ -21,7 +21,7 @@ affiliations:
    index: 1
  - name: Research Lab for Urban Transport, Frankfurt am Main, Germany
    index: 2
-date: 15 March 2021
+date: 15 July 2022
 bibliography: paper.bib
 
 ---
@@ -29,43 +29,44 @@ bibliography: paper.bib
 
 # Summary
 
-Discretization of urban areas is a crucial aspect in many spatial analyses. It helps to understand geographical space and provides a framework for analyzing geospatial data [@gold:2016]. The process of discretization of space into subspaces without overlaps and gaps is called *tessellation*. The polygons, created using tessellation, are called *tiles*. Based on the tiles, tessellation methods can be grouped into regular and irregular. In regular tessellation methods, tiles have the same shape and size. Tiles created by irregular tessellation methods may differ in shape or size.
+Discretization of urban areas is a crucial aspect in many spatial analyses. It helps to understand geographical space and provides a framework for analyzing geospatial data [@gold:2016]. The process of discretization of space into subspaces without overlaps and gaps is called tessellation. The polygons, created using tessellation, are called tiles. Tiles can have the same shape and size (regular) or may differ in shape or size (irregular).
 
-`TessPy` contains an implementation of different tessellation methods for geographical areas. It is built on top of `GeoPandas` [@kelsey_jordahl_2019]. Tiles are returned in a `GeoDataFrame` in `shapely` [@shapely_software] `Polygon` format. The required data for irregular tessellation methods is retrieved from the OpenStreetMap (OSM) [@OpenStreetMap]. Points of Interest (POI) are downloaded using the `overpass` API, the official OSM API, to access the OSM database. To get the road network data, `osmnx` [@boeing:2017] is used. The input can be in different formats. It can be a `Polygon` (or a `Multipolygon`) with a defined *coordinate reference system* (CRS), or an address. In case of an address, the area is retrieved from the OSM using `Nominatim`.
+`TessPy` contains an implementation of different tessellation methods for geographical areas and is designed to be flexible and easy to use. It is built on top of `GeoPandas` [@kelsey_jordahl_2019]. Tiles are returned in a `GeoDataFrame` in `shapely` [@shapely_software] `Polygon` format. Regular methods implemented here are squares and hexagons. The implemented irregular tessellations are adaptive squares, Voronoi diagrams, and city blocks. The irregular methods are data-driven and the required data is retrieved from the OpenStreetMap (OSM) [@OpenStreetMap]. Points of Interest (POI) are downloaded using `overpass` API, the official OSM API, to access the OSM database. To get the road network data, `osmnx` [@boeing:2017] is used. The input can be in different formats, e.g., a `Polygon` (or a `Multipolygon`) with a defined coordinate reference system (CRS), or an address.  More methods and functions are explained in the API documentation. Several examples (e.g., clustering of urban areas) are demonstrated in `TessPy` documentation.
 
-After defining the area, tessellation can be done using the implemented methods. Regular methods, implemented here, are squares and hexagons. Squares are created based on the Microsoft Bing Maps Tile System. This uses the `Mercator` projection and `quadkeys` for indexing and storage of tiles. Hexagons are created based on the Uber h3 grid system. In contrast to squares, hexagons have equal distance to the neighbor polygons, where distance is calculated as the distance of center points. In square and hexagon methods, the size of polygons is adjusted by setting a resolution.
+Being extensive and flexible, `TessPy` allows the user to customize the tessellation methods. This is essential, especially when it comes to irregular methods. For example, different initial clustering algorithms can be used to define centroids in the Voronoi method. \autoref{fig1} shows three examples for irregular tessellations for Frankfurt am Main.
 
-The implemented irregular tessellations are adaptive squares, Voronoi diagrams, and city blocks. These methods are based on geospatial data retrieved from the OSM database. For example, in adaptive squares, an initial square grid is generated. Next, the specified POI are fetched from the OSM. POI are then counted for each square. Finally, if the number of POI exceed a certain threshold, the square is subdivided into four *children squares*. This process is done until the POI counts of all the squares are within the defined threshold.
+![Irregular tessellation methods: Voronoi diagrams using k-means (left) and hdbscan (center), and city blocks (right).\label{fig1}](fig1_irregular_tess.png)
 
-In the Voronoi diagrams method, POI are used to generate Voronoi cells. POI can be directly set as generators. For example, if public transport locations are used as generators, each polygon consists of the area with all the points closer to the corresponding public transport station. In case of *too* many POI, they can be clustered. Generators are then defined as centroids of the clusters. The main characteristic of this method is that the created tiles tend to be smaller where the POI are dense and larger where POI are sparse. \autoref{fig1} shows an example of Voronoi tessellation for the city of Frankfurt am Main in Germany, based on the POI categories: `amenity`, `public_transport`, `building`, `shop`, and `office`.
+# Statement of Need
 
-![Voronoi tessellation of Frankfurt am Main\label{fig1}](fig1_Voronoi.png)
+The first challenge in most of spatial analyses is defining a (statistical) unit to proceed with quantitative analysis (or, in other words discretizing the studied region). `TessPy` addresses the process of creating the units for spatial analysis. It uses tessellation to build the tiles, which are then defined as units. `TessPy` is extensive and flexible at creating these units since various tessellation methods are implemented and all the tessellation methods are customizable. Therefore, it allows for endless variations in generating these units. 
 
-Different definitions of city blocks exist. In the context of `TessPy`, they refer to the area surrounded by the street segments. This method retrieves the road network of the area. Using the street segments, the smallest city block units are created. By defining the desired number of polygons, the algorithm merges the contiguous small polygons. This prevents traffic islands from ending up as final tiles. In addition, road types can be defined to modify the fineness of city blocks. For certain urban analyses, city blocks may provide significantly better results as they capture the city's structure more realistically.
+As @white:2008 argue, topology affects the outcome of geospatial models. Therefore, it is important to consider different tessellation methods while conducting spatial analyses. Regular tessellations are suitable for basic applications or when uniform/congruent tiles are required. For instance, @goovaerts:2000 uses square tessellation to analyze rainfall, and @asamer:2016 uses hexagons tessellation to optimize charging station locations for electric vehicles. The irregular tessellation methods are more sophisticated and complex. The created tiles are flexible and can adapt to the data structure depending on the spatial attribute. For example, @belej:2020 use Voronoi tessellation for geospatial analysis of real estate prices.
 
-This summary explains only a high-level functionality of `TessPy`. More methods and functions are explained in the API documentation. Several examples (e.g., clustering of urban areas) are demonstrated in `TessPy` documentation.
+Regarding the available dataset and the characteristics of the studied variable, the user can test different topologies (different tessellation methods or different units) and finally achieve what, in that particular case, leads to the most efficient quantitative analysis. Besides tessellation, `TessPy` provides further functionalities. For example, users can combine spatial discretization with additional data, in this case POI data are assigned to each tile [@hagen:2022]. Overall, `TessPy` provides the framework for geospatial analyses. By using the retrieved POI data and the created tiles, it allows further analyses. 
 
-In `TessPy`, only open-source data from the OSM is used to generalize the methods to (almost) any geographical area. In addition, all the implemented models are scalable to discretize metropolitan regions or even countries.
+# Example Usage 
 
+Assume we have a dataset of real estate prices in Berlin. It contains locations and the corresponding prices. Visualizing this dataset results in \autoref{fig2} (left), which does not indicate any insight into the real estate prices in Berlin. To start any quantitative analysis, we need first to define the units. We can do this by tessellating Berlin using `TessPy`, as shown in \autoref{fig2} (right). In this case, we create a square grid. This is the prerequisite for any statistical analysis.
 
-# Statement of need
+![Real estate locations visualized on the map (left), and Berlin tessellated in squares using TessPy (right).\label{fig2}](fig2_locations.png)
 
-As @white:2008 argue, topology affects the outcome of geospatial models. Therefore, it is important to consider different tessellation methods while conducting spatial analyses. Regular tessellations are suitable for basic applications or when uniform/congruent tiles are required. For instance, @goovaerts:2000 uses square tessellation to analyze rainfall, and @asamer:2016 uses hexagons tessellation to optimize charging station locations for electric vehicles.
+Statistical analyses such as a heatmap of prices or a test for spatial autocorrelation can be conducted based on the created tiles, as demonstrated in \autoref{fig3}.
 
-The irregular tessellation methods are more sophisticated and complex. The created tiles are flexible and can adapt to the data structure depending on the spatial attribute. For example, the adaptive squares method creates larger polygons where data is sparse, resulting in fewer final tiles (compared to squares) and better performance when it comes to computation time. In Voronoi diagrams, the distribution of data in tiles is more systematic and can be partially controlled by adjusting the desired number of tiles. For example, @belej:2020 use Voronoi tessellation for geospatial analysis of real estate prices.
+![A heatmap of real estate prices in Berlin (left), and spatial lag of prices (right) on the basis of the generated tiles.\label{fig3}](fig3_heatmaps.png)
 
-City blocks could exhibit a high performance by determining different functional zones of an urban area since the border between tiles is defined by streets. For example, @zheng:2011 use city blocks for analyzing GPS trajectories of taxis.
+All the above analyses can be demonstrated using another tessellation method, such as Voronoi polygons, with just a few lines of code. This simplicity of `TessPy` offers the user the opportunity to easily find the most suitable method to build the quantitative units for further steps.
 
-TessPy provides the framework for geospatial analyses. Moreover, by using the retrieved POI data and the created tiles, it allows further analyses. 
+Using `TessPy`, the number of different POI categories in each unit can be calculated. For example, a dataset with the number of restaurants in each tile can be created, and by merging this information, we can investigate if there is a correlation between the number of restaurants and real estate prices. Using `TessPy`, all the POI data can be retrieved to even build a model to explain or predict an outcome variable (such as the price).
 
+# Related Software Packages
+
+@fleischmann:2019 published `momepy`, a package for urban morphology, with the main purpose of quantitative analysis of urban forms. Using `momepy`, the user can generate a building-based morphological tessellation using Voronoi diagrams. This can be used, for example, to calculate which ratio of each tile is covered by a related building. However, this is only a special case of tessellation (Voronoi diagrams and buildings as generators). Moreover, created tiles may not cover the whole defined area since it tessellates the buffered building center points. `momepy` is not developed for geographical tessellation and none of the tessellation approaches of `TessPy` for geographical areas is mentioned by or implemented in `momepy`. 
+
+`tessagon` [@tessagon_software] is a python package for the tessellation of 3D surfaces using triangles, hexagons, and more. However, this package can only tessellate 3D surfaces (to use in 3D printers) and not geographical (or urban) areas.
 
 # Acknowledgements
 
 `TessPy` is the result of the research project [ClusterMobil](https://www.frankfurt-university.de/de/hochschule/fachbereich-1-architektur-bauingenieurwesen-geomatik/forschungsinstitut-ffin/fachgruppen-des-ffin/fg-neue-mobilitat/relut/forschungsprojekte-relut/clustermobil/) conducted by the [Research Lab for Urban Transport](https://www.frankfurt-university.de/en/about-us/faculty-1-architecture-civil-engineering-geomatics/research-institute-ffin/specialist-groups-of-the-ffin/specialist-group-new-mobility/relut/). This research project is funded by the state of Hesse and [HOLM](https://frankfurt-holm.de/) funding under the *Innovations in Logistics and Mobility* measure of the Hessian Ministry of Economics, Energy, Transport and Housing. [HA Project No.: 1017/21-19]
 
-
 # References
-
-
-
-

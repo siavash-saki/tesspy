@@ -1,4 +1,8 @@
-on: [push]
+name: Paper Draft
+
+on:
+  push:
+    branches: ["main"]
 
 jobs:
   paper:
