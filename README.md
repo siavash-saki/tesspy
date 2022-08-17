@@ -43,6 +43,20 @@ Install tesspy from conda-forge channel:
 conda install -c conda-forge tesspy
 ```
 
+## Install from the repository
+If you want to work with the latest development version, you can directly install it from GitHub.
+To do that, it is recommended to first install all the dependencies using conda. (preferably in a newly created env).
+
+```shell
+conda install -c conda-forge geopandas scipy h3-py osmnx hdbscan mercantile scikit-learn
+```
+
+Then install `TessPy` using:
+
+```shell
+pip install git+git://github.com/siavash-saki/tesspy
+```
+
 
 ## Dependencies
 
