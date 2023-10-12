@@ -65,7 +65,7 @@ Squares
 --------
 ::
 
-   ffm_sqruares = ffm.squares(resolution=15)
+   ffm_squares = ffm.squares(resolution=15)
 
 
 .. image:: ../readme_pics/Squares.png
@@ -75,7 +75,7 @@ Hexagons
 ----------
 ::
 
-   ffm_sqruares = ffm.squares(resolution=15)
+   ffm_hexagons = ffm.hexagons(resolution=8)
 
 .. image:: ../readme_pics/Hexagons.png
 
@@ -91,7 +91,7 @@ Voronoi Polygons
 ----------------
 ::
 
-   ffm_sqruares = ffm.squares(resolution=15)
+   ffm_voronoi = ffm.voronoi()
 
 .. image:: ../readme_pics/Voronoi.png
 
@@ -99,7 +99,7 @@ City Blocks
 ------------
 ::
 
-   ffm_sqruares = ffm.squares(resolution=15)
+   ffm_cityblocks = ffm.city_blocks()
 
 .. image:: ../readme_pics/CB.png
 
