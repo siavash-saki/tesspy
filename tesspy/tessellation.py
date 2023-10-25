@@ -267,7 +267,7 @@ class Tessellation:
             Dataframe containing squares
         """
         df_qk_squares = get_squares_polyfill(self.area_gdf, resolution)
-        df_qk_squares = df_qk_squares.drop(columns=["osm_id", "children_id"])
+        df_qk_squares = df_qk_squares[['geometry', 'quadkey']]
 
         return df_qk_squares
 
@@ -395,7 +395,7 @@ class Tessellation:
             aqk_count_df = df_tmp2
 
         final_aqk = gpd.sjoin(aqk_count_df, self.area_gdf)
-        final_aqk = final_aqk.drop(columns=["osm_id", "children_id", "index_right"])
+        final_aqk = final_aqk[['quadkey', 'count', 'geometry']]
 
         return final_aqk
 
