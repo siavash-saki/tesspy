@@ -293,7 +293,7 @@ class Tessellation:
         )
 
         return df_h3_hexagons
-
+    
     def adaptive_squares(
         self,
         start_resolution: int,
@@ -381,6 +381,89 @@ class Tessellation:
             if verbose:
                 print(
                     f"Threshold={threshold}  ==> set as the median POI-count per square at the initial level"
+                )
+
+        i = start_resolution
+        while max(aqk_count_df["count"].values) > threshold:
+            i += 1
+            if verbose:
+                print(f"Threshold exceeded! Squares are subdivided into resolution {i}")
+
+            df_tmp = get_adaptive_squares(aqk_count_df, threshold)
+            df_tmp.drop(columns=["count"], inplace=True)
+            df_tmp2 = count_poi(df_tmp, poi_data_aqk)
+            aqk_count_df = df_tmp2
+
+        final_aqk = gpd.sjoin(aqk_count_df, self.area_gdf)
+        final_aqk = final_aqk.drop(columns=["osm_id", "children_id", "index_right"])
+
+        return final_aqk
+
+    def adaptive_squares_custom_POI(
+        self,
+        start_resolution: int,
+        points_json_path: str,
+        threshold=None,
+        timeout=60,
+        verbose=True,
+    ):
+
+        """
+        Generate adaptive squares based on the input POI data.
+        Squares are created at the start resolution. Each square is broken
+        into four smaller squares while the number of its POI exceeds the
+        threshold.
+        POI categories should be a list of OSM primary map features.
+        A complete list can be found on the OSM website:
+        https://wiki.openstreetmap.org/wiki/Map_features
+
+        Parameters
+        ----------
+        start_resolution : int
+            Specifies the size of initial squares
+        poi_categories : A list of OSM primary map features or 'all'
+                         default=["amenity", 'building']
+            'all' means all the available POI categories
+            Possible values in the list: ['aerialway', 'aeroway',
+            'amenity', 'barrier', 'boundary', 'building', 'craft',
+            'emergency', 'geological', 'healthcare', 'highway',
+            'historic', 'landuse', 'leisure', 'man_made', 'military',
+            'natural', 'office', 'place', 'power', 'public_transport',
+            'railway', 'route', 'shop', 'sport', 'telecom', 'tourism',
+            'water', 'waterway']
+        threshold : int, default=None
+            Threshold for the number of POI in a single square. If square
+            has more, it is divided into four squares. If None passed, the
+            median number of POI per square in the initial level is used
+            as threshold.
+        timeout : int, default=60
+            The TCP connection timeout for the request
+        verbose : bool, default=False
+            If True, print information while computing
+
+        Returns
+        -------
+        df_adaptive_squares : pandas.DataFrame
+            Dataframe containing adaptive squares
+        """
+
+        with open(points_json_path,'r') as f:
+            points_data = json.load(f)
+        # data, based on which, tessellation should be done
+        data = [{'osm_id': i, 'amenity':True} for i, site in enumerate(points_data)]
+        points_geom = [Point(d['lat'], d['lon']) for d in points_data]
+        points_gdf = gpd.GeoDataFrame(data, geometry=points_geom, crs="EPSG:4326")
+        
+        tess_data = points_gdf  # Use the points GeoDataFrame instead of OSM data
+        poi_data_aqk = tess_data
+        df_aqk = get_squares_polyfill(self.area_gdf, start_resolution)
+        aqk_count_df = count_poi(df_aqk, poi_data_aqk)
+    
+        if not threshold:
+            threshold = int(np.median(aqk_count_df["count"].values))
+            if verbose:
+                print(
+                    f"Threshold={threshold}  ==> set as the median point count per square at the initial level"
                 )
 
         i = start_resolution
