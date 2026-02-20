@@ -107,6 +107,27 @@ ffm_city_blocks = ffm.city_blocks(n_polygons=500)
 ```
 ![city_blocks_tessellation](docs/readme_pics/CB.png)
 
+## Citing Tesspy
+
+We would be very grateful if you would cite Tesspy in your scientific publications. Please feel free to use the following citation for this purpose: 
+Saki et al., (2022). TessPy: a python package for geographical tessellation. Journal of Open Source Software, 7(76), 4620, https://doi.org/10.21105/joss.04620
+
+or the bibtex citation directly:
+```{bibtex}
+@article{Saki2022, 
+        doi = {10.21105/joss.04620}, 
+        url = {https://doi.org/10.21105/joss.04620}, 
+        year = {2022}, 
+        publisher = {The Open Journal}, 
+        volume = {7}, 
+        number = {76}, 
+        pages = {4620}, 
+        author = {Siavash Saki and Jonas Hamann and Tobias Hagen}, 
+        title = {TessPy: a python package for geographical tessellation}, 
+        journal = {Journal of Open Source Software}}
+```
+
+
 ## Contributing to tesspy
 All kind of contributions are welcome: 
 * Improvement of code with new features, bug fixes, and  bug reports
