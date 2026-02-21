@@ -1,6 +1,29 @@
 """
 Tessellation algorithm implementations.
+
 Each module contains the core functions for one tessellation method.
+These are pure computational functions that operate on GeoDataFrames and do
+not make network requests.  The Tessellation class in tesspy.tessellation
+orchestrates them.
+
+Modules
+-------
+squares     : regular and adaptive square grids (mercantile quadkeys)
+hexagons    : H3 hexagon grids (Uber H3)
+voronoi     : Voronoi polygon construction (scipy)
+city_blocks : road-network-based city block polygons (osmnx + shapely)
+_clustering : hierarchical clustering helper (scikit-learn)
+
+Exports
+-------
+get_squares_polyfill, get_adaptive_squares, count_poi,
+get_h3_hexagons, voronoi_polygons,
+split_linestring, explode, create_blocks, get_rest_polygon,
+get_hierarchical_clustering_parameter
+
+Depends on
+----------
+geopandas, shapely, mercantile, h3, scipy, scikit-learn
 """
 
 from tesspy.methods.squares import count_poi, get_adaptive_squares, get_squares_polyfill

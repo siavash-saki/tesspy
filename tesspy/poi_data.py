@@ -1,12 +1,23 @@
 """
 Backward-compatibility shim for tesspy.poi_data.
 
-Classes have been moved to tesspy.data.*
-Import from there directly in new code:
+.. deprecated::
+    This module is deprecated and will be removed in v0.3.0.
+    Import from tesspy.data directly:
 
     from tesspy.data.poi import POIdata
     from tesspy.data.roads import RoadData
 """
+
+import warnings
+
+warnings.warn(
+    "tesspy.poi_data is deprecated and will be removed in v0.3.0. "
+    "Import from tesspy.data instead: "
+    "'from tesspy.data.poi import POIdata'",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
 from tesspy.data.poi import POIdata
 from tesspy.data.roads import RoadData

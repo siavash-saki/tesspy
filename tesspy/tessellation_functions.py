@@ -1,8 +1,9 @@
 """
 Backward-compatibility shim for tesspy.tessellation_functions.
 
-All functions have been moved to tesspy.methods.*
-Import from there directly in new code:
+.. deprecated::
+    This module is deprecated and will be removed in v0.3.0.
+    Import from tesspy.methods directly:
 
     from tesspy.methods.squares import count_poi, get_squares_polyfill, get_adaptive_squares
     from tesspy.methods.hexagons import get_h3_hexagons
@@ -10,6 +11,16 @@ Import from there directly in new code:
     from tesspy.methods.city_blocks import split_linestring, explode, create_blocks, get_rest_polygon
     from tesspy.methods._clustering import get_hierarchical_clustering_parameter
 """
+
+import warnings
+
+warnings.warn(
+    "tesspy.tessellation_functions is deprecated and will be removed in v0.3.0. "
+    "Import from tesspy.methods instead: "
+    "'from tesspy.methods.squares import get_squares_polyfill, ...'",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
 from tesspy.methods.squares import count_poi, get_adaptive_squares, get_squares_polyfill
 from tesspy.methods.hexagons import get_h3_hexagons

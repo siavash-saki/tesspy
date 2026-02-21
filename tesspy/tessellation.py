@@ -16,7 +16,7 @@ import hdbscan
 from sklearn.cluster import AgglomerativeClustering
 from shapely.ops import unary_union
 
-from tesspy._constants import OSM_HIGHWAY_TYPES, OSM_PRIMARY_FEATURES
+from tesspy._constants import DEFAULT_POI_CATEGORIES, OSM_HIGHWAY_TYPES, OSM_PRIMARY_FEATURES
 from tesspy._validators import _check_input_geodataframe, _check_valid_geometry_gdf
 from tesspy.data._geo import count_poi_per_tile, get_city_polygon
 from tesspy.data.poi import POIdata
@@ -157,7 +157,7 @@ class Tessellation:
             GeoDataFrame with adaptive square tiles
         """
         if poi_categories is None:
-            poi_categories = ["amenity", "building"]
+            poi_categories = DEFAULT_POI_CATEGORIES.copy()
 
         if poi_categories == "all":
             poi_categories = self.osm_primary_features()
@@ -245,7 +245,7 @@ class Tessellation:
             GeoDataFrame with Voronoi polygon tiles and a 'voronoi_id' column
         """
         if poi_categories is None:
-            poi_categories = ["amenity", "building"]
+            poi_categories = DEFAULT_POI_CATEGORIES.copy()
 
         if poi_categories == "all":
             poi_categories = self.osm_primary_features()

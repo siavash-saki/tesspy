@@ -1,5 +1,15 @@
 """
 Geocoding helpers and the count_poi_per_tile public utility.
+
+Exports
+-------
+get_city_polygon : geocode a city name to a GeoDataFrame boundary polygon
+count_poi_per_tile : count OSM POI categories per tessellation tile
+
+Depends on
+----------
+tesspy._constants (DEFAULT_POI_CATEGORIES), tesspy.data.poi (POIdata),
+osmnx, geopandas, shapely
 """
 
 import warnings
@@ -8,6 +18,9 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 from shapely.geometry import Point
+
+from tesspy._constants import DEFAULT_POI_CATEGORIES
+from tesspy.data.poi import POIdata
 
 
 def get_city_polygon(city: str) -> gpd.GeoDataFrame:
@@ -35,7 +48,7 @@ def get_city_polygon(city: str) -> gpd.GeoDataFrame:
 
 
 def count_poi_per_tile(
-    city,
+    city: gpd.GeoDataFrame | str,
     gdf: gpd.GeoDataFrame,
     poi_categories: list[str] | str | None = None,
     timeout: int = 120,
@@ -44,18 +57,18 @@ def count_poi_per_tile(
     Count POI categories per tessellation tile.
 
     For each POI category an additional count column is added to the
-    tessellation GeoDataFrame. Accepts either a Tessellation object or
-    a city name string.
+    tessellation GeoDataFrame.
 
     Parameters
     ----------
-    city : tesspy.Tessellation or str
-        Tessellation object or city name string for the study area
+    city : geopandas.GeoDataFrame or str
+        Study area as a GeoDataFrame (single Polygon/MultiPolygon, EPSG:4326)
+        or a city name string to geocode via OSM.
+        If you have a ``Tessellation`` object, pass ``t.get_polygon()`` here.
     gdf : geopandas.GeoDataFrame
         Tessellation GeoDataFrame (output of any Tessellation method)
     poi_categories : list of str or str, default=["amenity", "building"]
         OSM primary map feature categories to count per tile.
-        Pass 'all' for all available categories.
     timeout : int, default=120
         TCP timeout in seconds for the OSM Overpass request
 
@@ -64,18 +77,17 @@ def count_poi_per_tile(
     gdf : geopandas.GeoDataFrame
         Tessellation GeoDataFrame with additional count columns per POI category
     """
-    # Avoid circular import: Tessellation imports from data, so import here
-    from tesspy.tessellation import Tessellation
-
     if poi_categories is None:
-        poi_categories = ["amenity", "building"]
+        poi_categories = DEFAULT_POI_CATEGORIES.copy()
 
-    if type(city) == str:
-        city = Tessellation(city)
+    if isinstance(city, str):
+        area_gdf = get_city_polygon(city)
+    elif isinstance(city, gpd.GeoDataFrame):
+        area_gdf = city
     else:
-        raise ValueError(
-            "Please insert a valid city type. Valid types are: "
-            "tesspy.Tessellation object or string"
+        raise TypeError(
+            "city must be a GeoDataFrame or a city name string. "
+            "If you have a Tessellation object, pass t.get_polygon() instead."
         )
 
     if len(gdf) < 1:
@@ -83,17 +95,15 @@ def count_poi_per_tile(
             "Please insert a valid tessellation GeoDataFrame with at least one tile."
         )
 
-    if type(poi_categories) == str:
+    if isinstance(poi_categories, str):
         poi_categories = [poi_categories]
-    elif type(poi_categories) not in (list,):
+    elif not isinstance(poi_categories, list):
         raise ValueError(
             "poi_categories must be a string or list of OSM primary feature names."
         )
 
-    from tesspy.data.poi import POIdata
-
     df_poi = POIdata(
-        city.get_polygon(),
+        area_gdf,
         poi_categories=poi_categories,
         timeout=timeout,
         verbose=False,
