@@ -57,7 +57,7 @@ Homepage = "https://github.com/siavash-saki/tesspy"
 Repository = "https://github.com/siavash-saki/tesspy"
 Documentation = "https://tesspy.readthedocs.io"
 
-[tool.hatchling.version]
+[tool.hatch.version]
 path = "tesspy/_version.py"
 
 [tool.pytest.ini_options]
