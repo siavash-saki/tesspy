@@ -80,10 +80,10 @@ class POIdata:
 
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", FutureWarning)
-            self.area_buffered = self.area.buffer(0.008).simplify(0.005)
+            area_buffered = self.area.buffer(0.008).simplify(0.005)
 
-        assert self.area_buffered is not None
-        exter_coordinates = self.area_buffered.iloc[0].exterior.coords
+        self.area_buffered = area_buffered
+        exter_coordinates = area_buffered.iloc[0].exterior.coords
         xy = np.array(exter_coordinates)
 
         lat_min = geom_floor(np.min(xy[:, 0]))
