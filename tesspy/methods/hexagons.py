@@ -24,7 +24,7 @@ def get_h3_hexagons(gdf: gpd.GeoDataFrame, resolution: int) -> gpd.GeoDataFrame:
     gdf : geopandas.GeoDataFrame
         GeoDataFrame containing the hexagons
     """
-    if type(gdf.geometry.iloc[0]) == Polygon:
+    if isinstance(gdf.geometry.iloc[0], Polygon):
         hexs = h3.polyfill(
             gdf.geometry[0].__geo_interface__, resolution, geo_json_conformant=True
         )
@@ -38,7 +38,7 @@ def get_h3_hexagons(gdf: gpd.GeoDataFrame, resolution: int) -> gpd.GeoDataFrame:
         gdf = gpd.GeoDataFrame(geometry=all_polys, crs="EPSG:4326")
         return gdf
 
-    elif type(gdf.geometry.iloc[0]) == MultiPolygon:
+    elif isinstance(gdf.geometry.iloc[0], MultiPolygon):
         parts_lst = []
         for idx, row in gdf.explode(index_parts=True).loc[0].iterrows():
             hexs = h3.polyfill(

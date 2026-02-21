@@ -10,7 +10,9 @@ from scipy.spatial import Voronoi
 from shapely.geometry import Polygon
 
 
-def voronoi_polygons(sp_voronoi_obj: Voronoi, diameter: float) -> Generator[Polygon, None, None]:
+def voronoi_polygons(
+    sp_voronoi_obj: Voronoi, diameter: float
+) -> Generator[Polygon, None, None]:
     """
     Convert a scipy Voronoi object into shapely Polygons.
 

@@ -65,7 +65,7 @@ class POIdata:
         query_string : str
         """
         with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
+            warnings.simplefilter("ignore", FutureWarning)
             self.area_buffered = self.area.buffer(0.008).simplify(0.005)
 
         exter_coordinates = self.area_buffered.iloc[0].exterior.coords
@@ -199,7 +199,7 @@ class POIdata:
             )
 
         for poi_category in self.poi_categories:
-            if not hasattr(poi_df, poi_category):
+            if poi_category not in poi_df.columns:
                 poi_df[poi_category] = False
 
         first_cols = ["type", "geometry", "tags", "center_latitude", "center_longitude"]

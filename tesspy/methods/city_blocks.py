@@ -91,7 +91,9 @@ def create_blocks(road_network: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
         raise AttributeError("Road network data must have a geometry attribute.")
 
 
-def get_rest_polygon(blocks: gpd.GeoDataFrame, area: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+def get_rest_polygon(
+    blocks: gpd.GeoDataFrame, area: gpd.GeoDataFrame
+) -> gpd.GeoDataFrame:
     """
     Create "rest polygons" to fill gaps not covered by road-based blocks.
 

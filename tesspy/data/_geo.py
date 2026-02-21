@@ -40,7 +40,7 @@ def get_city_polygon(city: str) -> gpd.GeoDataFrame:
     import osmnx as ox
 
     with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
+        warnings.simplefilter("ignore", FutureWarning)
         df_city = ox.geocode_to_gdf(city)
     df_city = df_city[["osm_id", "geometry"]]
     df_city = df_city.rename(columns={"osm_id": "osmid"})

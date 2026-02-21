@@ -16,12 +16,21 @@ import hdbscan
 from sklearn.cluster import AgglomerativeClustering
 from shapely.ops import unary_union
 
-from tesspy._constants import DEFAULT_POI_CATEGORIES, OSM_HIGHWAY_TYPES, OSM_PRIMARY_FEATURES
+from tesspy._constants import (
+    DEFAULT_POI_CATEGORIES,
+    OSM_HIGHWAY_TYPES,
+    OSM_PRIMARY_FEATURES,
+)
 from tesspy._validators import _check_input_geodataframe, _check_valid_geometry_gdf
 from tesspy.data._geo import count_poi_per_tile, get_city_polygon
 from tesspy.data.poi import POIdata
 from tesspy.data.roads import RoadData
-from tesspy.methods.city_blocks import create_blocks, explode, get_rest_polygon, split_linestring
+from tesspy.methods.city_blocks import (
+    create_blocks,
+    explode,
+    get_rest_polygon,
+    split_linestring,
+)
 from tesspy.methods.hexagons import get_h3_hexagons
 from tesspy.methods.squares import count_poi, get_adaptive_squares, get_squares_polyfill
 from tesspy.methods.voronoi import voronoi_polygons
@@ -59,9 +68,9 @@ class Tessellation:
     """
 
     def __init__(self, area: gpd.GeoDataFrame | str) -> None:
-        if type(area) == gpd.GeoDataFrame:
+        if isinstance(area, gpd.GeoDataFrame):
             self.area_gdf = _check_input_geodataframe(area)
-        elif type(area) == str:
+        elif isinstance(area, str):
             self.area_gdf = get_city_polygon(area)
         else:
             raise TypeError("area must be a GeoDataFrame or a string (city name)")
@@ -78,7 +87,7 @@ class Tessellation:
     def _get_missing_poi_categories(self, poi_list: list[str]) -> list[str]:
         """Return categories in poi_list that are not yet in self.poi_dataframe."""
         return [
-            cat for cat in poi_list if not hasattr(self.poi_dataframe, cat)
+            cat for cat in poi_list if cat not in self.poi_dataframe.columns
         ]
 
     # ------------------------------------------------------------------
@@ -252,7 +261,7 @@ class Tessellation:
 
         missing_poi_categories = self._get_missing_poi_categories(poi_categories)
 
-        if type(self.area_gdf) == MultiPolygon:
+        if isinstance(self.area_gdf.geometry.iloc[0], MultiPolygon):
             queried_area = self.area_gdf.convex_hull
         else:
             queried_area = self.area_gdf
@@ -354,12 +363,15 @@ class Tessellation:
         """
         if detail_deg is None:
             highwaytypes = self.osm_highway_types()
-        elif type(detail_deg) is int and detail_deg <= len(self.osm_highway_types()):
+        elif (
+            isinstance(detail_deg, int)
+            and detail_deg <= len(self.osm_highway_types())
+        ):
             highwaytypes = self.osm_highway_types()[:detail_deg]
         else:
             raise ValueError("detail_deg must be None or a valid int")
 
-        if type(self.area_gdf) == MultiPolygon:
+        if isinstance(self.area_gdf.geometry.iloc[0], MultiPolygon):
             queried_area = self.area_gdf.convex_hull
         else:
             queried_area = self.area_gdf
@@ -412,7 +424,7 @@ class Tessellation:
             print("Merging small city blocks with hierarchical clustering...")
 
         with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
+            warnings.simplefilter("ignore", FutureWarning)
             city_blocks["centroid"] = city_blocks.centroid
 
         coordinates = np.column_stack(
@@ -420,7 +432,7 @@ class Tessellation:
         )
         # Note: AgglomerativeClustering requires O(n²) memory and O(n³) time.
         # Large datasets may exhaust RAM.
-        model = AgglomerativeClustering(n_clusters=n_polygons, affinity="euclidean")
+        model = AgglomerativeClustering(n_clusters=n_polygons, metric="euclidean")
         model.fit(coordinates)
 
         city_blocks["Cluster"] = model.labels_

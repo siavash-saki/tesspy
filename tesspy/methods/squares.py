@@ -56,9 +56,13 @@ def get_squares_polyfill(gdf: gpd.GeoDataFrame, zoom_level: int) -> gpd.GeoDataF
     return gdf
 
 
-def get_adaptive_squares(input_gdf: gpd.GeoDataFrame, threshold: int) -> gpd.GeoDataFrame:
+def get_adaptive_squares(
+    input_gdf: gpd.GeoDataFrame, threshold: int
+) -> gpd.GeoDataFrame:
     """
-    Adaptive tessellation. Subdivides all squares where the POI count threshold is exceeded.
+    Adaptive tessellation.
+
+    Subdivides all squares where the POI count threshold is exceeded.
 
     Parameters
     ----------

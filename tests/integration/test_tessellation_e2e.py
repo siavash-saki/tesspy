@@ -210,13 +210,13 @@ def test_count_poi_per_tile_invalid_city_type():
 
 @pytest.mark.integration
 def test_count_poi_per_tile_empty_gdf():
-    """Passing an empty GeoDataFrame should raise ValueError (needs network for city lookup)."""
+    """Passing an empty GeoDataFrame should raise ValueError."""
     with pytest.raises(ValueError):
         count_poi_per_tile("Nizza", gpd.GeoDataFrame())
 
 
 @pytest.mark.integration
 def test_count_poi_per_tile_invalid_poi_type():
-    """Passing an int as poi_categories should raise ValueError (needs network for city lookup)."""
+    """Passing an int as poi_categories should raise ValueError."""
     with pytest.raises(ValueError):
         count_poi_per_tile("Nizza", gpd.GeoDataFrame(geometry=[]), poi_categories=10)

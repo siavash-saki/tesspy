@@ -45,7 +45,8 @@ def test_count_poi_uses_fixture_directly(leisure_poi_berlin, soho_polygon_gdf):
     soho_gdf["osm_id"] = 0
     city_squares = get_squares_polyfill(soho_gdf, 14)
 
-    # leisure_poi_berlin is used as generic point data (spatial join; only overlapping points counted)
+    # leisure_poi_berlin is used as generic point data
+    # (spatial join; only overlapping points counted)
     count_result = count_poi(city_squares, leisure_poi_berlin)
 
     assert isinstance(count_result, gpd.GeoDataFrame)

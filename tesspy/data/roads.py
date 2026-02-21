@@ -60,7 +60,7 @@ class RoadData:
         """
         if self.detail_deg is None:
             highwaytypes = self.osm_highway_types()
-        elif type(self.detail_deg) is int:
+        elif isinstance(self.detail_deg, int):
             highwaytypes = self.osm_highway_types()[: self.detail_deg]
         else:
             raise ValueError("detail_deg must be None or an int")
@@ -90,7 +90,9 @@ class RoadData:
         )
         graph_projected = ox.project_graph(graph, to_crs="epsg:4326")
         graph_undirected = graph_projected.to_undirected()
-        graph_edges_as_gdf = ox.graph_to_gdfs(graph_undirected, nodes=False, edges=True)
+        graph_edges_as_gdf = ox.graph_to_gdfs(
+            graph_undirected, nodes=False, edges=True
+        )
 
         if self.verbose:
             print(f"Collected {len(graph_edges_as_gdf)} street segments.")

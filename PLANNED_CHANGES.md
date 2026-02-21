@@ -10,16 +10,16 @@ Fix type-checking anti-patterns, unsafe attribute lookups, and warning suppressi
 
 **Files:** `tesspy/tessellation.py`, `tesspy/methods/hexagons.py`, `tesspy/data/roads.py`, `tesspy/data/poi.py`, `tesspy/data/_geo.py`, `pyproject.toml`
 
-- [ ] Replace `type(area) == gpd.GeoDataFrame` with `isinstance(area, gpd.GeoDataFrame)` (`tessellation.py:62`)
-- [ ] Replace `type(area) == str` with `isinstance(area, str)` (`tessellation.py:64`)
-- [ ] Replace `type(self.area_gdf) == MultiPolygon` with `isinstance(...)` (`tessellation.py:255, 362`)
-- [ ] Replace `type(gdf.geometry.iloc[0]) == Polygon` / `MultiPolygon` with `isinstance(...)` (`hexagons.py:27, 41`)
-- [ ] Replace `type(self.detail_deg) is int` with `isinstance(self.detail_deg, int)` (`roads.py:63`)
-- [ ] Replace `hasattr(self.poi_dataframe, cat)` with `cat in self.poi_dataframe.columns` (`tessellation.py:81`)
-- [ ] Replace `hasattr(poi_df, poi_category)` with `poi_category in poi_df.columns` (`poi.py:202`)
-- [ ] Specify warning category in `warnings.simplefilter("ignore")` — use `FutureWarning` or `ShapelyDeprecationWarning` instead of blanket suppression (`poi.py:68`, `_geo.py:43`, `tessellation.py:415`)
-- [ ] Remove `E501` from ruff ignore list and fix lines exceeding 88 chars (`pyproject.toml:75`)
-- [ ] Replace deprecated `affinity="euclidean"` with `metric="euclidean"` in AgglomerativeClustering (`tessellation.py:423`)
+- [x] Replace `type(area) == gpd.GeoDataFrame` with `isinstance(area, gpd.GeoDataFrame)` (`tessellation.py:62`)
+- [x] Replace `type(area) == str` with `isinstance(area, str)` (`tessellation.py:64`)
+- [x] Replace `type(self.area_gdf) == MultiPolygon` with `isinstance(...)` (`tessellation.py:255, 362`)
+- [x] Replace `type(gdf.geometry.iloc[0]) == Polygon` / `MultiPolygon` with `isinstance(...)` (`hexagons.py:27, 41`)
+- [x] Replace `type(self.detail_deg) is int` with `isinstance(self.detail_deg, int)` (`roads.py:63`)
+- [x] Replace `hasattr(self.poi_dataframe, cat)` with `cat in self.poi_dataframe.columns` (`tessellation.py:81`)
+- [x] Replace `hasattr(poi_df, poi_category)` with `poi_category in poi_df.columns` (`poi.py:202`)
+- [x] Specify warning category in `warnings.simplefilter("ignore")` — use `FutureWarning` or `ShapelyDeprecationWarning` instead of blanket suppression (`poi.py:68`, `_geo.py:43`, `tessellation.py:415`)
+- [x] Remove `E501` from ruff ignore list and fix lines exceeding 88 chars (`pyproject.toml:75`)
+- [x] Replace deprecated `affinity="euclidean"` with `metric="euclidean"` in AgglomerativeClustering (`tessellation.py:423`)
 
 ---
 
