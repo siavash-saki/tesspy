@@ -8,15 +8,13 @@ import warnings
 from typing import Literal
 
 import geopandas as gpd
+import hdbscan
 import numpy as np
 import pandas as pd
 from scipy.spatial import Voronoi
 from shapely.geometry import MultiPolygon, Point
-from sklearn.cluster import KMeans
-
-import hdbscan
-from sklearn.cluster import AgglomerativeClustering
 from shapely.ops import unary_union
+from sklearn.cluster import AgglomerativeClustering, KMeans
 
 from tesspy._constants import (
     DEFAULT_POI_CATEGORIES,
@@ -91,9 +89,7 @@ class Tessellation:
 
     def _get_missing_poi_categories(self, poi_list: list[str]) -> list[str]:
         """Return categories in poi_list that are not yet in self.poi_dataframe."""
-        return [
-            cat for cat in poi_list if cat not in self.poi_dataframe.columns
-        ]
+        return [cat for cat in poi_list if cat not in self.poi_dataframe.columns]
 
     # ------------------------------------------------------------------
     # Tessellation methods
@@ -380,7 +376,7 @@ class Tessellation:
         )
         voronoi_dia = Voronoi(generators)
         voronoi_poly = gpd.GeoDataFrame(
-            geometry=[p for p in voronoi_polygons(voronoi_dia, 0.1)], crs="EPSG:4326"
+            geometry=list(voronoi_polygons(voronoi_dia, 0.1)), crs="EPSG:4326"
         )
         voronoi_poly = gpd.sjoin(voronoi_poly, self.area_gdf)
         vor_polygons = voronoi_poly.intersection(self.area_gdf.geometry.iloc[0])
@@ -442,9 +438,8 @@ class Tessellation:
 
         if detail_deg is None:
             highwaytypes = self.osm_highway_types()
-        elif (
-            isinstance(detail_deg, int)
-            and detail_deg <= len(self.osm_highway_types())
+        elif isinstance(detail_deg, int) and detail_deg <= len(
+            self.osm_highway_types()
         ):
             highwaytypes = self.osm_highway_types()[:detail_deg]
         else:
@@ -492,9 +487,9 @@ class Tessellation:
             city_blocks = _check_valid_geometry_gdf(city_blocks)
             city_blocks.reset_index(inplace=True)
             city_blocks.rename(columns={"index": "cityblock_id"}, inplace=True)
-            city_blocks["cityblock_id"] = (
-                "cityblockID" + city_blocks["cityblock_id"].astype(str)
-            )
+            city_blocks["cityblock_id"] = "cityblockID" + city_blocks[
+                "cityblock_id"
+            ].astype(str)
             log_progress(
                 logger,
                 verbose,
@@ -547,9 +542,9 @@ class Tessellation:
 
         final_city_blocks.reset_index(inplace=True)
         final_city_blocks.rename(columns={"index": "cityblock_id"}, inplace=True)
-        final_city_blocks["cityblock_id"] = (
-            "cityblockID" + final_city_blocks["cityblock_id"].astype(str)
-        )
+        final_city_blocks["cityblock_id"] = "cityblockID" + final_city_blocks[
+            "cityblock_id"
+        ].astype(str)
 
         log_progress(
             logger,

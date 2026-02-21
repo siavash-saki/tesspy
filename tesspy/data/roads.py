@@ -100,9 +100,7 @@ class RoadData:
         )
         graph_projected = ox.project_graph(graph, to_crs="epsg:4326")
         graph_undirected = graph_projected.to_undirected()
-        graph_edges_as_gdf = ox.graph_to_gdfs(
-            graph_undirected, nodes=False, edges=True
-        )
+        graph_edges_as_gdf = ox.graph_to_gdfs(graph_undirected, nodes=False, edges=True)
 
         log_progress(
             logger,

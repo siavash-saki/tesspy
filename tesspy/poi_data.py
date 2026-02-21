@@ -19,8 +19,8 @@ warnings.warn(
     stacklevel=2,
 )
 
-from tesspy.data.poi import POIdata
-from tesspy.data.roads import RoadData
-from tesspy.data._overpass import geom_ceil, geom_floor
+from tesspy.data._overpass import geom_ceil, geom_floor  # noqa: E402
+from tesspy.data.poi import POIdata  # noqa: E402
+from tesspy.data.roads import RoadData  # noqa: E402
 
 __all__ = ["POIdata", "RoadData", "geom_ceil", "geom_floor"]

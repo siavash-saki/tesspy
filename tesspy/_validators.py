@@ -38,9 +38,7 @@ def _check_input_geodataframe(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
         raise TypeError("Geometry column missing in GeoDataFrame")
 
     if type(gdf["geometry"].iloc[0]) not in [Polygon, MultiPolygon]:
-        raise TypeError(
-            "Geometry must be of type shapely Polygon or MultiPolygon"
-        )
+        raise TypeError("Geometry must be of type shapely Polygon or MultiPolygon")
 
     if gdf.crs is None:
         raise ValueError("GeoDataFrame must have a CRS")

@@ -26,7 +26,7 @@ def split_linestring(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     linestrings = []
     osmid = []
 
-    for idx, row in df.iterrows():
+    for _, row in df.iterrows():
         if len(row["geometry"].coords) == 2:
             linestrings.append(row["geometry"])
             osmid.append(row["osmid"])
@@ -130,6 +130,4 @@ def get_rest_polygon(
         return rest_polygons
 
     else:
-        raise ValueError(
-            "City blocks and the area both require a geometry attribute."
-        )
+        raise ValueError("City blocks and the area both require a geometry attribute.")

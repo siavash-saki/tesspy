@@ -8,6 +8,11 @@ import pandas as pd
 from shapely.geometry import MultiPolygon, Polygon
 
 
+def _hex_to_polygon(hex_id: str) -> Polygon:
+    """Convert an H3 hex ID to a shapely Polygon."""
+    return Polygon(h3.h3_to_geo_boundary(hex_id, geo_json=True))
+
+
 def get_h3_hexagons(gdf: gpd.GeoDataFrame, resolution: int) -> gpd.GeoDataFrame:
     """
     Hexagon tessellation based on the H3 implementation by Uber.
@@ -28,11 +33,8 @@ def get_h3_hexagons(gdf: gpd.GeoDataFrame, resolution: int) -> gpd.GeoDataFrame:
         hexs = h3.polyfill(
             gdf.geometry[0].__geo_interface__, resolution, geo_json_conformant=True
         )
-        polygonise = lambda hex_id: Polygon(
-            h3.h3_to_geo_boundary(hex_id, geo_json=True)
-        )
         all_polys = gpd.GeoSeries(
-            list(map(polygonise, hexs)), index=hexs, crs="EPSG:4326"
+            list(map(_hex_to_polygon, hexs)), index=hexs, crs="EPSG:4326"
         )
 
         gdf = gpd.GeoDataFrame(geometry=all_polys, crs="EPSG:4326")
@@ -40,16 +42,12 @@ def get_h3_hexagons(gdf: gpd.GeoDataFrame, resolution: int) -> gpd.GeoDataFrame:
 
     elif isinstance(gdf.geometry.iloc[0], MultiPolygon):
         parts_lst = []
-        for idx, row in gdf.explode(index_parts=True).loc[0].iterrows():
+        for _, row in gdf.explode(index_parts=True).loc[0].iterrows():
             hexs = h3.polyfill(
                 row.geometry.__geo_interface__, resolution, geo_json_conformant=True
             )
-
-            polygonise = lambda hex_id: Polygon(
-                h3.h3_to_geo_boundary(hex_id, geo_json=True)
-            )
             all_polys = gpd.GeoSeries(
-                list(map(polygonise, hexs)), index=hexs, crs="EPSG:4326"
+                list(map(_hex_to_polygon, hexs)), index=hexs, crs="EPSG:4326"
             )
 
             part_gdf = gpd.GeoDataFrame(geometry=all_polys)

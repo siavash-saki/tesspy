@@ -143,7 +143,7 @@ class POIdata:
             request_header.removesuffix("?data="),
         )
         fetch_start = time.perf_counter()
-        resp = requests.get(url=request_header + query_string)
+        resp = requests.get(url=request_header + query_string, timeout=self.timeout)
         fetch_duration = time.perf_counter() - fetch_start
         log_progress(
             logger,

@@ -4,7 +4,6 @@ Square and adaptive-square tessellation functions.
 
 import geopandas as gpd
 import mercantile
-import numpy as np
 import pandas as pd
 from shapely.geometry import box
 
@@ -28,7 +27,7 @@ def get_squares_polyfill(gdf: gpd.GeoDataFrame, zoom_level: int) -> gpd.GeoDataF
     geom_name = gdf.geometry.name
     temp_dfs = []
 
-    for idx, rows in gdf.iterrows():
+    for _, rows in gdf.iterrows():
         gdf_geometry = rows[geom_name]
         bbox = gdf_geometry.bounds
         tiles = mercantile.tiles(bbox[0], bbox[1], bbox[2], bbox[3], zoom_level)
@@ -41,9 +40,9 @@ def get_squares_polyfill(gdf: gpd.GeoDataFrame, zoom_level: int) -> gpd.GeoDataF
                 temp_row["quadkey"] = mercantile.quadkey(tile)
 
                 child_ids = mercantile.children(tile)
-                temp_row["children_id"] = list(
+                temp_row["children_id"] = [
                     mercantile.quadkey(c_tile) for c_tile in child_ids
-                )
+                ]
 
                 temp_rows.append(temp_row)
         temp_dfs.append(pd.DataFrame(temp_rows))
@@ -90,9 +89,9 @@ def get_adaptive_squares(
             new_row["quadkey"] = child
             new_row["geometry"] = box(*mercantile.bounds(child_tile))
             grand_children = mercantile.children(child_tile)
-            new_row["children_id"] = list(
+            new_row["children_id"] = [
                 mercantile.quadkey(c_tile) for c_tile in grand_children
-            )
+            ]
 
             tmp_df = pd.DataFrame(new_row).transpose()
             tmp_gdf = gpd.GeoDataFrame(tmp_df, geometry="geometry", crs="epsg:4326")

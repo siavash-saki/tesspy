@@ -32,7 +32,9 @@ def voronoi_polygons(
     centroid = sp_voronoi_obj.points.mean(axis=0)
 
     ridge_direction: dict = defaultdict(list)
-    for (p, q), rv in zip(sp_voronoi_obj.ridge_points, sp_voronoi_obj.ridge_vertices):
+    for (p, q), rv in zip(
+        sp_voronoi_obj.ridge_points, sp_voronoi_obj.ridge_vertices, strict=True
+    ):
         u, v = sorted(rv)
         if u == -1:
             tangent = sp_voronoi_obj.points[q] - sp_voronoi_obj.points[p]
