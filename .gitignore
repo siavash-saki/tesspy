@@ -43,4 +43,6 @@ htmlcov/
 # Secrets / tokens
 .gitTok
 
+uv.lock
+
 CLAUDE.md
