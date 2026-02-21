@@ -1,9 +1,13 @@
-tesspy/__pycache__
+__pycache__
+*/__pycache__
+cache
+*/cache
 tesspy/cache
 .gitTok
 tesspy.egg-info
 .idea
 venv
+.venv
 tutorials/.ipynb_checkpoints
 tesspy/.ipynb_checkpoints
 /Examples/cache/
