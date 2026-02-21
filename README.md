@@ -66,6 +66,21 @@ pip install git+git://github.com/siavash-saki/tesspy
 ## Documentation
 The official documentation is hosted on **[ReadTheDocs](https://tesspy.readthedocs.io)**.
 
+## Logging
+`tesspy` uses Python's standard `logging` module. By default, library logging is
+silent unless you configure it.
+
+Basic progress logs:
+```python
+from tesspy import Tessellation, configure_logging
+
+configure_logging("INFO")
+t = Tessellation("Frankfurt am Main")
+t.city_blocks(verbose=True)
+```
+
+Use `verbose=True` on POI-driven methods to emit progress events.
+
 
 ## Examples
 The city of "Frankfurt am Main" in Germany is used to showcase different tessellation methods. This is how a tessellation object is built, and different methods are called. For the tessellation methods based on Points of Interests (adaptive squares, Voronoi polygons, and City Blocks), we use `amenity` data from the OpenStreetMap.
@@ -142,4 +157,3 @@ If you have any ideas or questions, feel free to open an issue.
 
 ## Acknowledgements
 `tesspy` is the result of the research project [ClusterMobil](https://www.frankfurt-university.de/de/hochschule/fachbereich-1-architektur-bauingenieurwesen-geomatik/forschungsinstitut-ffin/fachgruppen-des-ffin/fg-neue-mobilitat/relut/forschungsprojekte-relut/clustermobil/) conducted by the [Research Lab for Urban Transport](https://www.frankfurt-university.de/en/about-us/faculty-1-architecture-civil-engineering-geomatics/research-institute-ffin/specialist-groups-of-the-ffin/specialist-group-new-mobility/relut/). This research project is funded by the state of Hesse and [HOLM](https://frankfurt-holm.de/) funding under the “Innovations in Logistics and Mobility” measure of the Hessian Ministry of Economics, Energy, Transport and Housing. [HA Project No.: 1017/21-19]
-

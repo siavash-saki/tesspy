@@ -14,6 +14,7 @@ Public API
 ----------
 Tessellation : main class; instantiate with a city name or GeoDataFrame
 count_poi_per_tile : count OSM POI categories per tessellation tile
+configure_logging : configure package logger output/level
 
 Subpackages
 -----------
@@ -30,9 +31,10 @@ Example
 
 import logging
 
+from tesspy._logging import configure_logging
 from tesspy._version import __version__
-from tesspy.tessellation import Tessellation
 from tesspy.data._geo import count_poi_per_tile
+from tesspy.tessellation import Tessellation
 
 logging.getLogger("tesspy").addHandler(logging.NullHandler())
 
@@ -40,4 +42,9 @@ name = "tesspy"
 __author__ = "Siavash Saki and Jonas Hamann"
 __author_email__ = "jonas.hamann@fb3.fra-uas.de"
 
-__all__ = ["Tessellation", "count_poi_per_tile", "__version__"]
+__all__ = [
+    "Tessellation",
+    "count_poi_per_tile",
+    "configure_logging",
+    "__version__",
+]

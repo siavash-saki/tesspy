@@ -3,11 +3,13 @@ Road network data retrieval via osmnx.
 """
 
 import logging
+import time
 
 import geopandas as gpd
 import osmnx as ox
 
 from tesspy._constants import OSM_HIGHWAY_TYPES
+from tesspy._logging import log_progress
 
 logger = logging.getLogger(__name__)
 
@@ -71,8 +73,13 @@ class RoadData:
         query = "|".join(highwaytypes[:-1]) + f"|{highwaytypes[-1]}"
         custom_filter = f"['highway'~'{query}']"
 
-        if self.verbose:
-            logger.info("Selected highway type(s): %s", custom_filter)
+        log_progress(
+            logger,
+            self.verbose,
+            "event=roads.filter.selected detail_deg=%s filter=%s",
+            self.detail_deg,
+            custom_filter,
+        )
 
         return custom_filter
 
@@ -86,8 +93,8 @@ class RoadData:
             GeoDataFrame containing road network edges
         """
         cf = self.create_custom_filter()
-        if self.verbose:
-            logger.info("Collecting road network data...")
+        log_progress(logger, self.verbose, "event=roads.fetch.start")
+        fetch_start = time.perf_counter()
         graph = ox.graph_from_polygon(
             self.area.boundary.convex_hull.values[0], custom_filter=cf
         )
@@ -97,9 +104,12 @@ class RoadData:
             graph_undirected, nodes=False, edges=True
         )
 
-        if self.verbose:
-            logger.info(
-                "Collected %d street segments.", len(graph_edges_as_gdf)
-            )
+        log_progress(
+            logger,
+            self.verbose,
+            "event=roads.fetch.done segments=%d duration_s=%.3f",
+            len(graph_edges_as_gdf),
+            time.perf_counter() - fetch_start,
+        )
 
         return graph_edges_as_gdf

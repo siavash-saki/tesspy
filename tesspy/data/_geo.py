@@ -12,6 +12,7 @@ tesspy._constants (DEFAULT_POI_CATEGORIES), tesspy.data.poi (POIdata),
 osmnx, geopandas, shapely
 """
 
+import logging
 import warnings
 
 import geopandas as gpd
@@ -20,7 +21,10 @@ import pandas as pd
 from shapely.geometry import Point
 
 from tesspy._constants import DEFAULT_POI_CATEGORIES
+from tesspy._logging import log_progress
 from tesspy.data.poi import POIdata
+
+logger = logging.getLogger(__name__)
 
 
 def get_city_polygon(city: str) -> gpd.GeoDataFrame:
@@ -39,11 +43,13 @@ def get_city_polygon(city: str) -> gpd.GeoDataFrame:
     """
     import osmnx as ox
 
+    logger.debug("event=geo.geocode.start city=%s", city)
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", FutureWarning)
         df_city = ox.geocode_to_gdf(city)
     df_city = df_city[["osm_id", "geometry"]]
     df_city = df_city.rename(columns={"osm_id": "osmid"})
+    logger.debug("event=geo.geocode.done city=%s rows=%d", city, len(df_city))
     return df_city
 
 
@@ -52,6 +58,7 @@ def count_poi_per_tile(
     gdf: gpd.GeoDataFrame,
     poi_categories: list[str] | str | None = None,
     timeout: int = 120,
+    verbose: bool = False,
 ) -> gpd.GeoDataFrame:
     """
     Count POI categories per tessellation tile.
@@ -71,12 +78,16 @@ def count_poi_per_tile(
         OSM primary map feature categories to count per tile.
     timeout : int, default=120
         TCP timeout in seconds for the OSM Overpass request
+    verbose : bool, default=False
+        Log progress information via the ``tesspy`` logger.
 
     Returns
     --------
     gdf : geopandas.GeoDataFrame
         Tessellation GeoDataFrame with additional count columns per POI category
     """
+    log_progress(logger, verbose, "event=poi.count.start timeout_s=%d", timeout)
+
     if poi_categories is None:
         poi_categories = DEFAULT_POI_CATEGORIES.copy()
 
@@ -106,7 +117,7 @@ def count_poi_per_tile(
         area_gdf,
         poi_categories=poi_categories,
         timeout=timeout,
-        verbose=False,
+        verbose=verbose,
     ).get_poi_data()
 
     points_geom = df_poi[["center_longitude", "center_latitude"]].apply(
@@ -136,5 +147,13 @@ def count_poi_per_tile(
 
     merged_polygons = gdf.merge(pivot_table, how="left", on=idx)
     merged_polygons.fillna(0, inplace=True)
+
+    log_progress(
+        logger,
+        verbose,
+        "event=poi.count.done tiles=%d poi_categories=%d",
+        len(merged_polygons),
+        len(poi_categories),
+    )
 
     return merged_polygons

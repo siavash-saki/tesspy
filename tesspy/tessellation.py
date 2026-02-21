@@ -3,6 +3,7 @@ Core Tessellation class — the primary public interface of tesspy.
 """
 
 import logging
+import time
 import warnings
 from typing import Literal
 
@@ -22,6 +23,7 @@ from tesspy._constants import (
     OSM_HIGHWAY_TYPES,
     OSM_PRIMARY_FEATURES,
 )
+from tesspy._logging import log_progress
 from tesspy._validators import _check_input_geodataframe, _check_valid_geometry_gdf
 from tesspy.data._geo import count_poi_per_tile, get_city_polygon
 from tesspy.data.poi import POIdata
@@ -168,11 +170,23 @@ class Tessellation:
         gpd.GeoDataFrame
             GeoDataFrame with adaptive square tiles
         """
+        method_start = time.perf_counter()
         if poi_categories is None:
             poi_categories = DEFAULT_POI_CATEGORIES.copy()
 
         if poi_categories == "all":
             poi_categories = self.osm_primary_features()
+
+        log_progress(
+            logger,
+            verbose,
+            "event=adaptive_squares.start start_resolution=%d poi_categories=%d "
+            "threshold=%s timeout_s=%d",
+            start_resolution,
+            len(poi_categories),
+            threshold,
+            timeout,
+        )
 
         missing_poi_categories = self._get_missing_poi_categories(poi_categories)
 
@@ -185,6 +199,14 @@ class Tessellation:
                 False
             )
             self.poi_dataframe = self.poi_dataframe.reset_index(drop=True)
+        else:
+            log_progress(
+                logger,
+                verbose,
+                "event=poi.cache.hit categories=%d",
+                len(poi_categories),
+                level=logging.DEBUG,
+            )
 
         tess_data = self.poi_dataframe[
             self.poi_dataframe[poi_categories].sum(axis=1) > 0
@@ -201,21 +223,22 @@ class Tessellation:
 
         if not threshold:
             threshold = int(np.median(aqk_count_df["count"].values))
-            if verbose:
-                logger.info(
-                    "Threshold=%d  => set as the median POI count "
-                    "per square at the initial level",
-                    threshold,
-                )
+            log_progress(
+                logger,
+                verbose,
+                "event=adaptive_squares.threshold.auto threshold=%d",
+                threshold,
+            )
 
         i = start_resolution
         while max(aqk_count_df["count"].values) > threshold:
             i += 1
-            if verbose:
-                logger.info(
-                    "Threshold exceeded. Subdividing to resolution %d...",
-                    i,
-                )
+            log_progress(
+                logger,
+                verbose,
+                "event=adaptive_squares.subdivide resolution=%d",
+                i,
+            )
 
             df_tmp = get_adaptive_squares(aqk_count_df, threshold)
             df_tmp.drop(columns=["count"], inplace=True)
@@ -224,6 +247,14 @@ class Tessellation:
 
         final_aqk = gpd.sjoin(aqk_count_df, self.area_gdf)
         final_aqk = final_aqk.drop(columns=["osm_id", "children_id", "index_right"])
+
+        log_progress(
+            logger,
+            verbose,
+            "event=adaptive_squares.done tiles=%d duration_s=%.3f",
+            len(final_aqk),
+            time.perf_counter() - method_start,
+        )
 
         return final_aqk
 
@@ -260,11 +291,24 @@ class Tessellation:
         gpd.GeoDataFrame
             GeoDataFrame with Voronoi polygon tiles and a 'voronoi_id' column
         """
+        method_start = time.perf_counter()
         if poi_categories is None:
             poi_categories = DEFAULT_POI_CATEGORIES.copy()
 
         if poi_categories == "all":
             poi_categories = self.osm_primary_features()
+
+        log_progress(
+            logger,
+            verbose,
+            "event=voronoi.start cluster_algo=%s poi_categories=%d n_polygons=%d "
+            "min_cluster_size=%d timeout_s=%d",
+            cluster_algo,
+            len(poi_categories),
+            n_polygons,
+            min_cluster_size,
+            timeout,
+        )
 
         missing_poi_categories = self._get_missing_poi_categories(poi_categories)
 
@@ -282,6 +326,14 @@ class Tessellation:
                 False
             )
             self.poi_dataframe = self.poi_dataframe.reset_index(drop=True)
+        else:
+            log_progress(
+                logger,
+                verbose,
+                "event=poi.cache.hit categories=%d",
+                len(poi_categories),
+                level=logging.DEBUG,
+            )
 
         tess_data = self.poi_dataframe[
             self.poi_dataframe[poi_categories].sum(axis=1) > 0
@@ -289,8 +341,7 @@ class Tessellation:
         data_locs = tess_data[["center_longitude", "center_latitude"]].values
 
         if cluster_algo == "k-means":
-            if verbose:
-                logger.info("K-Means Clustering...")
+            log_progress(logger, verbose, "event=voronoi.cluster.start algo=kmeans")
             clustering = KMeans(n_clusters=n_polygons).fit(data_locs)
             generators = [
                 np.mean(data_locs[clustering.labels_ == label], axis=0)
@@ -298,8 +349,7 @@ class Tessellation:
             ]
 
         elif cluster_algo == "hdbscan":
-            if verbose:
-                logger.info("HDBSCAN Clustering... This can take a while...")
+            log_progress(logger, verbose, "event=voronoi.cluster.start algo=hdbscan")
             clustering = hdbscan.HDBSCAN(
                 min_cluster_size=min_cluster_size, prediction_data=True
             ).fit(data_locs)
@@ -322,8 +372,12 @@ class Tessellation:
                 "cluster_algo must be one of: 'k-means', 'hdbscan', or None"
             )
 
-        if verbose:
-            logger.info("Creating Voronoi polygons...")
+        log_progress(
+            logger,
+            verbose,
+            "event=voronoi.polygons.create generators=%d",
+            len(generators),
+        )
         voronoi_dia = Voronoi(generators)
         voronoi_poly = gpd.GeoDataFrame(
             geometry=[p for p in voronoi_polygons(voronoi_dia, 0.1)], crs="EPSG:4326"
@@ -337,6 +391,14 @@ class Tessellation:
         df_voronoi.reset_index(inplace=True)
         df_voronoi.rename(columns={"index": "voronoi_id"}, inplace=True)
         df_voronoi["voronoi_id"] = "voronoiID" + df_voronoi["voronoi_id"].astype(str)
+
+        log_progress(
+            logger,
+            verbose,
+            "event=voronoi.done polygons=%d duration_s=%.3f",
+            len(df_voronoi),
+            time.perf_counter() - method_start,
+        )
 
         return df_voronoi
 
@@ -368,6 +430,16 @@ class Tessellation:
         gpd.GeoDataFrame
             GeoDataFrame with city block tiles and a 'cityblock_id' column
         """
+        method_start = time.perf_counter()
+        log_progress(
+            logger,
+            verbose,
+            "event=city_blocks.start n_polygons=%s detail_deg=%s split_roads=%s",
+            n_polygons,
+            detail_deg,
+            split_roads,
+        )
+
         if detail_deg is None:
             highwaytypes = self.osm_highway_types()
         elif (
@@ -392,14 +464,19 @@ class Tessellation:
             self.queried_highway_types = highwaytypes
         else:
             road_data = self.road_network
+            log_progress(
+                logger,
+                verbose,
+                "event=roads.cache.hit highwaytypes=%d",
+                len(highwaytypes),
+                level=logging.DEBUG,
+            )
 
         if split_roads:
-            if verbose:
-                logger.info("Splitting LineStrings to 2-point segments...")
+            log_progress(logger, verbose, "event=city_blocks.split_roads.start")
             road_data = split_linestring(road_data)
 
-        if verbose:
-            logger.info("Creating initial city blocks from road network...")
+        log_progress(logger, verbose, "event=city_blocks.blocks.create.start")
 
         blocks = create_blocks(road_data)
 
@@ -418,6 +495,13 @@ class Tessellation:
             city_blocks["cityblock_id"] = (
                 "cityblockID" + city_blocks["cityblock_id"].astype(str)
             )
+            log_progress(
+                logger,
+                verbose,
+                "event=city_blocks.done polygons=%d duration_s=%.3f",
+                len(city_blocks),
+                time.perf_counter() - method_start,
+            )
             return city_blocks
 
         if n_polygons > len(city_blocks):
@@ -427,8 +511,7 @@ class Tessellation:
                 f"Choose a value less than {len(city_blocks)}."
             )
 
-        if verbose:
-            logger.info("Merging small city blocks with hierarchical clustering...")
+        log_progress(logger, verbose, "event=city_blocks.merge.start")
 
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", FutureWarning)
@@ -466,6 +549,14 @@ class Tessellation:
         final_city_blocks.rename(columns={"index": "cityblock_id"}, inplace=True)
         final_city_blocks["cityblock_id"] = (
             "cityblockID" + final_city_blocks["cityblock_id"].astype(str)
+        )
+
+        log_progress(
+            logger,
+            verbose,
+            "event=city_blocks.done polygons=%d duration_s=%.3f",
+            len(final_city_blocks),
+            time.perf_counter() - method_start,
         )
 
         return final_city_blocks

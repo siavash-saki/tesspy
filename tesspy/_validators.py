@@ -71,7 +71,7 @@ def _check_valid_geometry_gdf(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
         raise TypeError("Geometry column missing in GeoDataFrame")
 
     if "MultiPolygon" in gdf.geom_type.unique():
-        logger.info("MultiPolygon found. Splitting it up...")
+        logger.info("event=geometry.multipolygon.explode")
         gdf = explode(gdf)
         gdf = gdf.reset_index()
         gdf.drop(columns=["level_0", "level_1"], inplace=True)

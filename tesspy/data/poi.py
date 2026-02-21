@@ -4,6 +4,7 @@ POI (Point of Interest) data retrieval via the OSM Overpass API.
 
 import json
 import logging
+import time
 import warnings
 
 import geopandas as gpd
@@ -13,6 +14,7 @@ import requests
 from shapely.geometry import Point
 
 from tesspy._constants import OSM_PRIMARY_FEATURES
+from tesspy._logging import log_progress
 from tesspy.data._overpass import geom_ceil, geom_floor
 
 logger = logging.getLogger(__name__)
@@ -67,6 +69,15 @@ class POIdata:
         --------
         query_string : str
         """
+        query_build_start = time.perf_counter()
+        log_progress(
+            logger,
+            self.verbose,
+            "event=poi.query.build.start poi_categories=%d timeout_s=%d",
+            len(self.poi_categories),
+            self.timeout,
+        )
+
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", FutureWarning)
             self.area_buffered = self.area.buffer(0.008).simplify(0.005)
@@ -99,6 +110,17 @@ class POIdata:
             + f"&bbox={lat_min},{lon_min},{lat_max},{lon_max}"
         )
 
+        log_progress(
+            logger,
+            self.verbose,
+            "event=poi.query.build.done bbox=%s,%s,%s,%s duration_s=%.3f",
+            lat_min,
+            lon_min,
+            lat_max,
+            lon_max,
+            time.perf_counter() - query_build_start,
+        )
+
         return query_string
 
     def get_poi_data(self) -> pd.DataFrame:
@@ -114,29 +136,61 @@ class POIdata:
         query_string = self.create_overpass_query_string()
         request_header = "https://overpass-api.de/api/interpreter?data="
 
-        if self.verbose:
-            logger.info("Getting data from OSM...")
-
+        log_progress(
+            logger,
+            self.verbose,
+            "event=poi.fetch.start endpoint=%s",
+            request_header.removesuffix("?data="),
+        )
+        fetch_start = time.perf_counter()
         resp = requests.get(url=request_header + query_string)
+        fetch_duration = time.perf_counter() - fetch_start
+        log_progress(
+            logger,
+            self.verbose,
+            "event=poi.fetch.response status_code=%d duration_s=%.3f",
+            resp.status_code,
+            fetch_duration,
+        )
+
         if resp.status_code == 429:
+            logger.warning(
+                "event=poi.fetch.error status_code=429 duration_s=%.3f",
+                fetch_duration,
+            )
             raise RuntimeError(
                 "429 Too Many Requests:\n"
                 "You have sent multiple requests from the same IP and exceeded "
                 "the fair use policy. Please wait a few minutes and try again."
             )
         elif resp.status_code == 504:
+            logger.warning(
+                "event=poi.fetch.error status_code=504 duration_s=%.3f",
+                fetch_duration,
+            )
             raise RuntimeError(
                 "504 Gateway Timeout:\n"
                 "The server is under heavy load and cannot process the request. "
                 "Please try again later."
             )
         elif resp.status_code != 200:
+            logger.error(
+                "event=poi.fetch.error status_code=%d body=%s duration_s=%.3f",
+                resp.status_code,
+                resp.text[:160].replace("\n", " "),
+                fetch_duration,
+            )
             raise RuntimeError("Bad Request!")
         else:
             resp = json.loads(resp.text)
 
-        if self.verbose:
-            logger.info("Creating POI DataFrame...")
+        parse_start = time.perf_counter()
+        log_progress(
+            logger,
+            self.verbose,
+            "event=poi.parse.start element_count=%d",
+            len(resp["elements"]),
+        )
 
         lst_nodes = []
         lst_ways = []
@@ -156,15 +210,25 @@ class POIdata:
                 )
                 lst_ways.append(item)
 
-        if self.verbose:
-            logger.debug("Cleaning POI DataFrame...")
+        log_progress(
+            logger,
+            self.verbose,
+            "event=poi.parse.split.done nodes=%d ways=%d",
+            len(lst_nodes),
+            len(lst_ways),
+            level=logging.DEBUG,
+        )
 
         nodes_df = pd.DataFrame(lst_nodes)
         ways_df = pd.DataFrame(lst_ways)
 
         if len(nodes_df) > 0 and len(ways_df) > 0:
-            if self.verbose:
-                logger.debug("Joining nodes and ways")
+            log_progress(
+                logger,
+                self.verbose,
+                "event=poi.parse.join mode=nodes_and_ways",
+                level=logging.DEBUG,
+            )
 
             nodes_df["geometry"] = nodes_df[["lon", "lat"]].apply(
                 lambda p: [{"lat": p["lat"], "lon": p["lon"]}], axis=1
@@ -178,15 +242,23 @@ class POIdata:
             poi_df = pd.concat([ways_df, nodes_df]).fillna(False)
 
         elif len(nodes_df) == 0 and len(ways_df) > 0:
-            if self.verbose:
-                logger.debug("No nodes found. Returning ways only.")
+            log_progress(
+                logger,
+                self.verbose,
+                "event=poi.parse.join mode=ways_only",
+                level=logging.DEBUG,
+            )
 
             ways_df = ways_df.drop(columns=["id", "bounds", "nodes"])
             poi_df = ways_df.fillna(False)
 
         elif len(nodes_df) > 0 and len(ways_df) == 0:
-            if self.verbose:
-                logger.debug("No ways found. Returning nodes only.")
+            log_progress(
+                logger,
+                self.verbose,
+                "event=poi.parse.join mode=nodes_only",
+                level=logging.DEBUG,
+            )
 
             nodes_df["geometry"] = nodes_df[["lon", "lat"]].apply(
                 lambda p: [{"lat": p["lat"], "lon": p["lon"]}], axis=1
@@ -197,9 +269,21 @@ class POIdata:
             nodes_df = nodes_df.drop(columns=["id"])
             poi_df = nodes_df.fillna(False)
         else:
+            logger.warning(
+                "event=poi.parse.empty_response poi_categories=%d",
+                len(self.poi_categories),
+            )
             raise ValueError(
                 "No POI data found for the specified poi_categories and area."
             )
+
+        log_progress(
+            logger,
+            self.verbose,
+            "event=poi.parse.done poi_count=%d duration_s=%.3f",
+            len(poi_df),
+            time.perf_counter() - parse_start,
+        )
 
         for poi_category in self.poi_categories:
             if poi_category not in poi_df.columns:
@@ -221,7 +305,15 @@ class POIdata:
         idx_to_keep = gpd.sjoin(poi_geo_df, area_buffered_gdf, predicate="within").index
         poi_df = poi_df.loc[idx_to_keep]
 
+        log_progress(
+            logger,
+            self.verbose,
+            "event=poi.filter.done poi_count=%d",
+            len(poi_df),
+        )
+
         if len(poi_df) == 0:
+            logger.warning("event=poi.filter.empty")
             raise ValueError("No POI data found within the study area.")
 
         return poi_df

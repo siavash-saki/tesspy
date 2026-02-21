@@ -1,6 +1,14 @@
 tesspy package
 ==============
 
+tesspy
+------
+
+.. automodule:: tesspy
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 tesspy.poi\_data
 -----------------------
 
