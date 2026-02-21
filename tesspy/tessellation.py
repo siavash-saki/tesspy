@@ -136,7 +136,7 @@ class Tessellation:
     def adaptive_squares(
         self,
         start_resolution: int,
-        poi_categories: list[str] | Literal["all"] = None,
+        poi_categories: list[str] | Literal["all"] | None = None,
         threshold: int | None = None,
         timeout: int = 60,
         verbose: bool = False,
@@ -257,7 +257,7 @@ class Tessellation:
     def voronoi(
         self,
         cluster_algo: Literal["k-means", "hdbscan"] | None = "k-means",
-        poi_categories: list[str] | Literal["all"] = None,
+        poi_categories: list[str] | Literal["all"] | None = None,
         timeout: int = 60,
         n_polygons: int = 100,
         min_cluster_size: int = 15,

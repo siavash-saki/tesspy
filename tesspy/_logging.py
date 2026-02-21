@@ -3,7 +3,7 @@ Shared logging utilities for tesspy.
 """
 
 import logging
-from typing import TextIO
+from typing import TextIO, cast
 
 _TESSPY_HANDLER_ATTR = "_tesspy_owned_handler"
 
@@ -45,7 +45,7 @@ def configure_logging(
     primary_handler: logging.StreamHandler | None = None
 
     if owned_handlers:
-        primary_handler = owned_handlers[0]
+        primary_handler = cast(logging.StreamHandler, owned_handlers[0])
         for extra in owned_handlers[1:]:
             package_logger.removeHandler(extra)
 
@@ -72,8 +72,7 @@ def log_progress(
     msg: str,
     *args: object,
     level: int = logging.INFO,
-    **kwargs: object,
 ) -> None:
     """Log a progress message only when verbose mode is enabled."""
     if verbose:
-        logger.log(level, msg, *args, **kwargs)
+        logger.log(level, msg, *args)

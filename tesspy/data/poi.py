@@ -43,7 +43,7 @@ class POIdata:
         timeout: int,
         verbose: bool,
     ) -> None:
-        self.area_buffered = None
+        self.area_buffered: gpd.GeoSeries | None = None
         self.area = area
         self.poi_categories = poi_categories
         self.timeout = timeout
@@ -82,6 +82,7 @@ class POIdata:
             warnings.simplefilter("ignore", FutureWarning)
             self.area_buffered = self.area.buffer(0.008).simplify(0.005)
 
+        assert self.area_buffered is not None
         exter_coordinates = self.area_buffered.iloc[0].exterior.coords
         xy = np.array(exter_coordinates)
 
