@@ -40,6 +40,7 @@ dev = [
     "pytest>=7.0",
     "pytest-cov>=4.0",
     "pytest-mock>=3.10",
+    "pytest-timeout>=2.0",
     "ruff>=0.4",
     "mypy>=1.0",
     "pre-commit>=3.0",
@@ -65,14 +66,18 @@ markers = [
     "slow: marks tests with sleep() calls or long runtimes",
 ]
 testpaths = ["tests"]
+timeout = 300
 
 [tool.ruff]
 target-version = "py311"
 line-length = 88
 
 [tool.ruff.lint]
-select = ["E", "F", "W", "I", "UP", "B", "C4"]
+select = ["E", "F", "W", "I", "UP", "B", "C4", "S"]
 ignore = []
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["S101"]
 
 [tool.mypy]
 python_version = "3.11"
@@ -86,3 +91,4 @@ omit = ["tests/*"]
 
 [tool.coverage.report]
 show_missing = true
+fail_under = 70

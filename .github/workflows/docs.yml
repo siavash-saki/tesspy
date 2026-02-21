@@ -1,0 +1,21 @@
+name: Docs
+
+on:
+  push:
+    branches: ["main", "develop"]
+  pull_request:
+    branches: ["main", "develop"]
+
+jobs:
+  docs:
+    name: Build Sphinx Docs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install package with docs dependencies
+        run: pip install -e ".[docs]"
+      - name: Build Sphinx docs
+        run: sphinx-build -W -b html docs/source docs/build/html

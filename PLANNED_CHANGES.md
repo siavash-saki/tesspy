@@ -82,13 +82,13 @@ Improve the CI pipeline with security scanning, docs verification, and broader t
 
 **Files:** `.github/workflows/tests_package.yml`, `.github/workflows/docs.yml` (new)
 
-- [ ] Add `develop` branch to push/PR triggers in `tests_package.yml` so CI runs on develop PRs too
-- [ ] Add `bandit` security scanning step (or `ruff` S rules) to lint job
-- [ ] Add `pip-audit` dependency vulnerability scanning step
-- [ ] Add Sphinx docs build verification workflow (`.github/workflows/docs.yml`) — build docs and fail on warnings
-- [ ] Add coverage `--fail-under` flag to pytest step in CI
-- [ ] Add `pytest-timeout` to the test runner with a global timeout (e.g., 300s for unit tests)
-- [ ] Pin action versions with full SHA hashes instead of tags for supply-chain security
+- [x] Add `develop` branch to push/PR triggers in `tests_package.yml` so CI runs on develop PRs too
+- [x] Add `bandit` security scanning step (or `ruff` S rules) to lint job
+- [x] Add `pip-audit` dependency vulnerability scanning step
+- [x] Add Sphinx docs build verification workflow (`.github/workflows/docs.yml`) — build docs and fail on warnings
+- [x] Add coverage `--fail-under` flag to pytest step in CI
+- [x] Add `pytest-timeout` to the test runner with a global timeout (e.g., 300s for unit tests)
+- [x] Pin action versions with full SHA hashes instead of tags for supply-chain security
 
 ---
 
