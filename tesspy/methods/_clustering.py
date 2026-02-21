@@ -31,7 +31,7 @@ def get_hierarchical_clustering_parameter(
         model = AgglomerativeClustering(
             n_clusters=None,
             distance_threshold=th,
-            affinity="euclidean",
+            metric="euclidean",
             compute_full_tree=True,
         )
         model.fit(coordinates)

@@ -45,16 +45,16 @@ Add unit tests for untested modules, error-path coverage, and enforce a coverage
 
 **Files:** `tests/unit/` (new files), `tests/conftest.py`, `pyproject.toml`
 
-- [ ] Add `tests/unit/test_hexagons.py` — unit tests for `get_h3_hexagons()` with mock GeoDataFrames (Polygon & MultiPolygon inputs)
-- [ ] Add `tests/unit/test_voronoi.py` — unit tests for `voronoi_polygons()` with a small synthetic Voronoi diagram
-- [ ] Add `tests/unit/test_clustering.py` — unit tests for `get_hierarchical_clustering_parameter()`
-- [ ] Add `tests/unit/test_road_data.py` — unit tests for `RoadData.create_custom_filter()` with various `detail_deg` values
-- [ ] Add `tests/unit/test_deprecation_shims.py` — verify that importing from `tesspy.tessellation_functions` and `tesspy.poi_data` emits `DeprecationWarning`
-- [ ] Add error-path tests for `POIdata.get_poi_data()` — mock HTTP 429, 504, and non-200 responses
-- [ ] Add error-path tests for `Tessellation.__init__()` — invalid area types (int, list, etc.)
-- [ ] Add tests for `count_poi_per_tile()` — invalid inputs, empty GeoDataFrame, string city name
-- [ ] Add `pytest-timeout` to dev dependencies in `pyproject.toml`
-- [ ] Set coverage fail-under threshold (e.g., 70%) in `pyproject.toml` `[tool.coverage.report]`
+- [x] Add `tests/unit/test_hexagons.py` — unit tests for `get_h3_hexagons()` with mock GeoDataFrames (Polygon & MultiPolygon inputs)
+- [x] Add `tests/unit/test_voronoi.py` — unit tests for `voronoi_polygons()` with a small synthetic Voronoi diagram
+- [x] Add `tests/unit/test_clustering.py` — unit tests for `get_hierarchical_clustering_parameter()`
+- [x] Add `tests/unit/test_road_data.py` — unit tests for `RoadData.create_custom_filter()` with various `detail_deg` values
+- [x] Add `tests/unit/test_deprecation_shims.py` — verify that importing from `tesspy.tessellation_functions` and `tesspy.poi_data` emits `DeprecationWarning`
+- [x] Add error-path tests for `POIdata.get_poi_data()` — mock HTTP 429, 504, and non-200 responses
+- [x] Add error-path tests for `Tessellation.__init__()` — invalid area types (int, list, etc.)
+- [x] Add tests for `count_poi_per_tile()` — invalid inputs, empty GeoDataFrame, string city name
+- [x] Add `pytest-timeout` to dev dependencies in `pyproject.toml`
+- [x] Set coverage fail-under threshold (e.g., 70%) in `pyproject.toml` `[tool.coverage.report]`
 
 ---
 
