@@ -29,13 +29,13 @@ Replace all `print()` statements with Python's `logging` module for proper obser
 
 **Files:** `tesspy/__init__.py`, `tesspy/tessellation.py`, `tesspy/data/poi.py`, `tesspy/data/roads.py`, `tesspy/_validators.py`
 
-- [ ] Add package-level logger in `tesspy/__init__.py`: `logging.getLogger("tesspy")`
-- [ ] Replace `print()` calls in `tessellation.py` verbose blocks with `logger.info()` (~8 locations)
-- [ ] Replace `print()` calls in `poi.py` verbose blocks with `logger.info()` / `logger.debug()` (~6 locations)
-- [ ] Replace `print()` calls in `roads.py` verbose blocks with `logger.info()` (~3 locations)
-- [ ] Replace `print("MultiPolygon found...")` in `_validators.py:70` with `logger.info()`
-- [ ] Add `NullHandler` to package logger so library users don't see unwanted output
-- [ ] Update docstrings to mention logging instead of "print progress information"
+- [x] Add package-level logger in `tesspy/__init__.py`: `logging.getLogger("tesspy")`
+- [x] Replace `print()` calls in `tessellation.py` verbose blocks with `logger.info()` (~8 locations)
+- [x] Replace `print()` calls in `poi.py` verbose blocks with `logger.info()` / `logger.debug()` (~6 locations)
+- [x] Replace `print()` calls in `roads.py` verbose blocks with `logger.info()` (~3 locations)
+- [x] Replace `print("MultiPolygon found...")` in `_validators.py:70` with `logger.info()`
+- [x] Add `NullHandler` to package logger so library users don't see unwanted output
+- [x] Update docstrings to mention logging instead of "print progress information"
 
 ---
 

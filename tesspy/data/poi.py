@@ -3,6 +3,7 @@ POI (Point of Interest) data retrieval via the OSM Overpass API.
 """
 
 import json
+import logging
 import warnings
 
 import geopandas as gpd
@@ -13,6 +14,8 @@ from shapely.geometry import Point
 
 from tesspy._constants import OSM_PRIMARY_FEATURES
 from tesspy.data._overpass import geom_ceil, geom_floor
+
+logger = logging.getLogger(__name__)
 
 
 class POIdata:
@@ -28,7 +31,7 @@ class POIdata:
     timeout : int
         TCP connection timeout in seconds for the Overpass request.
     verbose : bool
-        If True, print progress information.
+        If True, log progress information via the ``tesspy`` logger.
     """
 
     def __init__(
@@ -112,7 +115,7 @@ class POIdata:
         request_header = "https://overpass-api.de/api/interpreter?data="
 
         if self.verbose:
-            print("Getting data from OSM...")
+            logger.info("Getting data from OSM...")
 
         resp = requests.get(url=request_header + query_string)
         if resp.status_code == 429:
@@ -133,7 +136,7 @@ class POIdata:
             resp = json.loads(resp.text)
 
         if self.verbose:
-            print("Creating POI DataFrame...")
+            logger.info("Creating POI DataFrame...")
 
         lst_nodes = []
         lst_ways = []
@@ -154,14 +157,14 @@ class POIdata:
                 lst_ways.append(item)
 
         if self.verbose:
-            print("Cleaning POI DataFrame...")
+            logger.debug("Cleaning POI DataFrame...")
 
         nodes_df = pd.DataFrame(lst_nodes)
         ways_df = pd.DataFrame(lst_ways)
 
         if len(nodes_df) > 0 and len(ways_df) > 0:
             if self.verbose:
-                print("Joining nodes and ways")
+                logger.debug("Joining nodes and ways")
 
             nodes_df["geometry"] = nodes_df[["lon", "lat"]].apply(
                 lambda p: [{"lat": p["lat"], "lon": p["lon"]}], axis=1
@@ -176,14 +179,14 @@ class POIdata:
 
         elif len(nodes_df) == 0 and len(ways_df) > 0:
             if self.verbose:
-                print("No nodes found. Returning ways only.")
+                logger.debug("No nodes found. Returning ways only.")
 
             ways_df = ways_df.drop(columns=["id", "bounds", "nodes"])
             poi_df = ways_df.fillna(False)
 
         elif len(nodes_df) > 0 and len(ways_df) == 0:
             if self.verbose:
-                print("No ways found. Returning nodes only.")
+                logger.debug("No ways found. Returning nodes only.")
 
             nodes_df["geometry"] = nodes_df[["lon", "lat"]].apply(
                 lambda p: [{"lat": p["lat"], "lon": p["lon"]}], axis=1

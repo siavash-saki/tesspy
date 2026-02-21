@@ -2,11 +2,14 @@
 Road network data retrieval via osmnx.
 """
 
+import logging
 
 import geopandas as gpd
 import osmnx as ox
 
 from tesspy._constants import OSM_HIGHWAY_TYPES
+
+logger = logging.getLogger(__name__)
 
 
 class RoadData:
@@ -22,7 +25,7 @@ class RoadData:
     split_roads : bool
         If True, LineStrings are split so each has exactly 2 points.
     verbose : bool
-        If True, print progress information.
+        If True, log progress information via the ``tesspy`` logger.
     """
 
     def __init__(
@@ -69,7 +72,7 @@ class RoadData:
         custom_filter = f"['highway'~'{query}']"
 
         if self.verbose:
-            print(f"Selected highway type(s): {custom_filter}")
+            logger.info("Selected highway type(s): %s", custom_filter)
 
         return custom_filter
 
@@ -84,7 +87,7 @@ class RoadData:
         """
         cf = self.create_custom_filter()
         if self.verbose:
-            print("Collecting road network data...")
+            logger.info("Collecting road network data...")
         graph = ox.graph_from_polygon(
             self.area.boundary.convex_hull.values[0], custom_filter=cf
         )
@@ -95,6 +98,8 @@ class RoadData:
         )
 
         if self.verbose:
-            print(f"Collected {len(graph_edges_as_gdf)} street segments.")
+            logger.info(
+                "Collected %d street segments.", len(graph_edges_as_gdf)
+            )
 
         return graph_edges_as_gdf

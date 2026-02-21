@@ -28,9 +28,13 @@ Example
 >>> hexagons = t.hexagons(resolution=8)
 """
 
+import logging
+
 from tesspy._version import __version__
 from tesspy.tessellation import Tessellation
 from tesspy.data._geo import count_poi_per_tile
+
+logging.getLogger("tesspy").addHandler(logging.NullHandler())
 
 name = "tesspy"
 __author__ = "Siavash Saki and Jonas Hamann"

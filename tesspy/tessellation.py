@@ -2,6 +2,7 @@
 Core Tessellation class — the primary public interface of tesspy.
 """
 
+import logging
 import warnings
 from typing import Literal
 
@@ -34,6 +35,8 @@ from tesspy.methods.city_blocks import (
 from tesspy.methods.hexagons import get_h3_hexagons
 from tesspy.methods.squares import count_poi, get_adaptive_squares, get_squares_polyfill
 from tesspy.methods.voronoi import voronoi_polygons
+
+logger = logging.getLogger(__name__)
 
 # Backward-compatibility re-exports so that code doing
 #   from tesspy.tessellation import get_city_polygon
@@ -158,7 +161,7 @@ class Tessellation:
         timeout : int, default=60
             Overpass API timeout in seconds
         verbose : bool, default=False
-            Print progress information
+            Log progress information via the ``tesspy`` logger
 
         Returns
         -------
@@ -199,16 +202,20 @@ class Tessellation:
         if not threshold:
             threshold = int(np.median(aqk_count_df["count"].values))
             if verbose:
-                print(
-                    f"Threshold={threshold}  => set as the median POI count per "
-                    "square at the initial level"
+                logger.info(
+                    "Threshold=%d  => set as the median POI count "
+                    "per square at the initial level",
+                    threshold,
                 )
 
         i = start_resolution
         while max(aqk_count_df["count"].values) > threshold:
             i += 1
             if verbose:
-                print(f"Threshold exceeded. Subdividing to resolution {i}...")
+                logger.info(
+                    "Threshold exceeded. Subdividing to resolution %d...",
+                    i,
+                )
 
             df_tmp = get_adaptive_squares(aqk_count_df, threshold)
             df_tmp.drop(columns=["count"], inplace=True)
@@ -246,7 +253,7 @@ class Tessellation:
         min_cluster_size : int, default=15
             Minimum cluster size (hdbscan only)
         verbose : bool, default=False
-            Print progress information
+            Log progress information via the ``tesspy`` logger
 
         Returns
         -------
@@ -283,7 +290,7 @@ class Tessellation:
 
         if cluster_algo == "k-means":
             if verbose:
-                print("K-Means Clustering...")
+                logger.info("K-Means Clustering...")
             clustering = KMeans(n_clusters=n_polygons).fit(data_locs)
             generators = [
                 np.mean(data_locs[clustering.labels_ == label], axis=0)
@@ -292,7 +299,7 @@ class Tessellation:
 
         elif cluster_algo == "hdbscan":
             if verbose:
-                print("HDBSCAN Clustering... This can take a while...")
+                logger.info("HDBSCAN Clustering... This can take a while...")
             clustering = hdbscan.HDBSCAN(
                 min_cluster_size=min_cluster_size, prediction_data=True
             ).fit(data_locs)
@@ -316,7 +323,7 @@ class Tessellation:
             )
 
         if verbose:
-            print("Creating Voronoi polygons...")
+            logger.info("Creating Voronoi polygons...")
         voronoi_dia = Voronoi(generators)
         voronoi_poly = gpd.GeoDataFrame(
             geometry=[p for p in voronoi_polygons(voronoi_dia, 0.1)], crs="EPSG:4326"
@@ -354,7 +361,7 @@ class Tessellation:
             Split LineStrings so each has exactly 2 points (more robust
             polygonization, but slower).
         verbose : bool, default=False
-            Print progress information
+            Log progress information via the ``tesspy`` logger
 
         Returns
         -------
@@ -388,11 +395,11 @@ class Tessellation:
 
         if split_roads:
             if verbose:
-                print("Splitting LineStrings to 2-point segments...")
+                logger.info("Splitting LineStrings to 2-point segments...")
             road_data = split_linestring(road_data)
 
         if verbose:
-            print("Creating initial city blocks from road network...")
+            logger.info("Creating initial city blocks from road network...")
 
         blocks = create_blocks(road_data)
 
@@ -421,7 +428,7 @@ class Tessellation:
             )
 
         if verbose:
-            print("Merging small city blocks with hierarchical clustering...")
+            logger.info("Merging small city blocks with hierarchical clustering...")
 
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", FutureWarning)

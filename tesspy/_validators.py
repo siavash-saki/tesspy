@@ -2,10 +2,14 @@
 Input validation helpers for the Tessellation class.
 """
 
+import logging
+
 import geopandas as gpd
 from shapely.geometry import MultiPolygon, Polygon
 
 from tesspy.methods.city_blocks import explode
+
+logger = logging.getLogger(__name__)
 
 
 def _check_input_geodataframe(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
@@ -67,7 +71,7 @@ def _check_valid_geometry_gdf(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
         raise TypeError("Geometry column missing in GeoDataFrame")
 
     if "MultiPolygon" in gdf.geom_type.unique():
-        print("MultiPolygon found. Splitting it up...")
+        logger.info("MultiPolygon found. Splitting it up...")
         gdf = explode(gdf)
         gdf = gdf.reset_index()
         gdf.drop(columns=["level_0", "level_1"], inplace=True)
