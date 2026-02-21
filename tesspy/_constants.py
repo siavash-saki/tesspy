@@ -1,0 +1,58 @@
+"""
+Shared OSM constants used across the package.
+These lists serve as the single source of truth to avoid duplication.
+"""
+
+OSM_PRIMARY_FEATURES = [
+    "aerialway",
+    "aeroway",
+    "amenity",
+    "barrier",
+    "boundary",
+    "building",
+    "craft",
+    "emergency",
+    "geological",
+    "healthcare",
+    "highway",
+    "historic",
+    "landuse",
+    "leisure",
+    "man_made",
+    "military",
+    "natural",
+    "office",
+    "place",
+    "power",
+    "public_transport",
+    "railway",
+    "route",
+    "shop",
+    "sport",
+    "telecom",
+    "tourism",
+    "water",
+    "waterway",
+]
+
+OSM_HIGHWAY_TYPES = [
+    "motorway",
+    "trunk",
+    "primary",
+    "secondary",
+    "tertiary",
+    "residential",
+    "unclassified",
+    "motorway_link",
+    "trunk_link",
+    "primary_link",
+    "secondary_link",
+    "living_street",
+    "pedestrian",
+    "track",
+    "bus_guideway",
+    "footway",
+    "path",
+    "service",
+    "cycleway",
+]
