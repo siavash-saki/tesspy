@@ -128,7 +128,7 @@ def count_poi_per_tile(
     )
 
     tess_data["value"] = (
-        tess_data.drop(columns=["geometry"]).idxmax(1).where(tess_data.any(1))
+        tess_data.drop(columns=["geometry"]).idxmax(axis=1).where(tess_data.any(axis=1))
     )
     tess_data = tess_data[["value", "geometry"]]
 
