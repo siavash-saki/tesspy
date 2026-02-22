@@ -12,7 +12,7 @@ from tesspy.data.roads import RoadData
 
 @pytest.fixture()
 def dummy_area():
-    """Minimal GeoDataFrame for constructing RoadData (not used by create_custom_filter)."""
+    """Minimal GeoDataFrame for constructing RoadData."""
     poly = Polygon([(0, 0), (1, 0), (1, 1), (0, 1)])
     return gpd.GeoDataFrame(geometry=[poly], crs="EPSG:4326")
 

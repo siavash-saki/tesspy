@@ -51,4 +51,3 @@ def test_configure_logging_rejects_invalid_level():
 
     with pytest.raises(ValueError, match="Invalid logging level"):
         configure_logging("NOT_A_LEVEL")
-

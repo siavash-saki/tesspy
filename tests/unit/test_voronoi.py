@@ -11,14 +11,16 @@ from tesspy.methods.voronoi import voronoi_polygons
 
 def test_returns_polygons_for_simple_points():
     """voronoi_polygons yields one Polygon per input point."""
-    points = np.array([
-        [0.0, 0.0],
-        [1.0, 0.0],
-        [0.5, 1.0],
-        [0.5, 0.5],
-        [0.0, 1.0],
-        [1.0, 1.0],
-    ])
+    points = np.array(
+        [
+            [0.0, 0.0],
+            [1.0, 0.0],
+            [0.5, 1.0],
+            [0.5, 0.5],
+            [0.0, 1.0],
+            [1.0, 1.0],
+        ]
+    )
     vor = Voronoi(points)
     result = list(voronoi_polygons(vor, diameter=2.0))
 
@@ -29,12 +31,14 @@ def test_returns_polygons_for_simple_points():
 
 def test_all_polygons_are_valid():
     """All yielded polygons should be geometrically valid."""
-    points = np.array([
-        [0.0, 0.0],
-        [2.0, 0.0],
-        [1.0, 2.0],
-        [1.0, 0.5],
-    ])
+    points = np.array(
+        [
+            [0.0, 0.0],
+            [2.0, 0.0],
+            [1.0, 2.0],
+            [1.0, 0.5],
+        ]
+    )
     vor = Voronoi(points)
     result = list(voronoi_polygons(vor, diameter=5.0))
 
@@ -44,13 +48,15 @@ def test_all_polygons_are_valid():
 
 def test_polygons_have_nonzero_area():
     """Each Voronoi polygon should have positive area."""
-    points = np.array([
-        [0.0, 0.0],
-        [1.0, 0.0],
-        [0.0, 1.0],
-        [1.0, 1.0],
-        [0.5, 0.5],
-    ])
+    points = np.array(
+        [
+            [0.0, 0.0],
+            [1.0, 0.0],
+            [0.0, 1.0],
+            [1.0, 1.0],
+            [0.5, 0.5],
+        ]
+    )
     vor = Voronoi(points)
     result = list(voronoi_polygons(vor, diameter=5.0))
 

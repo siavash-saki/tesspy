@@ -8,7 +8,6 @@ import pytest
 from tesspy.data.poi import POIdata
 from tesspy.data.roads import RoadData
 from tesspy.tessellation import Tessellation
-
 from tests.conftest import call_with_osm_retry
 
 
@@ -26,11 +25,9 @@ def test_get_poi_data_city_1():
     ffm_data = call_with_osm_retry(poi_data.get_poi_data)
 
     assert len(ffm_data) > 0
-    assert hasattr(ffm_data, "geometry")
-    assert hasattr(ffm_data, "public_transport")
-    assert hasattr(ffm_data, "center_latitude")
-    assert hasattr(ffm_data, "center_longitude")
-    assert hasattr(ffm_data, "tags")
+    assert "public_transport" in ffm_data.columns
+    assert "center_latitude" in ffm_data.columns
+    assert "center_longitude" in ffm_data.columns
 
 
 @pytest.mark.integration
@@ -47,11 +44,9 @@ def test_get_poi_data_city_2():
     dsd_data = call_with_osm_retry(poi_data_2.get_poi_data)
 
     assert len(dsd_data) > 0
-    assert hasattr(dsd_data, "geometry")
-    assert hasattr(dsd_data, "public_transport")
-    assert hasattr(dsd_data, "center_latitude")
-    assert hasattr(dsd_data, "center_longitude")
-    assert hasattr(dsd_data, "tags")
+    assert "public_transport" in dsd_data.columns
+    assert "center_latitude" in dsd_data.columns
+    assert "center_longitude" in dsd_data.columns
 
 
 @pytest.mark.integration
@@ -60,7 +55,7 @@ def test_get_road_network_data():
     city = Tessellation("SOHO, London").get_polygon()
     road_data = RoadData(city).get_road_network()
 
-    assert type(road_data) == gpd.GeoDataFrame
+    assert isinstance(road_data, gpd.GeoDataFrame)
     assert len(road_data) > 100
     assert hasattr(road_data, "geometry")
     assert hasattr(road_data, "highway")

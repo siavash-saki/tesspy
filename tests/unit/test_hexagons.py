@@ -12,33 +12,39 @@ from tesspy.methods.hexagons import get_h3_hexagons
 @pytest.fixture()
 def small_polygon_gdf():
     """A small polygon in central Berlin large enough for H3 resolution 7."""
-    poly = Polygon([
-        (13.38, 52.51),
-        (13.42, 52.51),
-        (13.42, 52.53),
-        (13.38, 52.53),
-        (13.38, 52.51),
-    ])
+    poly = Polygon(
+        [
+            (13.38, 52.51),
+            (13.42, 52.51),
+            (13.42, 52.53),
+            (13.38, 52.53),
+            (13.38, 52.51),
+        ]
+    )
     return gpd.GeoDataFrame(geometry=[poly], crs="EPSG:4326")
 
 
 @pytest.fixture()
 def multi_polygon_gdf():
     """A MultiPolygon consisting of two separate squares, large enough for H3."""
-    poly1 = Polygon([
-        (13.30, 52.48),
-        (13.40, 52.48),
-        (13.40, 52.54),
-        (13.30, 52.54),
-        (13.30, 52.48),
-    ])
-    poly2 = Polygon([
-        (13.45, 52.48),
-        (13.55, 52.48),
-        (13.55, 52.54),
-        (13.45, 52.54),
-        (13.45, 52.48),
-    ])
+    poly1 = Polygon(
+        [
+            (13.30, 52.48),
+            (13.40, 52.48),
+            (13.40, 52.54),
+            (13.30, 52.54),
+            (13.30, 52.48),
+        ]
+    )
+    poly2 = Polygon(
+        [
+            (13.45, 52.48),
+            (13.55, 52.48),
+            (13.55, 52.54),
+            (13.45, 52.54),
+            (13.45, 52.48),
+        ]
+    )
     mp = MultiPolygon([poly1, poly2])
     return gpd.GeoDataFrame(geometry=[mp], crs="EPSG:4326")
 

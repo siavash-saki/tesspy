@@ -10,11 +10,19 @@ from tesspy.methods._clustering import get_hierarchical_clustering_parameter
 def test_returns_int_for_easy_threshold():
     """With a high threshold, a low distance_threshold should suffice."""
     # 3 tight clusters, well separated
-    coords = np.array([
-        [0, 0], [1, 1], [2, 2],
-        [500, 500], [501, 501], [502, 502],
-        [1000, 1000], [1001, 1001], [1002, 1002],
-    ])
+    coords = np.array(
+        [
+            [0, 0],
+            [1, 1],
+            [2, 2],
+            [500, 500],
+            [501, 501],
+            [502, 502],
+            [1000, 1000],
+            [1001, 1001],
+            [1002, 1002],
+        ]
+    )
     result = get_hierarchical_clustering_parameter(coords, threshold=10)
 
     assert isinstance(result, int)
@@ -34,10 +42,16 @@ def test_returns_none_when_impossible():
 def test_returns_first_satisfying_threshold():
     """The function should return the smallest distance_threshold that works."""
     # Two tight clusters, separated by ~600 units
-    coords = np.array([
-        [0, 0], [1, 0], [0, 1],
-        [600, 600], [601, 600], [600, 601],
-    ])
+    coords = np.array(
+        [
+            [0, 0],
+            [1, 0],
+            [0, 1],
+            [600, 600],
+            [601, 600],
+            [600, 601],
+        ]
+    )
     result = get_hierarchical_clustering_parameter(coords, threshold=3)
 
     assert isinstance(result, int)

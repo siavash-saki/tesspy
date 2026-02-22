@@ -4,7 +4,6 @@ Uses pre-downloaded local fixture data.
 """
 
 import geopandas as gpd
-import pytest
 
 from tesspy.methods.squares import count_poi, get_adaptive_squares, get_squares_polyfill
 

@@ -3,18 +3,42 @@ Unit tests for OSM constant lists (no network required).
 """
 
 from tesspy._constants import OSM_HIGHWAY_TYPES, OSM_PRIMARY_FEATURES
-from tesspy.tessellation import Tessellation
 from tesspy.data.poi import POIdata
 from tesspy.data.roads import RoadData
+from tesspy.tessellation import Tessellation
 
 
 def test_osm_primary_features_content():
     expected = [
-        "aerialway", "aeroway", "amenity", "barrier", "boundary", "building",
-        "craft", "emergency", "geological", "healthcare", "highway", "historic",
-        "landuse", "leisure", "man_made", "military", "natural", "office",
-        "place", "power", "public_transport", "railway", "route", "shop",
-        "sport", "telecom", "tourism", "water", "waterway",
+        "aerialway",
+        "aeroway",
+        "amenity",
+        "barrier",
+        "boundary",
+        "building",
+        "craft",
+        "emergency",
+        "geological",
+        "healthcare",
+        "highway",
+        "historic",
+        "landuse",
+        "leisure",
+        "man_made",
+        "military",
+        "natural",
+        "office",
+        "place",
+        "power",
+        "public_transport",
+        "railway",
+        "route",
+        "shop",
+        "sport",
+        "telecom",
+        "tourism",
+        "water",
+        "waterway",
     ]
     assert OSM_PRIMARY_FEATURES == expected
     assert "house" not in OSM_PRIMARY_FEATURES

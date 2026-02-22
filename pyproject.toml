@@ -90,7 +90,7 @@ select = ["E", "F", "W", "I", "UP", "B", "C4", "S"]
 ignore = []
 
 [tool.ruff.lint.per-file-ignores]
-"tests/**/*.py" = ["S101"]
+"tests/**/*.py" = ["S101", "S110", "S301"]
 
 [tool.mypy]
 python_version = "3.11"

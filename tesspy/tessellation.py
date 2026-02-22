@@ -479,9 +479,9 @@ class Tessellation:
         city_blocks_gdf = city_blocks_gdf[["geometry"]].reset_index(drop=True)
         city_blocks_gdf = city_blocks_gdf.reset_index()
         city_blocks_gdf = city_blocks_gdf.rename(columns={"index": "cityblock_id"})
-        city_blocks_gdf["cityblock_id"] = (
-            "cityblockID" + city_blocks_gdf["cityblock_id"].astype(str)
-        )
+        city_blocks_gdf["cityblock_id"] = "cityblockID" + city_blocks_gdf[
+            "cityblock_id"
+        ].astype(str)
 
         log_progress(
             logger,

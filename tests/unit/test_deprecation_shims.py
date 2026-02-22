@@ -7,8 +7,6 @@ import importlib
 import sys
 import warnings
 
-import pytest
-
 
 def _fresh_import(module_name: str):
     """Force a fresh import of a module by removing it from sys.modules."""
