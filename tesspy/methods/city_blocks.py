@@ -65,7 +65,7 @@ def explode(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
         right_index=True,
     )
     gdf_out = gdf_out.set_index(["level_0", "level_1"]).set_geometry("geometry")
-    gdf_out.crs = gdf.crs
+    gdf_out = gdf_out.set_crs(gdf.crs)
     return gdf_out
 
 
