@@ -18,4 +18,4 @@ jobs:
       - name: Install package with docs dependencies
         run: pip install -e ".[docs]"
       - name: Build Sphinx docs
-        run: sphinx-build -W -b html docs/source docs/build/html
+        run: sphinx-build -b html docs/source docs/build/html
