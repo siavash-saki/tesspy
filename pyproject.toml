@@ -52,6 +52,15 @@ docs = [
     "sphinx-rtd-theme",
     "nbsphinx",
 ]
+examples = [
+    "jupyterlab",
+    "ipykernel",
+    "contextily",
+    "esda",
+    "libpysal",
+    "seaborn",
+    "statsmodels",
+]
 
 [project.urls]
 Homepage = "https://github.com/siavash-saki/tesspy"
