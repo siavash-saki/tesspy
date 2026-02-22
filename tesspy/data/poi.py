@@ -191,20 +191,20 @@ class POIdata:
 
         lst_nodes = []
         lst_ways = []
+        cat_set = set(self.poi_categories)
 
         for item in resp["elements"]:
-            for cat in self.poi_categories:
-                if cat in item["tags"]:
-                    item[cat] = True
+            matched = cat_set & item["tags"].keys()
+            for cat in matched:
+                item[cat] = True
             if item["type"] == "node":
                 lst_nodes.append(item)
             elif item["type"] == "way":
-                item["center_latitude"] = np.mean(
-                    [point["lat"] for point in item["geometry"]]
-                )
-                item["center_longitude"] = np.mean(
-                    [point["lon"] for point in item["geometry"]]
-                )
+                geom = item["geometry"]
+                lats = [p["lat"] for p in geom]
+                lons = [p["lon"] for p in geom]
+                item["center_latitude"] = sum(lats) / len(lats)
+                item["center_longitude"] = sum(lons) / len(lons)
                 lst_ways.append(item)
 
         log_progress(
@@ -219,51 +219,41 @@ class POIdata:
         nodes_df = pd.DataFrame(lst_nodes)
         ways_df = pd.DataFrame(lst_ways)
 
-        if len(nodes_df) > 0 and len(ways_df) > 0:
+        has_nodes = len(nodes_df) > 0
+        has_ways = len(ways_df) > 0
+
+        if has_nodes:
             log_progress(
                 logger,
                 self.verbose,
-                "event=poi.parse.join mode=nodes_and_ways",
+                "event=poi.parse.join mode=%s",
+                "nodes_and_ways" if has_ways else "nodes_only",
                 level=logging.DEBUG,
             )
-
-            nodes_df["geometry"] = nodes_df[["lon", "lat"]].apply(
-                lambda p: [{"lat": p["lat"], "lon": p["lon"]}], axis=1
-            )
+            nodes_df["geometry"] = [
+                [{"lat": lat, "lon": lon}]
+                for lat, lon in zip(nodes_df["lat"], nodes_df["lon"], strict=True)
+            ]
             nodes_df = nodes_df.rename(
                 columns={"lat": "center_latitude", "lon": "center_longitude"}
             )
             nodes_df = nodes_df.drop(columns=["id"])
+
+        if has_ways:
+            if not has_nodes:
+                log_progress(
+                    logger,
+                    self.verbose,
+                    "event=poi.parse.join mode=ways_only",
+                    level=logging.DEBUG,
+                )
             ways_df = ways_df.drop(columns=["id", "bounds", "nodes"])
 
+        if has_nodes and has_ways:
             poi_df = pd.concat([ways_df, nodes_df]).fillna(False)
-
-        elif len(nodes_df) == 0 and len(ways_df) > 0:
-            log_progress(
-                logger,
-                self.verbose,
-                "event=poi.parse.join mode=ways_only",
-                level=logging.DEBUG,
-            )
-
-            ways_df = ways_df.drop(columns=["id", "bounds", "nodes"])
+        elif has_ways:
             poi_df = ways_df.fillna(False)
-
-        elif len(nodes_df) > 0 and len(ways_df) == 0:
-            log_progress(
-                logger,
-                self.verbose,
-                "event=poi.parse.join mode=nodes_only",
-                level=logging.DEBUG,
-            )
-
-            nodes_df["geometry"] = nodes_df[["lon", "lat"]].apply(
-                lambda p: [{"lat": p["lat"], "lon": p["lon"]}], axis=1
-            )
-            nodes_df = nodes_df.rename(
-                columns={"lat": "center_latitude", "lon": "center_longitude"}
-            )
-            nodes_df = nodes_df.drop(columns=["id"])
+        elif has_nodes:
             poi_df = nodes_df.fillna(False)
         else:
             logger.warning(
