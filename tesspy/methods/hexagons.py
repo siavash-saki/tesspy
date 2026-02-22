@@ -10,7 +10,20 @@ from shapely.geometry import MultiPolygon, Polygon
 
 def _hex_to_polygon(hex_id: str) -> Polygon:
     """Convert an H3 hex ID to a shapely Polygon."""
-    return Polygon(h3.h3_to_geo_boundary(hex_id, geo_json=True))
+    # cell_to_boundary returns (lat, lng) tuples; shapely needs (lng, lat)
+    coords = h3.cell_to_boundary(hex_id)
+    return Polygon([(lng, lat) for lat, lng in coords])
+
+
+def _geojson_to_h3poly(geojson: dict) -> h3.LatLngPoly:
+    """Convert a GeoJSON Polygon dict to an H3Poly.
+
+    GeoJSON uses (lng, lat) order; H3 uses (lat, lng).
+    """
+    coords = geojson["coordinates"]
+    outer = [(lat, lng) for lng, lat in coords[0]]
+    holes = [[(lat, lng) for lng, lat in hole] for hole in coords[1:]]
+    return h3.LatLngPoly(outer, *holes)
 
 
 def get_h3_hexagons(gdf: gpd.GeoDataFrame, resolution: int) -> gpd.GeoDataFrame:
@@ -30,11 +43,10 @@ def get_h3_hexagons(gdf: gpd.GeoDataFrame, resolution: int) -> gpd.GeoDataFrame:
         GeoDataFrame containing the hexagons
     """
     if isinstance(gdf.geometry.iloc[0], Polygon):
-        hexs = h3.polyfill(
-            gdf.geometry[0].__geo_interface__, resolution, geo_json_conformant=True
-        )
+        h3_poly = _geojson_to_h3poly(gdf.geometry[0].__geo_interface__)
+        hexs = h3.polygon_to_cells(h3_poly, resolution)
         all_polys = gpd.GeoSeries(
-            list(map(_hex_to_polygon, hexs)), index=hexs, crs="EPSG:4326"
+            list(map(_hex_to_polygon, hexs)), index=list(hexs), crs="EPSG:4326"
         )
 
         gdf = gpd.GeoDataFrame(geometry=all_polys, crs="EPSG:4326")
@@ -43,11 +55,10 @@ def get_h3_hexagons(gdf: gpd.GeoDataFrame, resolution: int) -> gpd.GeoDataFrame:
     elif isinstance(gdf.geometry.iloc[0], MultiPolygon):
         parts_lst = []
         for _, row in gdf.explode(index_parts=True).loc[0].iterrows():
-            hexs = h3.polyfill(
-                row.geometry.__geo_interface__, resolution, geo_json_conformant=True
-            )
+            h3_poly = _geojson_to_h3poly(row.geometry.__geo_interface__)
+            hexs = h3.polygon_to_cells(h3_poly, resolution)
             all_polys = gpd.GeoSeries(
-                list(map(_hex_to_polygon, hexs)), index=hexs, crs="EPSG:4326"
+                list(map(_hex_to_polygon, hexs)), index=list(hexs), crs="EPSG:4326"
             )
 
             part_gdf = gpd.GeoDataFrame(geometry=all_polys)
