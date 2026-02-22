@@ -3,9 +3,9 @@ City block tessellation functions using road network data.
 """
 
 import geopandas as gpd
-from shapely.geometry import LineString, Point
+from shapely import make_valid as shapely_make_valid
+from shapely.geometry import LineString
 from shapely.ops import polygonize, unary_union
-from shapely.validation import make_valid
 
 
 def split_linestring(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
@@ -26,18 +26,15 @@ def split_linestring(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     linestrings = []
     osmid = []
 
-    for _, row in df.iterrows():
-        if len(row["geometry"].coords) == 2:
-            linestrings.append(row["geometry"])
-            osmid.append(row["osmid"])
+    for geom, oid in zip(df.geometry, df["osmid"], strict=True):
+        coords = geom.coords
+        if len(coords) == 2:
+            linestrings.append(geom)
+            osmid.append(oid)
         else:
-            for i in range(0, len(row["geometry"].coords) - 1):
-                p1 = Point(row["geometry"].coords[i][0], row["geometry"].coords[i][1])
-                p2 = Point(
-                    row["geometry"].coords[i + 1][0], row["geometry"].coords[i + 1][1]
-                )
-                linestrings.append(LineString([p1, p2]))
-                osmid.append(row["osmid"])
+            for i in range(len(coords) - 1):
+                linestrings.append(LineString(coords[i : i + 2]))
+                osmid.append(oid)
 
     dataset = gpd.GeoDataFrame({"osmid": osmid, "geometry": linestrings})
     return dataset
@@ -104,15 +101,13 @@ def get_rest_polygon(
         GeoDataFrame containing the gap-filling polygons
     """
     if hasattr(blocks, "geometry") and hasattr(area, "geometry"):
-        blocks["geometry"] = blocks["geometry"].apply(lambda x: make_valid(x))
+        blocks = blocks.copy()
+        blocks["geometry"] = shapely_make_valid(blocks["geometry"].values)
 
-        merged_polygons = gpd.GeoSeries(
-            unary_union(blocks["geometry"].to_numpy()), crs="EPSG:4326"
-        )
+        merged = unary_union(blocks["geometry"])
 
-        rest = area.difference(merged_polygons)
-        rest = gpd.GeoDataFrame(rest)
-        rest = rest.rename(columns={0: "geometry"}).set_geometry("geometry")
+        rest = area.difference(gpd.GeoSeries([merged], crs="EPSG:4326"))
+        rest = gpd.GeoDataFrame(rest, columns=["geometry"]).set_geometry("geometry")
 
         rest_polygons = rest.explode(index_parts=True).reset_index()
         rest_polygons = rest_polygons.drop(columns=["level_0"]).rename(
