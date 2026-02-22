@@ -60,6 +60,7 @@ examples = [
     "libpysal",
     "seaborn",
     "statsmodels",
+    "mapclassify",
 ]
 
 [project.urls]
