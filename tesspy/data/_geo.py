@@ -47,7 +47,6 @@ def get_city_polygon(city: str) -> gpd.GeoDataFrame:
         warnings.simplefilter("ignore", FutureWarning)
         df_city = ox.geocode_to_gdf(city)
     df_city = df_city[["osm_id", "geometry"]]
-    df_city = df_city.rename(columns={"osm_id": "osmid"})
     logger.debug("event=geo.geocode.done city=%s rows=%d", city, len(df_city))
     return df_city
 
@@ -57,7 +56,7 @@ def count_poi_per_tile(
     gdf: gpd.GeoDataFrame,
     poi_categories: list[str] | str | None = None,
     timeout: int = 120,
-    verbose: bool = False,
+    verbose: bool = True,
 ) -> gpd.GeoDataFrame:
     """
     Count POI categories per tessellation tile.
@@ -77,7 +76,7 @@ def count_poi_per_tile(
         OSM primary map feature categories to count per tile.
     timeout : int, default=120
         TCP timeout in seconds for the OSM Overpass request
-    verbose : bool, default=False
+    verbose : bool, default=True
         Log progress information via the ``tesspy`` logger.
 
     Returns

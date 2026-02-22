@@ -61,7 +61,6 @@ def configure_logging(
     primary_handler.setLevel(resolved_level)
 
     package_logger.setLevel(resolved_level)
-    package_logger.propagate = False
 
     return package_logger
 

@@ -139,7 +139,7 @@ class Tessellation:
         poi_categories: list[str] | Literal["all"] | None = None,
         threshold: int | None = None,
         timeout: int = 60,
-        verbose: bool = False,
+        verbose: bool = True,
     ) -> gpd.GeoDataFrame:
         """
         Generate adaptive squares based on POI density.
@@ -158,7 +158,7 @@ class Tessellation:
             count across all initial squares.
         timeout : int, default=60
             Overpass API timeout in seconds
-        verbose : bool, default=False
+        verbose : bool, default=True
             Log progress information via the ``tesspy`` logger
 
         Returns
@@ -261,7 +261,7 @@ class Tessellation:
         timeout: int = 60,
         n_polygons: int = 100,
         min_cluster_size: int = 15,
-        verbose: bool = False,
+        verbose: bool = True,
     ) -> gpd.GeoDataFrame:
         """
         Generate Voronoi polygon tessellation driven by POI density.
@@ -279,7 +279,7 @@ class Tessellation:
             Target number of polygons (k-means only)
         min_cluster_size : int, default=15
             Minimum cluster size (hdbscan only)
-        verbose : bool, default=False
+        verbose : bool, default=True
             Log progress information via the ``tesspy`` logger
 
         Returns
@@ -403,7 +403,7 @@ class Tessellation:
         n_polygons: int | None = None,
         detail_deg: int | None = None,
         split_roads: bool = True,
-        verbose: bool = False,
+        verbose: bool = True,
     ) -> gpd.GeoDataFrame:
         """
         Create city block tiles using OSM road network data.
@@ -418,7 +418,7 @@ class Tessellation:
         split_roads : bool, default=True
             Split LineStrings so each has exactly 2 points (more robust
             polygonization, but slower).
-        verbose : bool, default=False
+        verbose : bool, default=True
             Log progress information via the ``tesspy`` logger
 
         Returns
