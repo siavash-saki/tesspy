@@ -60,6 +60,8 @@ def test_tessellation_functions_re_exports_names():
         "get_adaptive_squares",
         "get_h3_hexagons",
         "voronoi_polygons",
+        "create_city_blocks",
+        "merge_city_blocks",
         "split_linestring",
         "explode",
         "create_blocks",

@@ -11,8 +11,7 @@ import numpy as np
 import pandas as pd
 from scipy.spatial import Voronoi
 from shapely.geometry import MultiPolygon
-from shapely.ops import unary_union
-from sklearn.cluster import HDBSCAN, AgglomerativeClustering, KMeans
+from sklearn.cluster import HDBSCAN, KMeans
 
 from tesspy._constants import (
     DEFAULT_POI_CATEGORIES,
@@ -25,9 +24,8 @@ from tesspy.data._geo import count_poi_per_tile, get_city_polygon
 from tesspy.data.poi import POIdata
 from tesspy.data.roads import RoadData
 from tesspy.methods.city_blocks import (
-    create_blocks,
-    get_rest_polygon,
-    split_linestring,
+    create_city_blocks,
+    merge_city_blocks,
 )
 from tesspy.methods.hexagons import get_h3_hexagons
 from tesspy.methods.squares import count_poi, get_adaptive_squares, get_squares_polyfill
@@ -397,22 +395,24 @@ class Tessellation:
         self,
         n_polygons: int | None = None,
         detail_deg: int | None = None,
-        split_roads: bool = True,
         verbose: bool = True,
     ) -> gpd.GeoDataFrame:
         """
         Create city block tiles using OSM road network data.
 
+        The study area boundary is included in the road line network before
+        polygonization, producing gap-free blocks that fully tile the area.
+        When *n_polygons* is set, adjacent blocks are merged using
+        connectivity-constrained agglomerative clustering.
+
         Parameters
         ----------
         n_polygons : int or None, default=None
-            Target number of city blocks (approximate). Uses hierarchical
-            clustering to merge small blocks. If None, all raw blocks are returned.
+            Target number of city blocks (approximate).  Uses adjacency-
+            constrained hierarchical clustering to merge small blocks.
+            If None, all raw blocks are returned.
         detail_deg : int or None, default=None
             Number of top OSM highway types to include. None means all 19 types.
-        split_roads : bool, default=True
-            Split LineStrings so each has exactly 2 points (more robust
-            polygonization, but slower).
         verbose : bool, default=True
             Log progress information via the ``tesspy`` logger
 
@@ -425,10 +425,9 @@ class Tessellation:
         log_progress(
             logger,
             verbose,
-            "event=city_blocks.start n_polygons=%s detail_deg=%s split_roads=%s",
+            "event=city_blocks.start n_polygons=%s detail_deg=%s",
             n_polygons,
             detail_deg,
-            split_roads,
         )
 
         if detail_deg is None:
@@ -447,7 +446,7 @@ class Tessellation:
 
         if self.queried_highway_types != highwaytypes:
             road_data_collect_object = RoadData(
-                queried_area, detail_deg, split_roads, verbose
+                queried_area, detail_deg, verbose=verbose
             )
             road_data = road_data_collect_object.get_road_network()
             self.road_network = road_data
@@ -462,87 +461,37 @@ class Tessellation:
                 level=logging.DEBUG,
             )
 
-        if split_roads:
-            log_progress(logger, verbose, "event=city_blocks.split_roads.start")
-            road_data = split_linestring(road_data)
-
         log_progress(logger, verbose, "event=city_blocks.blocks.create.start")
 
-        blocks = create_blocks(road_data)
+        city_blocks_gdf = create_city_blocks(road_data, self.area_gdf)
 
-        polygons_in_area = gpd.sjoin(blocks, queried_area, how="inner")
-        polygons_in_area = polygons_in_area.drop(columns=["index_right"])
+        if n_polygons is not None:
+            if n_polygons > len(city_blocks_gdf):
+                raise ValueError(
+                    f"Cannot extract more city blocks than the initial count. "
+                    f"Initial: {len(city_blocks_gdf)}, requested: {n_polygons}. "
+                    f"Choose a value less than {len(city_blocks_gdf)}."
+                )
+            log_progress(logger, verbose, "event=city_blocks.merge.start")
+            city_blocks_gdf = merge_city_blocks(city_blocks_gdf, n_polygons)
 
-        rest_polygons = get_rest_polygon(polygons_in_area, queried_area)
-
-        city_blocks = pd.concat([polygons_in_area, rest_polygons])
-
-        if not n_polygons:
-            city_blocks = city_blocks[["geometry"]].reset_index(drop=True)
-            city_blocks = _check_valid_geometry_gdf(city_blocks)
-            city_blocks = city_blocks.reset_index()
-            city_blocks = city_blocks.rename(columns={"index": "cityblock_id"})
-            city_blocks["cityblock_id"] = "cityblockID" + city_blocks[
-                "cityblock_id"
-            ].astype(str)
-            log_progress(
-                logger,
-                verbose,
-                "event=city_blocks.done polygons=%d duration_s=%.3f",
-                len(city_blocks),
-                time.perf_counter() - method_start,
-            )
-            return city_blocks
-
-        if n_polygons > len(city_blocks):
-            raise ValueError(
-                f"Cannot extract more city blocks than the initial count. "
-                f"Initial: {len(city_blocks)}, requested: {n_polygons}. "
-                f"Choose a value less than {len(city_blocks)}."
-            )
-
-        log_progress(logger, verbose, "event=city_blocks.merge.start")
-
-        city_blocks["centroid"] = city_blocks.geometry.centroid
-
-        coordinates = np.column_stack(
-            [city_blocks["centroid"].x, city_blocks["centroid"].y]
+        city_blocks_gdf = _check_valid_geometry_gdf(city_blocks_gdf)
+        city_blocks_gdf = city_blocks_gdf[["geometry"]].reset_index(drop=True)
+        city_blocks_gdf = city_blocks_gdf.reset_index()
+        city_blocks_gdf = city_blocks_gdf.rename(columns={"index": "cityblock_id"})
+        city_blocks_gdf["cityblock_id"] = (
+            "cityblockID" + city_blocks_gdf["cityblock_id"].astype(str)
         )
-        # Note: AgglomerativeClustering requires O(n²) memory and O(n³) time.
-        # Large datasets may exhaust RAM.
-        model = AgglomerativeClustering(n_clusters=n_polygons, metric="euclidean")
-        model.fit(coordinates)
-
-        city_blocks["Cluster"] = model.labels_
-
-        merged_polys = (
-            city_blocks.groupby("Cluster")["geometry"].agg(unary_union).tolist()
-        )
-
-        merged_polys_df = gpd.GeoDataFrame({"geometry": merged_polys}, crs="EPSG:4326")
-        keep_df = merged_polys_df[merged_polys_df.geom_type == "Polygon"]
-        to_explode = merged_polys_df[merged_polys_df.geom_type == "MultiPolygon"]
-        explode_df = to_explode.explode(index_parts=False).reset_index(drop=True)
-        final_city_blocks = pd.concat([keep_df, explode_df])
-        final_city_blocks = final_city_blocks[["geometry"]].reset_index(drop=True)
-
-        final_city_blocks = _check_valid_geometry_gdf(final_city_blocks)
-
-        final_city_blocks = final_city_blocks.reset_index()
-        final_city_blocks = final_city_blocks.rename(columns={"index": "cityblock_id"})
-        final_city_blocks["cityblock_id"] = "cityblockID" + final_city_blocks[
-            "cityblock_id"
-        ].astype(str)
 
         log_progress(
             logger,
             verbose,
             "event=city_blocks.done polygons=%d duration_s=%.3f",
-            len(final_city_blocks),
+            len(city_blocks_gdf),
             time.perf_counter() - method_start,
         )
 
-        return final_city_blocks
+        return city_blocks_gdf
 
     # ------------------------------------------------------------------
     # Accessors

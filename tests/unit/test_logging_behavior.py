@@ -163,13 +163,8 @@ def test_tessellation_logs_cache_hit_events(soho_polygon_gdf, monkeypatch, caplo
     )
     monkeypatch.setattr(
         tess_module,
-        "create_blocks",
-        lambda roads: gpd.GeoDataFrame(geometry=[area_poly], crs="EPSG:4326"),
-    )
-    monkeypatch.setattr(
-        tess_module,
-        "get_rest_polygon",
-        lambda polygons, area: gpd.GeoDataFrame(geometry=[], crs="EPSG:4326"),
+        "create_city_blocks",
+        lambda roads, area: gpd.GeoDataFrame(geometry=[area_poly], crs="EPSG:4326"),
     )
     monkeypatch.setattr(tess_module, "_check_valid_geometry_gdf", lambda gdf: gdf)
 
@@ -183,7 +178,6 @@ def test_tessellation_logs_cache_hit_events(soho_polygon_gdf, monkeypatch, caplo
         tess.city_blocks(
             n_polygons=None,
             detail_deg=None,
-            split_roads=False,
             verbose=True,
         )
 

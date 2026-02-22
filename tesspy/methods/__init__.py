@@ -18,7 +18,8 @@ Exports
 -------
 get_squares_polyfill, get_adaptive_squares, count_poi,
 get_h3_hexagons, voronoi_polygons,
-split_linestring, explode, create_blocks, get_rest_polygon,
+create_city_blocks, merge_city_blocks,
+split_linestring, explode, create_blocks, get_rest_polygon (deprecated),
 get_hierarchical_clustering_parameter
 
 Depends on
@@ -29,8 +30,10 @@ geopandas, shapely, mercantile, h3, scipy, scikit-learn
 from tesspy.methods._clustering import get_hierarchical_clustering_parameter
 from tesspy.methods.city_blocks import (
     create_blocks,
+    create_city_blocks,
     explode,
     get_rest_polygon,
+    merge_city_blocks,
     split_linestring,
 )
 from tesspy.methods.hexagons import get_h3_hexagons
@@ -43,6 +46,8 @@ __all__ = [
     "get_adaptive_squares",
     "get_h3_hexagons",
     "voronoi_polygons",
+    "create_city_blocks",
+    "merge_city_blocks",
     "split_linestring",
     "explode",
     "create_blocks",

@@ -31,8 +31,10 @@ from tesspy.methods._clustering import (  # noqa: E402
 )
 from tesspy.methods.city_blocks import (  # noqa: E402
     create_blocks,
+    create_city_blocks,
     explode,
     get_rest_polygon,
+    merge_city_blocks,
     split_linestring,
 )
 from tesspy.methods.hexagons import get_h3_hexagons  # noqa: E402
@@ -49,6 +51,8 @@ __all__ = [
     "get_adaptive_squares",
     "get_h3_hexagons",
     "voronoi_polygons",
+    "create_city_blocks",
+    "merge_city_blocks",
     "split_linestring",
     "explode",
     "create_blocks",
