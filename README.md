@@ -2,7 +2,7 @@
 [![Tests](https://github.com/siavash-saki/tesspy/actions/workflows/tests_package.yml/badge.svg)](https://github.com/siavash-saki/tesspy/actions/workflows/tests_package.yml)
 [![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 [![Documentation Status](https://readthedocs.org/projects/tesspy/badge/?version=latest)](https://tesspy.readthedocs.io/en/latest/?badge=latest)
-![version](https://img.shields.io/badge/version-0.1.2-blue)
+![version](https://img.shields.io/badge/version-0.2.0-blue)
 [![Conda Version](https://img.shields.io/conda/vn/conda-forge/tesspy.svg)](https://anaconda.org/conda-forge/tesspy)
 
 <img align="left" src="docs/readme_pics/logo.jpg">
@@ -13,58 +13,61 @@ The process of discretization of space into subspaces without overlaps and gaps 
 
 
 ## Installation
-You can install ``tesspy`` from PyPI using pip (**Not Recommended**):
+
+Install `tesspy` using [uv](https://docs.astral.sh/uv/) (**Recommended**):
+```shell
+uv pip install tesspy
 ```
+
+or using pip:
+```shell
 pip install tesspy
 ```
 
-and from conda (**Recommended**):
-```
+`tesspy` is also available on conda-forge:
+```shell
 conda install -c conda-forge tesspy
 ```
 
 ## Creating a new environment for tesspy
 
-`tesspy` depends on `geopandas`, which could make the installation sometimes tricky because of the conflicts with the current packages. Therefore, we recommend creating a new clean environment and installing the dependencies from the conda-forge channel.
-
-
-Create a new environment:
-```shell
-conda create -n tesspy_env -c conda-forge
-```
-
-Activate this environment:
-```shell
-conda activate tesspy_env
-```
-
-Install tesspy from conda-forge channel:
-```shell
-conda install -c conda-forge tesspy
-```
-
-## Install from the repository
-If you want to work with the latest development version, you can directly install it from GitHub.
-To do that, it is recommended to first install all the dependencies using conda. (preferably in a newly created env).
+We recommend using uv to create and manage a virtual environment:
 
 ```shell
-conda install -c conda-forge geopandas scipy h3-py osmnx hdbscan mercantile scikit-learn
+uv venv tesspy_env
+source tesspy_env/bin/activate  # Linux/macOS
+# tesspy_env\Scripts\activate   # Windows
+uv pip install tesspy
 ```
 
-Then install `TessPy` using:
+To also install dependencies for running the example notebooks:
 
 ```shell
-pip install git+git://github.com/siavash-saki/tesspy
+uv pip install "tesspy[examples]"
 ```
-
 
 ## Dependencies
 
-`tesspy`'s dependencies are: `geopandas`, `scipy`, `h3-py`, `osmnx`, `hdbscan`, `mercantile`, and `scikit-learn`.
+`tesspy`'s dependencies are: `geopandas`, `scipy`, `h3-py`, `osmnx`, `hdbscan`, `mercantile`, `matplotlib` and `scikit-learn`.
 
 
 ## Documentation
 The official documentation is hosted on **[ReadTheDocs](https://tesspy.readthedocs.io)**.
+
+## Logging
+`tesspy` uses Python's standard `logging` module. By default, library logging is
+silent unless you configure it.
+
+Basic progress logs:
+```python
+from tesspy import Tessellation, configure_logging
+
+configure_logging("INFO")
+t = Tessellation("Frankfurt am Main")
+t.city_blocks(verbose=True)
+```
+
+Use `verbose=True` on POI-driven methods to emit progress events.
 
 
 ## Examples
@@ -129,10 +132,18 @@ or the bibtex citation directly:
 
 
 ## Contributing to tesspy
-All kind of contributions are welcome: 
+All kind of contributions are welcome:
 * Improvement of code with new features, bug fixes, and  bug reports
 * Improvement of documentation
 * Additional tests
+
+To set up a development environment, clone the repo and install in editable mode:
+
+```shell
+git clone https://github.com/siavash-saki/tesspy.git
+cd tesspy
+uv pip install -e ".[dev,examples]"
+```
 
 Follow the instructions [here](https://tesspy.readthedocs.io/en/latest/Contribution.html)
 for submitting a PR.
@@ -142,4 +153,3 @@ If you have any ideas or questions, feel free to open an issue.
 
 ## Acknowledgements
 `tesspy` is the result of the research project [ClusterMobil](https://www.frankfurt-university.de/de/hochschule/fachbereich-1-architektur-bauingenieurwesen-geomatik/forschungsinstitut-ffin/fachgruppen-des-ffin/fg-neue-mobilitat/relut/forschungsprojekte-relut/clustermobil/) conducted by the [Research Lab for Urban Transport](https://www.frankfurt-university.de/en/about-us/faculty-1-architecture-civil-engineering-geomatics/research-institute-ffin/specialist-groups-of-the-ffin/specialist-group-new-mobility/relut/). This research project is funded by the state of Hesse and [HOLM](https://frankfurt-holm.de/) funding under the “Innovations in Logistics and Mobility” measure of the Hessian Ministry of Economics, Energy, Transport and Housing. [HA Project No.: 1017/21-19]
-

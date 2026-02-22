@@ -1,73 +1,70 @@
-# This workflow will install Python dependencies, run tests and lint with a variety of Python versions
-# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
-
 name: Tests
 
 on:
   push:
-    branches: [ "main", "test_branch"]
+    branches: ["main", "develop"]
   pull_request:
-    branches: [ "main"]
+    branches: ["main", "develop"]
 
 jobs:
 
-  Lint:
-    name: Lint
+  lint:
+    name: Lint and Format
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: psf/black@stable
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+      - name: Run ruff (lint)
+        run: uvx ruff check tesspy/
+      - name: Run ruff (format check)
+        run: uvx ruff format --check tesspy/
 
-  Test:
-    name: Build on ${{ matrix.os }} with ${{ matrix.py }}
-    runs-on: ${{ matrix.os }}
-    defaults:
-      run:
-        shell: bash -l {0}
+  typecheck:
+    name: Type Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install with dev dependencies
+        run: pip install -e ".[dev]"
+      - name: Run mypy
+        run: mypy tesspy/ --ignore-missing-imports
+
+  unit-tests:
+    name: Unit Tests (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - os: ubuntu-latest
-            env: tests/envs/38-env.yaml
-            py: py3.8
-
-          - os: ubuntu-latest
-            env: tests/envs/39-env.yaml
-            py: py3.9
-
-          - os: ubuntu-latest
-            env: tests/envs/310-env.yaml
-            py: py3.10
-
-          - os: macos-latest
-            env: tests/envs/310-env.yaml
-            py: py3.10
-
-          - os: windows-latest
-            env: tests/envs/310-env.yaml
-            py: py3.10
-
+        python-version: ["3.11", "3.12", "3.13"]
     steps:
-      - uses: actions/checkout@v2
-
-      - name: Setup Conda
-        uses: conda-incubator/setup-miniconda@v2
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
-          environment-file: ${{ matrix.env }}
-          miniforge-version: latest
-          miniforge-variant: Mambaforge
-          use-mamba: true
+          python-version: ${{ matrix.python-version }}
+      - name: Install package and dev dependencies
+        run: pip install -e ".[dev]"
+      - name: Run unit tests
+        run: pytest tests/unit/ -v --timeout=300 --cov=tesspy --cov-report=xml --cov-report=term-missing --cov-fail-under=70
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: false
 
-      - name: Install tesspy
-        run: pip install .
-
-      - name: Check environment
-        run: |
-          conda info
-          conda list
-      - name: Test tesspy
-        run: |
-          pytest -v --color yes --cov-config .coveragerc --cov tesspy --cov-append --cov-report term-missing --cov-report xml tests
-
-      - uses: codecov/codecov-action@v2
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    # Only run integration tests on pushes to main to preserve OSM API quota
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install package and dev dependencies
+        run: pip install -e ".[dev]"
+      - name: Run integration tests
+        run: pytest tests/integration/ -v -m integration --timeout=600

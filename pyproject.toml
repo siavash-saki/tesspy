@@ -1,0 +1,107 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "tesspy"
+dynamic = ["version"]
+description = "Tessellation of Urban Areas"
+readme = "README.md"
+license = { file = "LICENSE.md" }
+authors = [
+    { name = "Siavash Saki" },
+    { name = "Jonas Hamann", email = "jonas.hamann@fb3.fra-uas.de" },
+]
+keywords = ["tessellation", "GIS", "urban", "OpenStreetMap"]
+classifiers = [
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "License :: OSI Approved :: BSD License",
+    "Intended Audience :: Science/Research",
+    "Operating System :: OS Independent",
+    "Topic :: Scientific/Engineering :: GIS",
+]
+requires-python = ">=3.11"
+dependencies = [
+    "geopandas>=1.0",
+    "scipy>=1.11",
+    "h3>=4.0",
+    "osmnx>=1.9",
+    "mercantile>=1.2",
+    "scikit-learn>=1.3",
+    "requests>=2.28",
+    "numpy>=1.26",
+    "matplotlib>=3.10.8",
+    "pandas>=2.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "pytest-mock>=3.10",
+    "pytest-timeout>=2.0",
+    "ruff>=0.4",
+    "mypy>=1.0",
+    "pre-commit>=3.0",
+    "types-requests",
+]
+docs = [
+    "sphinx",
+    "furo",
+    "nbsphinx",
+    "myst-parser",
+    "pypandoc_binary",
+]
+examples = [
+    "jupyterlab",
+    "ipykernel",
+    "contextily",
+    "esda",
+    "libpysal",
+    "seaborn",
+    "statsmodels",
+    "mapclassify",
+]
+
+[project.urls]
+Homepage = "https://github.com/siavash-saki/tesspy"
+Repository = "https://github.com/siavash-saki/tesspy"
+Documentation = "https://tesspy.readthedocs.io"
+
+[tool.hatch.version]
+path = "tesspy/_version.py"
+
+[tool.pytest.ini_options]
+markers = [
+    "integration: marks tests that make real OSM API calls (deselect with '-m not integration')",
+    "slow: marks tests with sleep() calls or long runtimes",
+]
+testpaths = ["tests"]
+timeout = 300
+
+[tool.ruff]
+target-version = "py311"
+line-length = 88
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "C4", "S"]
+ignore = []
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["S101", "S110", "S301"]
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_ignores = true
+ignore_missing_imports = true
+
+[tool.coverage.run]
+source = ["tesspy"]
+omit = ["tests/*"]
+
+[tool.coverage.report]
+show_missing = true
+fail_under = 70

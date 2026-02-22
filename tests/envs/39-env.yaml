@@ -6,7 +6,7 @@ dependencies:
   - geopandas=0.10
   - h3-py
   - osmnx
-  - hdbscan
+  - scikit-learn
   - mercantile
   # testing
   - pytest

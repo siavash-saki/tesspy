@@ -1,0 +1,149 @@
+"""
+Geocoding helpers and the count_poi_per_tile public utility.
+
+Exports
+-------
+get_city_polygon : geocode a city name to a GeoDataFrame boundary polygon
+count_poi_per_tile : count OSM POI categories per tessellation tile
+
+Depends on
+----------
+tesspy._constants (DEFAULT_POI_CATEGORIES), tesspy.data.poi (POIdata),
+osmnx, geopandas, shapely
+"""
+
+import logging
+
+import geopandas as gpd
+import pandas as pd
+
+from tesspy._constants import DEFAULT_POI_CATEGORIES
+from tesspy._logging import log_progress
+from tesspy.data.poi import POIdata
+
+logger = logging.getLogger(__name__)
+
+
+def get_city_polygon(city: str) -> gpd.GeoDataFrame:
+    """
+    Retrieve the boundary polygon of a city or region from OSM.
+
+    Parameters
+    ----------
+    city : str
+        Name of a city or address of a region
+
+    Returns
+    --------
+    df_city : geopandas.GeoDataFrame
+        GeoDataFrame containing the boundary polygon
+    """
+    import osmnx as ox
+
+    logger.debug("event=geo.geocode.start city=%s", city)
+    df_city = ox.geocode_to_gdf(city)
+    df_city = df_city[["osm_id", "geometry"]]
+    logger.debug("event=geo.geocode.done city=%s rows=%d", city, len(df_city))
+    return df_city
+
+
+def count_poi_per_tile(
+    city: gpd.GeoDataFrame | str,
+    gdf: gpd.GeoDataFrame,
+    poi_categories: list[str] | str | None = None,
+    timeout: int = 300,
+    verbose: bool = True,
+) -> gpd.GeoDataFrame:
+    """
+    Count POI categories per tessellation tile.
+
+    For each POI category an additional count column is added to the
+    tessellation GeoDataFrame.
+
+    Parameters
+    ----------
+    city : geopandas.GeoDataFrame or str
+        Study area as a GeoDataFrame (single Polygon/MultiPolygon, EPSG:4326)
+        or a city name string to geocode via OSM.
+        If you have a ``Tessellation`` object, pass ``t.get_polygon()`` here.
+    gdf : geopandas.GeoDataFrame
+        Tessellation GeoDataFrame (output of any Tessellation method)
+    poi_categories : list of str or str, default=["amenity", "building"]
+        OSM primary map feature categories to count per tile.
+    timeout : int, default=300
+        TCP timeout in seconds for the OSM Overpass request
+    verbose : bool, default=True
+        Log progress information via the ``tesspy`` logger.
+
+    Returns
+    --------
+    gdf : geopandas.GeoDataFrame
+        Tessellation GeoDataFrame with additional count columns per POI category
+    """
+    log_progress(logger, verbose, "event=poi.count.start timeout_s=%d", timeout)
+
+    if poi_categories is None:
+        poi_categories = DEFAULT_POI_CATEGORIES.copy()
+
+    if isinstance(city, str):
+        area_gdf = get_city_polygon(city)
+    elif isinstance(city, gpd.GeoDataFrame):
+        area_gdf = city
+    else:
+        raise TypeError(
+            "city must be a GeoDataFrame or a city name string. "
+            "If you have a Tessellation object, pass t.get_polygon() instead."
+        )
+
+    if len(gdf) < 1:
+        raise ValueError(
+            "Please insert a valid tessellation GeoDataFrame with at least one tile."
+        )
+
+    if isinstance(poi_categories, str):
+        poi_categories = [poi_categories]
+    elif not isinstance(poi_categories, list):
+        raise ValueError(
+            "poi_categories must be a string or list of OSM primary feature names."
+        )
+
+    df_poi = POIdata(
+        area_gdf,
+        poi_categories=poi_categories,
+        timeout=timeout,
+        verbose=verbose,
+    ).get_poi_data()
+
+    points_geom = gpd.points_from_xy(
+        df_poi["center_longitude"], df_poi["center_latitude"]
+    )
+
+    tess_data = gpd.GeoDataFrame(
+        geometry=points_geom, data=df_poi[poi_categories], crs="EPSG:4326"
+    )
+
+    tess_data["value"] = (
+        tess_data.drop(columns=["geometry"]).idxmax(axis=1).where(tess_data.any(axis=1))
+    )
+    tess_data = tess_data[["value", "geometry"]]
+
+    try:
+        idx = [s for s in gdf.columns if "id" in s][0]
+    except IndexError:
+        idx = [s for s in gdf.columns if "key" in s][0]
+
+    spatial_join = gpd.sjoin(gdf, tess_data).reset_index(drop=True)
+    counts = pd.crosstab(spatial_join[idx], spatial_join["value"])
+
+    merged_polygons = gdf.merge(counts, how="left", on=idx)
+    merged_polygons = merged_polygons.fillna(0)
+
+    log_progress(
+        logger,
+        verbose,
+        "event=poi.count.done tiles=%d poi_categories=%d",
+        len(merged_polygons),
+        len(poi_categories),
+    )
+
+    return merged_polygons
