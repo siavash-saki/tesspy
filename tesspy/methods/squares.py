@@ -25,32 +25,26 @@ def get_squares_polyfill(gdf: gpd.GeoDataFrame, zoom_level: int) -> gpd.GeoDataF
         GeoDataFrame containing the squares
     """
     geom_name = gdf.geometry.name
-    temp_dfs = []
+    records: list[dict] = []
 
     for _, rows in gdf.iterrows():
         gdf_geometry = rows[geom_name]
+        row_data = {k: v for k, v in rows.items() if k != geom_name}
         bbox = gdf_geometry.bounds
         tiles = mercantile.tiles(bbox[0], bbox[1], bbox[2], bbox[3], zoom_level)
-        temp_rows = []
         for tile in tiles:
-            temp_row = rows.copy()
             square = box(*mercantile.bounds(tile))
             if square.intersects(gdf_geometry):
-                temp_row[geom_name] = square
-                temp_row["quadkey"] = mercantile.quadkey(tile)
-
+                record = row_data.copy()
+                record[geom_name] = square
+                record["quadkey"] = mercantile.quadkey(tile)
                 child_ids = mercantile.children(tile)
-                temp_row["children_id"] = [
+                record["children_id"] = [
                     mercantile.quadkey(c_tile) for c_tile in child_ids
                 ]
+                records.append(record)
 
-                temp_rows.append(temp_row)
-        temp_dfs.append(pd.DataFrame(temp_rows))
-
-    df = pd.concat(temp_dfs)
-    df = df.reset_index(drop=True)
-
-    gdf = gpd.GeoDataFrame(df, geometry=geom_name, crs="epsg:4326")
+    gdf = gpd.GeoDataFrame(records, geometry=geom_name, crs="epsg:4326")
 
     return gdf
 
@@ -75,30 +69,31 @@ def get_adaptive_squares(
     gdf : geopandas.GeoDataFrame
         GeoDataFrame containing the updated squares
     """
-    gdf = input_gdf.copy()
-    gdf_exceeded = gdf[gdf["count"] >= threshold]
+    exceeded_mask = input_gdf["count"] >= threshold
+    kept = input_gdf[~exceeded_mask]
+    exceeded = input_gdf[exceeded_mask]
 
-    for idx, row in gdf_exceeded.iterrows():
-        children = gdf_exceeded.loc[[idx]]["children_id"].iloc[0]
-        gdf = gdf.drop([idx])
-
+    new_rows: list[dict] = []
+    for children in exceeded["children_id"]:
         for child in children:
-            new_row = row.copy()
             child_tile = mercantile.quadkey_to_tile(child)
-
-            new_row["quadkey"] = child
-            new_row["geometry"] = box(*mercantile.bounds(child_tile))
             grand_children = mercantile.children(child_tile)
-            new_row["children_id"] = [
-                mercantile.quadkey(c_tile) for c_tile in grand_children
-            ]
+            new_rows.append(
+                {
+                    "quadkey": child,
+                    "geometry": box(*mercantile.bounds(child_tile)),
+                    "children_id": [
+                        mercantile.quadkey(c_tile) for c_tile in grand_children
+                    ],
+                }
+            )
 
-            tmp_df = pd.DataFrame(new_row).transpose()
-            tmp_gdf = gpd.GeoDataFrame(tmp_df, geometry="geometry", crs="epsg:4326")
+    if new_rows:
+        new_gdf = gpd.GeoDataFrame(new_rows, geometry="geometry", crs="epsg:4326")
+        gdf = pd.concat([kept, new_gdf], ignore_index=True)
+    else:
+        gdf = kept.reset_index(drop=True)
 
-            gdf = pd.concat([gdf, tmp_gdf], axis=0)
-
-    gdf.index = gdf.reset_index(drop=True).index
     return gdf
 
 
@@ -118,18 +113,13 @@ def count_poi(df: gpd.GeoDataFrame, points: gpd.GeoDataFrame) -> gpd.GeoDataFram
     final_gdf : geopandas.GeoDataFrame
         GeoDataFrame containing the tiles with an added 'count' column
     """
-    points_in_polygon = gpd.sjoin(df, points, how="left", predicate="contains")
-    points_in_polygon["count"] = 1
-    points_in_polygon = points_in_polygon.reset_index()
+    joined = gpd.sjoin(df, points, how="left", predicate="contains")
+    counts = joined.groupby("quadkey").size().rename("count")
 
-    tmp_a = points_in_polygon.groupby(by="quadkey").count()
-    tmp_a = tmp_a["count"].reset_index()
-    tmp_a = tmp_a.sort_values(by="quadkey", ascending=True)
-
-    tmp_b = df.reset_index().sort_values(by="quadkey", ascending=True)
-
-    final_df = pd.merge(tmp_a, tmp_b, on="quadkey")
-    final_gdf = final_df[["quadkey", "count", "geometry", "children_id"]]
+    final_gdf = df[["quadkey", "geometry", "children_id"]].merge(
+        counts, on="quadkey", how="left"
+    )
+    final_gdf["count"] = final_gdf["count"].fillna(0).astype(int)
     final_gdf = gpd.GeoDataFrame(final_gdf, geometry="geometry")
 
     return final_gdf
