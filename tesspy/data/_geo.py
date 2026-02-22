@@ -133,13 +133,9 @@ def count_poi_per_tile(
         idx = [s for s in gdf.columns if "key" in s][0]
 
     spatial_join = gpd.sjoin(gdf, tess_data)
-    pivot_table = pd.pivot_table(
-        spatial_join, index=idx, columns="value", aggfunc={"value": len}
-    )
+    counts = pd.crosstab(spatial_join[idx], spatial_join["value"])
 
-    pivot_table.columns = pivot_table.columns.droplevel()
-
-    merged_polygons = gdf.merge(pivot_table, how="left", on=idx)
+    merged_polygons = gdf.merge(counts, how="left", on=idx)
     merged_polygons = merged_polygons.fillna(0)
 
     log_progress(
