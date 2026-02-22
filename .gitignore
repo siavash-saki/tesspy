@@ -30,6 +30,7 @@ htmlcov/
 # Jupyter
 **/.ipynb_checkpoints/
 test_notebooks
+docs/source/example_notebooks/
 
 # Project cache
 **/cache/

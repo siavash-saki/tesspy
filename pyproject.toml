@@ -49,8 +49,10 @@ dev = [
 ]
 docs = [
     "sphinx",
-    "sphinx-rtd-theme",
+    "furo",
     "nbsphinx",
+    "myst-parser",
+    "pypandoc_binary",
 ]
 examples = [
     "jupyterlab",

@@ -1,4 +1,6 @@
 ipykernel
 ipython
 nbsphinx
-sphinx_rtd_theme
+furo
+myst-parser
+pypandoc_binary

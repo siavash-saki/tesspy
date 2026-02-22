@@ -1,0 +1,3 @@
+# All functions
+
+- {ref}`genindex`
