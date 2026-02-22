@@ -1,67 +1,29 @@
 """
 Unit tests for POIdata.get_poi_data error paths (no network required).
-Uses monkeypatch to stub HTTP responses.
+Uses monkeypatch to stub osmnx calls.
 """
 
 import geopandas as gpd
 import pytest
-from shapely.geometry import Polygon
+from shapely.geometry import Point, Polygon
 
+import tesspy.data.poi as poi_module
 from tesspy.data.poi import POIdata
 
 
 @pytest.fixture()
 def area_gdf():
     """A small polygon for constructing POIdata."""
-    poly = Polygon([
-        (13.38, 52.51),
-        (13.42, 52.51),
-        (13.42, 52.53),
-        (13.38, 52.53),
-        (13.38, 52.51),
-    ])
+    poly = Polygon(
+        [
+            (13.38, 52.51),
+            (13.42, 52.51),
+            (13.42, 52.53),
+            (13.38, 52.53),
+            (13.38, 52.51),
+        ]
+    )
     return gpd.GeoDataFrame(geometry=[poly], crs="EPSG:4326")
-
-
-class _FakeResponse:
-    """Minimal mock for requests.Response."""
-
-    def __init__(self, status_code, text=""):
-        self.status_code = status_code
-        self.text = text
-
-
-def test_http_429_raises_runtime_error(area_gdf, monkeypatch):
-    """HTTP 429 should raise RuntimeError with '429' in the message."""
-    monkeypatch.setattr(
-        "tesspy.data.poi.requests.get",
-        lambda **kwargs: _FakeResponse(429),
-    )
-    poi = POIdata(area_gdf, ["amenity"], timeout=10, verbose=False)
-    with pytest.raises(RuntimeError, match="429"):
-        poi.get_poi_data()
-
-
-def test_http_504_raises_runtime_error(area_gdf, monkeypatch):
-    """HTTP 504 should raise RuntimeError with '504' in the message."""
-    monkeypatch.setattr(
-        "tesspy.data.poi.requests.get",
-        lambda **kwargs: _FakeResponse(504),
-    )
-    poi = POIdata(area_gdf, ["amenity"], timeout=10, verbose=False)
-    with pytest.raises(RuntimeError, match="504"):
-        poi.get_poi_data()
-
-
-def test_http_other_error_raises_runtime_error(area_gdf, monkeypatch):
-    """Non-200/429/504 status should raise RuntimeError with 'Bad Request'."""
-    monkeypatch.setattr(
-        "tesspy.data.poi.requests.get",
-        lambda **kwargs: _FakeResponse(400, text="error details here"),
-    )
-    poi = POIdata(area_gdf, ["amenity"], timeout=10, verbose=False)
-    with pytest.raises(RuntimeError, match="Bad Request"):
-        poi.get_poi_data()
 
 
 def test_invalid_category_raises_value_error(area_gdf):
@@ -72,14 +34,48 @@ def test_invalid_category_raises_value_error(area_gdf):
 
 
 def test_empty_response_raises_value_error(area_gdf, monkeypatch):
-    """HTTP 200 with no elements should raise ValueError."""
-    import json
-
-    empty_resp = json.dumps({"elements": []})
+    """osmnx returning an empty GeoDataFrame should raise ValueError."""
+    empty_gdf = gpd.GeoDataFrame(geometry=[], crs="EPSG:4326")
     monkeypatch.setattr(
-        "tesspy.data.poi.requests.get",
-        lambda **kwargs: _FakeResponse(200, text=empty_resp),
+        poi_module.ox,
+        "features_from_polygon",
+        lambda *args, **kwargs: empty_gdf,
     )
     poi = POIdata(area_gdf, ["amenity"], timeout=10, verbose=False)
     with pytest.raises(ValueError, match="No POI data found"):
         poi.get_poi_data()
+
+
+def test_osmnx_exception_propagates(area_gdf, monkeypatch):
+    """Network errors from osmnx should propagate to the caller."""
+
+    def raise_error(*args, **kwargs):
+        raise RuntimeError("Overpass server error")
+
+    monkeypatch.setattr(
+        poi_module.ox,
+        "features_from_polygon",
+        raise_error,
+    )
+    poi = POIdata(area_gdf, ["amenity"], timeout=10, verbose=False)
+    with pytest.raises(RuntimeError, match="Overpass server error"):
+        poi.get_poi_data()
+
+
+def test_missing_category_column_returns_false(area_gdf, monkeypatch):
+    """If a queried category has no results, the column should be all False."""
+    fake_gdf = gpd.GeoDataFrame(
+        {"amenity": ["cafe"]},
+        geometry=[Point(13.40, 52.52)],
+        crs="EPSG:4326",
+    )
+    monkeypatch.setattr(
+        poi_module.ox,
+        "features_from_polygon",
+        lambda *args, **kwargs: fake_gdf,
+    )
+    poi = POIdata(area_gdf, ["amenity", "building"], timeout=10, verbose=False)
+    result = poi.get_poi_data()
+
+    assert result["amenity"].iloc[0]
+    assert not result["building"].iloc[0]

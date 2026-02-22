@@ -2,13 +2,12 @@
 Unit tests for runtime logging behavior across tesspy modules.
 """
 
-import json
 import logging
 
 import geopandas as gpd
 import pandas as pd
 import pytest
-from shapely.geometry import LineString, Polygon
+from shapely.geometry import LineString, Point, Polygon
 
 import tesspy.data._geo as geo_module
 import tesspy.data.poi as poi_module
@@ -19,46 +18,18 @@ from tesspy.data.roads import RoadData
 from tesspy.tessellation import Tessellation
 
 
-class _DummyResponse:
-    def __init__(self, status_code: int, payload: dict | None = None, text: str = ""):
-        self.status_code = status_code
-        self.text = json.dumps(payload) if payload is not None else text
-
-
-def _mock_poi_sjoin(monkeypatch):
-    def fake_sjoin(left, right, *args, **kwargs):
-        return left.copy()
-
-    monkeypatch.setattr(poi_module.gpd, "sjoin", fake_sjoin)
+def _fake_features_from_polygon(*args, **kwargs):
+    """Return a minimal GeoDataFrame mimicking osmnx.features_from_polygon."""
+    return gpd.GeoDataFrame(
+        {"amenity": ["cafe", "school"]},
+        geometry=[Point(-0.13, 51.51), Point(-0.131, 51.512)],
+        crs="EPSG:4326",
+    )
 
 
 def test_poi_verbose_true_emits_progress_events(soho_polygon_gdf, monkeypatch, caplog):
-    _mock_poi_sjoin(monkeypatch)
-
-    payload = {
-        "elements": [
-            {
-                "type": "node",
-                "id": 1,
-                "lat": 51.51,
-                "lon": -0.13,
-                "tags": {"amenity": "cafe"},
-            },
-            {
-                "type": "way",
-                "id": 2,
-                "bounds": {},
-                "nodes": [1, 2],
-                "geometry": [
-                    {"lat": 51.511, "lon": -0.131},
-                    {"lat": 51.512, "lon": -0.132},
-                ],
-                "tags": {"amenity": "school"},
-            },
-        ]
-    }
     monkeypatch.setattr(
-        poi_module.requests, "get", lambda *args, **kwargs: _DummyResponse(200, payload)
+        poi_module.ox, "features_from_polygon", _fake_features_from_polygon
     )
 
     poi = POIdata(
@@ -72,29 +43,15 @@ def test_poi_verbose_true_emits_progress_events(soho_polygon_gdf, monkeypatch, c
 
     messages = [record.getMessage() for record in caplog.records]
     assert len(result) > 0
-    assert any("event=poi.query.build.start" in msg for msg in messages)
     assert any("event=poi.fetch.start" in msg for msg in messages)
     assert any("event=poi.parse.done" in msg for msg in messages)
-    assert any("event=poi.filter.done" in msg for msg in messages)
 
 
 def test_poi_verbose_false_suppresses_progress_events(
     soho_polygon_gdf, monkeypatch, caplog
 ):
-    _mock_poi_sjoin(monkeypatch)
-    payload = {
-        "elements": [
-            {
-                "type": "node",
-                "id": 1,
-                "lat": 51.51,
-                "lon": -0.13,
-                "tags": {"amenity": "cafe"},
-            }
-        ]
-    }
     monkeypatch.setattr(
-        poi_module.requests, "get", lambda *args, **kwargs: _DummyResponse(200, payload)
+        poi_module.ox, "features_from_polygon", _fake_features_from_polygon
     )
 
     poi = POIdata(
@@ -111,22 +68,12 @@ def test_poi_verbose_false_suppresses_progress_events(
     assert not any("event=poi.parse.done" in msg for msg in messages)
 
 
-@pytest.mark.parametrize(
-    ("status_code", "expected_level"),
-    [
-        (429, logging.WARNING),
-        (504, logging.WARNING),
-        (500, logging.ERROR),
-    ],
-)
-def test_poi_http_errors_log_before_raise(
-    soho_polygon_gdf, monkeypatch, caplog, status_code, expected_level
-):
-    _mock_poi_sjoin(monkeypatch)
+def test_poi_empty_response_logs_warning(soho_polygon_gdf, monkeypatch, caplog):
+    empty_gdf = gpd.GeoDataFrame(geometry=[], crs="EPSG:4326")
     monkeypatch.setattr(
-        poi_module.requests,
-        "get",
-        lambda *args, **kwargs: _DummyResponse(status_code, None, text="server error"),
+        poi_module.ox,
+        "features_from_polygon",
+        lambda *a, **kw: empty_gdf,
     )
 
     poi = POIdata(
@@ -137,14 +84,14 @@ def test_poi_http_errors_log_before_raise(
     )
 
     with caplog.at_level(logging.DEBUG, logger="tesspy.data.poi"):
-        with pytest.raises(RuntimeError):
+        with pytest.raises(ValueError):
             poi.get_poi_data()
 
     log_records = [
-        r for r in caplog.records if "event=poi.fetch.error" in r.getMessage()
+        r for r in caplog.records if "event=poi.fetch.empty" in r.getMessage()
     ]
     assert len(log_records) == 1
-    assert log_records[0].levelno == expected_level
+    assert log_records[0].levelno == logging.WARNING
 
 
 def test_roaddata_emits_progress_events(soho_polygon_gdf, monkeypatch, caplog):
