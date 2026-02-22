@@ -132,7 +132,7 @@ def count_poi_per_tile(
     except IndexError:
         idx = [s for s in gdf.columns if "key" in s][0]
 
-    spatial_join = gpd.sjoin(gdf, tess_data)
+    spatial_join = gpd.sjoin(gdf, tess_data).reset_index(drop=True)
     counts = pd.crosstab(spatial_join[idx], spatial_join["value"])
 
     merged_polygons = gdf.merge(counts, how="left", on=idx)
