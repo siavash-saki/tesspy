@@ -133,7 +133,7 @@ class Tessellation:
         start_resolution: int,
         poi_categories: list[str] | Literal["all"] | None = None,
         threshold: int | None = None,
-        timeout: int = 60,
+        timeout: int = 300,
         verbose: bool = True,
     ) -> gpd.GeoDataFrame:
         """
@@ -151,7 +151,7 @@ class Tessellation:
         threshold : int or None, default=None
             POI count threshold for subdivision. If None, uses the median
             count across all initial squares.
-        timeout : int, default=60
+        timeout : int, default=300
             Overpass API timeout in seconds
         verbose : bool, default=True
             Log progress information via the ``tesspy`` logger
@@ -252,7 +252,7 @@ class Tessellation:
         self,
         cluster_algo: Literal["k-means", "hdbscan"] | None = "k-means",
         poi_categories: list[str] | Literal["all"] | None = None,
-        timeout: int = 60,
+        timeout: int = 300,
         n_polygons: int = 100,
         min_cluster_size: int = 15,
         verbose: bool = True,
@@ -267,7 +267,7 @@ class Tessellation:
             If None, POI locations are used directly (max 5000).
         poi_categories : list of str or 'all', default=["amenity", "building"]
             OSM primary map feature categories used as input data
-        timeout : int, default=60
+        timeout : int, default=300
             Overpass API timeout in seconds
         n_polygons : int, default=100
             Target number of polygons (k-means only)

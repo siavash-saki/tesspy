@@ -51,7 +51,7 @@ def count_poi_per_tile(
     city: gpd.GeoDataFrame | str,
     gdf: gpd.GeoDataFrame,
     poi_categories: list[str] | str | None = None,
-    timeout: int = 120,
+    timeout: int = 300,
     verbose: bool = True,
 ) -> gpd.GeoDataFrame:
     """
@@ -70,7 +70,7 @@ def count_poi_per_tile(
         Tessellation GeoDataFrame (output of any Tessellation method)
     poi_categories : list of str or str, default=["amenity", "building"]
         OSM primary map feature categories to count per tile.
-    timeout : int, default=120
+    timeout : int, default=300
         TCP timeout in seconds for the OSM Overpass request
     verbose : bool, default=True
         Log progress information via the ``tesspy`` logger.
