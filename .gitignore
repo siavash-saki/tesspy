@@ -29,6 +29,7 @@ htmlcov/
 
 # Jupyter
 **/.ipynb_checkpoints/
+test_notebooks
 
 # Project cache
 **/cache/
@@ -42,7 +43,5 @@ htmlcov/
 
 # Secrets / tokens
 .gitTok
-
-uv.lock
 
 CLAUDE.md

@@ -79,8 +79,8 @@ def get_adaptive_squares(
     gdf_exceeded = gdf[gdf["count"] >= threshold]
 
     for idx, row in gdf_exceeded.iterrows():
-        children = gdf_exceeded.loc[[idx]]["children_id"].values[0]
-        gdf.drop([idx], inplace=True)
+        children = gdf_exceeded.loc[[idx]]["children_id"].iloc[0]
+        gdf = gdf.drop([idx])
 
         for child in children:
             new_row = row.copy()
@@ -118,11 +118,11 @@ def count_poi(df: gpd.GeoDataFrame, points: gpd.GeoDataFrame) -> gpd.GeoDataFram
     final_gdf : geopandas.GeoDataFrame
         GeoDataFrame containing the tiles with an added 'count' column
     """
-    pointsInPolygon = gpd.sjoin(df, points, how="left", predicate="contains")
-    pointsInPolygon["count"] = 1
-    pointsInPolygon.reset_index(inplace=True)
+    points_in_polygon = gpd.sjoin(df, points, how="left", predicate="contains")
+    points_in_polygon["count"] = 1
+    points_in_polygon = points_in_polygon.reset_index()
 
-    tmp_a = pointsInPolygon.groupby(by="quadkey").count()
+    tmp_a = points_in_polygon.groupby(by="quadkey").count()
     tmp_a = tmp_a["count"].reset_index()
     tmp_a = tmp_a.sort_values(by="quadkey", ascending=True)
 

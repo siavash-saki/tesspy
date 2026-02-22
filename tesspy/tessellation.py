@@ -4,17 +4,15 @@ Core Tessellation class — the primary public interface of tesspy.
 
 import logging
 import time
-import warnings
 from typing import Literal
 
 import geopandas as gpd
-import hdbscan
 import numpy as np
 import pandas as pd
 from scipy.spatial import Voronoi
-from shapely.geometry import MultiPolygon, Point
+from shapely.geometry import MultiPolygon
 from shapely.ops import unary_union
-from sklearn.cluster import AgglomerativeClustering, KMeans
+from sklearn.cluster import HDBSCAN, AgglomerativeClustering, KMeans
 
 from tesspy._constants import (
     DEFAULT_POI_CATEGORIES,
@@ -28,7 +26,6 @@ from tesspy.data.poi import POIdata
 from tesspy.data.roads import RoadData
 from tesspy.methods.city_blocks import (
     create_blocks,
-    explode,
     get_rest_polygon,
     split_linestring,
 )
@@ -207,8 +204,8 @@ class Tessellation:
         tess_data = self.poi_dataframe[
             self.poi_dataframe[poi_categories].sum(axis=1) > 0
         ]
-        points_geom = tess_data[["center_longitude", "center_latitude"]].apply(
-            lambda p: Point(p["center_longitude"], p["center_latitude"]), axis=1
+        points_geom = gpd.points_from_xy(
+            tess_data["center_longitude"], tess_data["center_latitude"]
         )
         tess_data = gpd.GeoDataFrame(
             geometry=points_geom, data=tess_data[poi_categories], crs="EPSG:4326"
@@ -218,7 +215,7 @@ class Tessellation:
         aqk_count_df = count_poi(df_aqk, poi_data_aqk)
 
         if not threshold:
-            threshold = int(np.median(aqk_count_df["count"].values))
+            threshold = int(np.median(aqk_count_df["count"].to_numpy()))
             log_progress(
                 logger,
                 verbose,
@@ -227,7 +224,7 @@ class Tessellation:
             )
 
         i = start_resolution
-        while max(aqk_count_df["count"].values) > threshold:
+        while max(aqk_count_df["count"].to_numpy()) > threshold:
             i += 1
             log_progress(
                 logger,
@@ -237,9 +234,8 @@ class Tessellation:
             )
 
             df_tmp = get_adaptive_squares(aqk_count_df, threshold)
-            df_tmp.drop(columns=["count"], inplace=True)
-            df_tmp2 = count_poi(df_tmp, poi_data_aqk)
-            aqk_count_df = df_tmp2
+            df_tmp = df_tmp.drop(columns=["count"])
+            aqk_count_df = count_poi(df_tmp, poi_data_aqk)
 
         final_aqk = gpd.sjoin(aqk_count_df, self.area_gdf)
         final_aqk = final_aqk.drop(columns=["osm_id", "children_id", "index_right"])
@@ -334,7 +330,7 @@ class Tessellation:
         tess_data = self.poi_dataframe[
             self.poi_dataframe[poi_categories].sum(axis=1) > 0
         ]
-        data_locs = tess_data[["center_longitude", "center_latitude"]].values
+        data_locs = tess_data[["center_longitude", "center_latitude"]].to_numpy()
 
         if cluster_algo == "k-means":
             log_progress(logger, verbose, "event=voronoi.cluster.start algo=kmeans")
@@ -346,8 +342,8 @@ class Tessellation:
 
         elif cluster_algo == "hdbscan":
             log_progress(logger, verbose, "event=voronoi.cluster.start algo=hdbscan")
-            clustering = hdbscan.HDBSCAN(
-                min_cluster_size=min_cluster_size, prediction_data=True
+            clustering = HDBSCAN(
+                min_cluster_size=min_cluster_size,
             ).fit(data_locs)
             generators = [
                 np.mean(data_locs[clustering.labels_ == label], axis=0)
@@ -384,8 +380,8 @@ class Tessellation:
 
         df_voronoi = _check_valid_geometry_gdf(df_voronoi)
 
-        df_voronoi.reset_index(inplace=True)
-        df_voronoi.rename(columns={"index": "voronoi_id"}, inplace=True)
+        df_voronoi = df_voronoi.reset_index()
+        df_voronoi = df_voronoi.rename(columns={"index": "voronoi_id"})
         df_voronoi["voronoi_id"] = "voronoiID" + df_voronoi["voronoi_id"].astype(str)
 
         log_progress(
@@ -476,7 +472,7 @@ class Tessellation:
         blocks = create_blocks(road_data)
 
         polygons_in_area = gpd.sjoin(blocks, queried_area, how="inner")
-        polygons_in_area.drop(columns=["index_right"], inplace=True)
+        polygons_in_area = polygons_in_area.drop(columns=["index_right"])
 
         rest_polygons = get_rest_polygon(polygons_in_area, queried_area)
 
@@ -485,8 +481,8 @@ class Tessellation:
         if not n_polygons:
             city_blocks = city_blocks[["geometry"]].reset_index(drop=True)
             city_blocks = _check_valid_geometry_gdf(city_blocks)
-            city_blocks.reset_index(inplace=True)
-            city_blocks.rename(columns={"index": "cityblock_id"}, inplace=True)
+            city_blocks = city_blocks.reset_index()
+            city_blocks = city_blocks.rename(columns={"index": "cityblock_id"})
             city_blocks["cityblock_id"] = "cityblockID" + city_blocks[
                 "cityblock_id"
             ].astype(str)
@@ -508,9 +504,7 @@ class Tessellation:
 
         log_progress(logger, verbose, "event=city_blocks.merge.start")
 
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", FutureWarning)
-            city_blocks["centroid"] = city_blocks.centroid
+        city_blocks["centroid"] = city_blocks.geometry.centroid
 
         coordinates = np.column_stack(
             [city_blocks["centroid"].x, city_blocks["centroid"].y]
@@ -532,16 +526,14 @@ class Tessellation:
         merged_polys_df = gpd.GeoDataFrame({"geometry": merged_polys}, crs="EPSG:4326")
         keep_df = merged_polys_df[merged_polys_df.geom_type == "Polygon"]
         to_explode = merged_polys_df[merged_polys_df.geom_type == "MultiPolygon"]
-        explode_df = explode(to_explode)
-        explode_df = explode_df.reset_index()
-        explode_df.drop(columns=["level_0", "level_1"], inplace=True)
+        explode_df = to_explode.explode(index_parts=False).reset_index(drop=True)
         final_city_blocks = pd.concat([keep_df, explode_df])
         final_city_blocks = final_city_blocks[["geometry"]].reset_index(drop=True)
 
         final_city_blocks = _check_valid_geometry_gdf(final_city_blocks)
 
-        final_city_blocks.reset_index(inplace=True)
-        final_city_blocks.rename(columns={"index": "cityblock_id"}, inplace=True)
+        final_city_blocks = final_city_blocks.reset_index()
+        final_city_blocks = final_city_blocks.rename(columns={"index": "cityblock_id"})
         final_city_blocks["cityblock_id"] = "cityblockID" + final_city_blocks[
             "cityblock_id"
         ].astype(str)

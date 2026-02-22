@@ -5,13 +5,11 @@ POI (Point of Interest) data retrieval via the OSM Overpass API.
 import json
 import logging
 import time
-import warnings
 
 import geopandas as gpd
 import numpy as np
 import pandas as pd
 import requests
-from shapely.geometry import Point
 
 from tesspy._constants import OSM_PRIMARY_FEATURES
 from tesspy._logging import log_progress
@@ -78,9 +76,7 @@ class POIdata:
             self.timeout,
         )
 
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", FutureWarning)
-            area_buffered = self.area.buffer(0.008).simplify(0.005)
+        area_buffered = self.area.geometry.buffer(0.008).simplify(0.005)
 
         self.area_buffered = area_buffered
         exter_coordinates = area_buffered.iloc[0].exterior.coords
@@ -198,7 +194,7 @@ class POIdata:
 
         for item in resp["elements"]:
             for cat in self.poi_categories:
-                if cat in item["tags"].keys():
+                if cat in item["tags"]:
                     item[cat] = True
             if item["type"] == "node":
                 lst_nodes.append(item)
@@ -295,10 +291,9 @@ class POIdata:
         poi_df = poi_df[first_cols + second_cols]
         poi_df = poi_df.reset_index(drop=True)
 
-        geometry_column = [
-            Point(coords)
-            for coords in poi_df[["center_longitude", "center_latitude"]].values
-        ]
+        geometry_column = gpd.points_from_xy(
+            poi_df["center_longitude"], poi_df["center_latitude"]
+        )
         poi_geo_df = gpd.GeoDataFrame(geometry=geometry_column, crs="EPSG:4326")
         area_buffered_gdf = gpd.GeoDataFrame(
             geometry=self.area_buffered, crs="epsg:4326"

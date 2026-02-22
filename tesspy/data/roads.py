@@ -96,7 +96,7 @@ class RoadData:
         log_progress(logger, self.verbose, "event=roads.fetch.start")
         fetch_start = time.perf_counter()
         graph = ox.graph_from_polygon(
-            self.area.boundary.convex_hull.values[0], custom_filter=cf
+            self.area.boundary.convex_hull.iloc[0], custom_filter=cf
         )
         graph_projected = ox.project_graph(graph, to_crs="epsg:4326")
         graph_undirected = graph_projected.to_undirected()

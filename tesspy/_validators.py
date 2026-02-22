@@ -7,8 +7,6 @@ import logging
 import geopandas as gpd
 from shapely.geometry import MultiPolygon, Polygon
 
-from tesspy.methods.city_blocks import explode
-
 logger = logging.getLogger(__name__)
 
 
@@ -37,7 +35,7 @@ def _check_input_geodataframe(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     if not hasattr(gdf, "geometry"):
         raise TypeError("Geometry column missing in GeoDataFrame")
 
-    if type(gdf["geometry"].iloc[0]) not in [Polygon, MultiPolygon]:
+    if not isinstance(gdf["geometry"].iloc[0], (Polygon, MultiPolygon)):
         raise TypeError("Geometry must be of type shapely Polygon or MultiPolygon")
 
     if gdf.crs is None:
@@ -70,8 +68,6 @@ def _check_valid_geometry_gdf(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
 
     if "MultiPolygon" in gdf.geom_type.unique():
         logger.info("event=geometry.multipolygon.explode")
-        gdf = explode(gdf)
-        gdf = gdf.reset_index()
-        gdf.drop(columns=["level_0", "level_1"], inplace=True)
+        gdf = gdf.explode(index_parts=False).reset_index(drop=True)
 
     return gdf

@@ -13,11 +13,9 @@ osmnx, geopandas, shapely
 """
 
 import logging
-import warnings
 
 import geopandas as gpd
 import pandas as pd
-from shapely.geometry import Point
 
 from tesspy._constants import DEFAULT_POI_CATEGORIES
 from tesspy._logging import log_progress
@@ -43,9 +41,7 @@ def get_city_polygon(city: str) -> gpd.GeoDataFrame:
     import osmnx as ox
 
     logger.debug("event=geo.geocode.start city=%s", city)
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", FutureWarning)
-        df_city = ox.geocode_to_gdf(city)
+    df_city = ox.geocode_to_gdf(city)
     df_city = df_city[["osm_id", "geometry"]]
     logger.debug("event=geo.geocode.done city=%s rows=%d", city, len(df_city))
     return df_city
@@ -118,8 +114,8 @@ def count_poi_per_tile(
         verbose=verbose,
     ).get_poi_data()
 
-    points_geom = df_poi[["center_longitude", "center_latitude"]].apply(
-        lambda p: Point(p["center_longitude"], p["center_latitude"]), axis=1
+    points_geom = gpd.points_from_xy(
+        df_poi["center_longitude"], df_poi["center_latitude"]
     )
 
     tess_data = gpd.GeoDataFrame(
@@ -132,9 +128,9 @@ def count_poi_per_tile(
     tess_data = tess_data[["value", "geometry"]]
 
     try:
-        idx = [s for s in gdf.columns if s.__contains__("id")][0]
+        idx = [s for s in gdf.columns if "id" in s][0]
     except IndexError:
-        idx = [s for s in gdf.columns if s.__contains__("key")][0]
+        idx = [s for s in gdf.columns if "key" in s][0]
 
     spatial_join = gpd.sjoin(gdf, tess_data)
     pivot_table = pd.pivot_table(
@@ -144,7 +140,7 @@ def count_poi_per_tile(
     pivot_table.columns = pivot_table.columns.droplevel()
 
     merged_polygons = gdf.merge(pivot_table, how="left", on=idx)
-    merged_polygons.fillna(0, inplace=True)
+    merged_polygons = merged_polygons.fillna(0)
 
     log_progress(
         logger,

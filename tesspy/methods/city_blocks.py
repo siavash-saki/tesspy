@@ -57,16 +57,7 @@ def explode(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     gdf_out : geopandas.GeoDataFrame
         GeoDataFrame with only single Polygon geometries
     """
-    gs = gdf.explode(index_parts=True)
-    gdf2 = gs.reset_index().rename(columns={0: "geometry"})
-    gdf_out = gdf2.merge(
-        gdf.drop("geometry", axis=1),
-        left_on="level_0",
-        right_index=True,
-    )
-    gdf_out = gdf_out.set_index(["level_0", "level_1"]).set_geometry("geometry")
-    gdf_out = gdf_out.set_crs(gdf.crs)
-    return gdf_out
+    return gdf.explode(index_parts=True)
 
 
 def create_blocks(road_network: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
@@ -115,17 +106,18 @@ def get_rest_polygon(
     if hasattr(blocks, "geometry") and hasattr(area, "geometry"):
         blocks["geometry"] = blocks["geometry"].apply(lambda x: make_valid(x))
 
-        merged_polygons = gpd.GeoSeries(unary_union(blocks["geometry"].values))
-        merged_polygons.set_crs("EPSG:4326", allow_override=True, inplace=True)
+        merged_polygons = gpd.GeoSeries(
+            unary_union(blocks["geometry"].to_numpy()), crs="EPSG:4326"
+        )
 
         rest = area.difference(merged_polygons)
         rest = gpd.GeoDataFrame(rest)
         rest = rest.rename(columns={0: "geometry"}).set_geometry("geometry")
 
-        rest_polygons = explode(rest)
-        rest_polygons.reset_index(inplace=True)
-        rest_polygons.drop(columns=["level_0"], inplace=True)
-        rest_polygons.rename(columns={"level_1": "osm_id"}, inplace=True)
+        rest_polygons = rest.explode(index_parts=True).reset_index()
+        rest_polygons = rest_polygons.drop(columns=["level_0"]).rename(
+            columns={"level_1": "osm_id"}
+        )
 
         return rest_polygons
 
