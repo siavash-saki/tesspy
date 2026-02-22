@@ -215,7 +215,7 @@ class Tessellation:
         aqk_count_df = count_poi(df_aqk, poi_data_aqk)
 
         if not threshold:
-            threshold = int(np.median(aqk_count_df["count"].to_numpy()))
+            threshold = int(aqk_count_df["count"].median())
             log_progress(
                 logger,
                 verbose,
@@ -224,7 +224,7 @@ class Tessellation:
             )
 
         i = start_resolution
-        while max(aqk_count_df["count"].to_numpy()) > threshold:
+        while aqk_count_df["count"].max() > threshold:
             i += 1
             log_progress(
                 logger,
@@ -335,20 +335,19 @@ class Tessellation:
         if cluster_algo == "k-means":
             log_progress(logger, verbose, "event=voronoi.cluster.start algo=kmeans")
             clustering = KMeans(n_clusters=n_polygons).fit(data_locs)
-            generators = [
-                np.mean(data_locs[clustering.labels_ == label], axis=0)
-                for label in range(n_polygons)
-            ]
+            generators = np.empty((n_polygons, 2))
+            for label in range(n_polygons):
+                generators[label] = data_locs[clustering.labels_ == label].mean(axis=0)
 
         elif cluster_algo == "hdbscan":
             log_progress(logger, verbose, "event=voronoi.cluster.start algo=hdbscan")
             clustering = HDBSCAN(
                 min_cluster_size=min_cluster_size,
             ).fit(data_locs)
-            generators = [
-                np.mean(data_locs[clustering.labels_ == label], axis=0)
-                for label in range(clustering.labels_.max() + 1)
-            ]
+            n_clusters = clustering.labels_.max() + 1
+            generators = np.empty((n_clusters, 2))
+            for label in range(n_clusters):
+                generators[label] = data_locs[clustering.labels_ == label].mean(axis=0)
 
         elif cluster_algo is None:
             if len(tess_data) > 5000:
@@ -516,12 +515,9 @@ class Tessellation:
 
         city_blocks["Cluster"] = model.labels_
 
-        merged_polys = []
-        for idx in city_blocks["Cluster"].unique():
-            tmp = city_blocks[city_blocks["Cluster"] == idx]
-            polygons = tmp["geometry"].to_numpy()
-            merged_polygon = gpd.GeoSeries(unary_union(polygons))
-            merged_polys.append(merged_polygon[0])
+        merged_polys = (
+            city_blocks.groupby("Cluster")["geometry"].agg(unary_union).tolist()
+        )
 
         merged_polys_df = gpd.GeoDataFrame({"geometry": merged_polys}, crs="EPSG:4326")
         keep_df = merged_polys_df[merged_polys_df.geom_type == "Polygon"]
