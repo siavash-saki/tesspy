@@ -368,8 +368,15 @@ class Tessellation:
             len(generators),
         )
         voronoi_dia = Voronoi(generators)
+        # Compute diameter from bounding box diagonal so infinite Voronoi regions
+        # extend far enough to cover the full study area.  The hardcoded 0.1
+        # (degrees) was too small for any city larger than ~11 km and caused
+        # coverage gaps near the boundary of the generator point set.
+        x_range = generators[:, 0].max() - generators[:, 0].min()
+        y_range = generators[:, 1].max() - generators[:, 1].min()
+        voronoi_diameter = np.sqrt(x_range**2 + y_range**2)
         voronoi_poly = gpd.GeoDataFrame(
-            geometry=list(voronoi_polygons(voronoi_dia, 0.1)), crs="EPSG:4326"
+            geometry=list(voronoi_polygons(voronoi_dia, voronoi_diameter)), crs="EPSG:4326"
         )
         voronoi_poly = gpd.sjoin(voronoi_poly, self.area_gdf)
         vor_polygons = voronoi_poly.intersection(self.area_gdf.geometry.iloc[0])
