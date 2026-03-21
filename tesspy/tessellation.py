@@ -342,7 +342,13 @@ class Tessellation:
             clustering = HDBSCAN(
                 min_cluster_size=min_cluster_size,
             ).fit(data_locs)
-            n_clusters = clustering.labels_.max() + 1
+            max_label = clustering.labels_.max()
+            if max_label < 0:
+                raise ValueError(
+                    "HDBSCAN found no clusters (all points classified as noise). "
+                    "Try reducing min_cluster_size."
+                )
+            n_clusters = max_label + 1
             generators = np.empty((n_clusters, 2))
             for label in range(n_clusters):
                 generators[label] = data_locs[clustering.labels_ == label].mean(axis=0)
