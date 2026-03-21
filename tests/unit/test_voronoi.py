@@ -73,3 +73,48 @@ def test_is_generator():
     # Should be a generator, consumable with next()
     first = next(gen)
     assert isinstance(first, Polygon)
+
+
+def test_diameter_covers_wide_generator_span():
+    """Voronoi polygons must cover the full bounding box when diameter matches the spread.
+
+    Regression test for tessellation.py hardcoding diameter=0.1.  For generators
+    spanning more than 0.1 units, infinite Voronoi regions were truncated too early,
+    leaving coverage gaps near the edges of the generator set.
+
+    Verifies that a diameter equal to the bounding-box diagonal produces complete
+    coverage, while diameter=0.1 fails for widely-spaced generators.
+    """
+    from shapely.geometry import box
+    from shapely.ops import unary_union
+
+    # Generators spanning 2.0 units — much larger than the old hardcoded 0.1
+    points = np.array(
+        [
+            [0.0, 0.0],
+            [2.0, 0.0],
+            [0.0, 2.0],
+            [2.0, 2.0],
+            [1.0, 1.0],
+        ]
+    )
+    vor = Voronoi(points)
+    bounding_box = box(0.0, 0.0, 2.0, 2.0)
+
+    # With the correct diameter (diagonal ≈ 2.83), coverage should be complete.
+    x_range = points[:, 0].max() - points[:, 0].min()
+    y_range = points[:, 1].max() - points[:, 1].min()
+    diameter = np.sqrt(x_range**2 + y_range**2)
+    polygons = list(voronoi_polygons(vor, diameter))
+
+    union = unary_union(polygons)
+    assert union.covers(bounding_box), (
+        "Voronoi union does not cover bounding box — diameter may be too small"
+    )
+
+    # With the old hardcoded diameter=0.1, coverage fails for wide generator spread
+    small_polygons = list(voronoi_polygons(vor, 0.1))
+    small_union = unary_union(small_polygons)
+    assert not small_union.covers(bounding_box), (
+        "Expected coverage gap with diameter=0.1 for wide generator spread"
+    )
