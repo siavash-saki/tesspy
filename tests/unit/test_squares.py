@@ -73,3 +73,31 @@ def test_get_adaptive_squares(leisure_poi_berlin):
     max_count = int(count_result["count"].max()) + 1
     unchanged = get_adaptive_squares(count_result, max_count)
     assert len(unchanged) == len(city_squares)
+
+
+def test_get_adaptive_squares_threshold_zero_subdivides_all(leisure_poi_berlin):
+    """Threshold=0 subdivides ALL tiles (count >= 0 is always true).
+
+    This verifies the dangerous edge case that the auto-threshold fix in
+    Tessellation.adaptive_squares guards against: when median POI count
+    is 0 and the old code used ``if not threshold`` instead of
+    ``if threshold is None``, the auto-computed threshold of 0 would
+    cause every tile to be subdivided on every iteration, producing an
+    infinite loop.
+    """
+    from shapely.geometry import box
+
+    mitte_bounds = leisure_poi_berlin.total_bounds
+    mitte_poly = box(*mitte_bounds)
+    mitte_gdf = gpd.GeoDataFrame(geometry=[mitte_poly], crs="EPSG:4326")
+    mitte_gdf["osm_id"] = 0
+
+    city_squares = get_squares_polyfill(mitte_gdf, 14)
+    count_result = count_poi(city_squares, leisure_poi_berlin)
+
+    # threshold=0 means count >= 0, which is true for ALL tiles,
+    # so every single tile gets subdivided into 4 children
+    subdivided = get_adaptive_squares(count_result, 0)
+    assert len(subdivided) > len(city_squares)
+    # In fact every tile is subdivided: each original tile becomes 4 children
+    assert len(subdivided) == len(city_squares) * 4
