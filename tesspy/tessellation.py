@@ -212,8 +212,8 @@ class Tessellation:
         df_aqk = get_squares_polyfill(self.area_gdf, start_resolution)
         aqk_count_df = count_poi(df_aqk, poi_data_aqk)
 
-        if not threshold:
-            threshold = int(aqk_count_df["count"].median())
+        if threshold is None:
+            threshold = max(1, int(aqk_count_df["count"].median()))
             log_progress(
                 logger,
                 verbose,
